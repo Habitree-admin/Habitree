@@ -7,7 +7,7 @@ exports.getNotifications = async (req, res) => {
     res.render('notifications/notifications', { 
         title: 'Notifications', 
         notifications,
-        csrfToken: req.csrfToken() // <-- Agrega esto
+        csrfToken: req.csrfToken()
     });
 };
 
@@ -34,10 +34,10 @@ exports.sendPushNotification = async (req, res) => {
 
 // Crear notificación en la base de datos y envia
 exports.createNotification = async (req, res) => {
-    const { canal, titulo, mensaje } = req.body;
+    const { canal, titulo, mensaje, category } = req.body;
     try {
-        // Guarda la notificación en la base de datos
-        await Notification.create(mensaje, canal);
+        // Guarda la notificación en la base de datos con los nuevos campos
+        await Notification.create(titulo, mensaje, canal, category);
         console.log('Success: Notificación creada en la base de datos');
         
         // Envía la notificación 
@@ -53,26 +53,24 @@ exports.createNotification = async (req, res) => {
 };
 
 
-
-
-
-
 exports.getNotificationEditor = async (req, res) => {
-    const { id } = req.params; // Este 'id' es el de la URL, el que se usa para buscar en la BD.
+    const { id } = req.params;
 
     try {
-        const [rows] = await Notification.fetchById(id); // Buscas por este ID.
+        const [rows] = await Notification.fetchById(id);
 
         if (!rows || rows.length === 0) {
             return res.status(404).send("Notificación no encontrada");
         }
 
-        const notification = rows[0]; // Los datos de la BD.
+        const notification = rows[0];
 
-        // Aquí estás pasando los datos. ¿Por qué el error?
+        // Pasa todos los campos incluyendo titulo y canal
         res.render('notifications/editNotifications', {
-            id: notification.IDNotification, // ¿Es este el ID que quieres mostrar en el form?
+            id: notification.IDNotification,
+            titulo: notification.titulo,
             description: notification.description,
+            canal: notification.canal,
             category: notification.category,
             isActive: notification.isActive ? 'Sí' : 'No',
             csrfToken: req.csrfToken()
@@ -84,13 +82,12 @@ exports.getNotificationEditor = async (req, res) => {
 };
 
 exports.postAddNotification = async (req, res) => {
-    const { description, category } = req.body;
+    const { titulo, mensaje, canal, category } = req.body;
     try {
-        // Llama a la función Add del model para añadir notificación
-        await Notification.add(description, category);
+        // Llama a la función Add del model con los nuevos campos
+        await Notification.add(titulo, mensaje, canal, category);
         // Redirige a la lista de notificaciones
         res.redirect('/notifications');
-    // Si hay un error se muestra en la consola y se envía un error 500
     } catch (error) {
         console.error(error);
         res.status(500).send("Error al agregar la notificación");
@@ -118,20 +115,16 @@ exports.postDelete = (req, res) => {
     }
 };
 
-exports.postUpdate = (req,res)=>{
-    const { id, description, category } = req.body;
+exports.postUpdate = (req, res) => {
+    const { id, titulo, description, canal, category } = req.body;
     try {
-        Notification.update(description,category,id)
-        console.log("Success update")
-        res.redirect('/notifications')
+        // Actualiza con todos los campos nuevos
+        Notification.update(titulo, description, canal, category, id);
+        console.log("Success update");
+        res.redirect('/notifications');
     }
     catch (error) {
         console.error(error);
-        res.status(500).send("Error al eliminar la notificación");
+        res.status(500).send("Error al actualizar la notificación");
     }
 }
-
-
-
-
-

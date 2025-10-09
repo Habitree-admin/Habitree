@@ -3,40 +3,26 @@
     <form id="form-add-notification" action="/notifications/create" method="POST">
         <!--campo CSRF -->
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-
-        <!-- 
-        <label for="descripcion-input">Description:</label>
-        <div class="input_container">
-            <input type="text" id="descripcion-input" name="description" required />
-        </div>
-        -->
-
-        <!-- Línea agregada: campo Título -->
+        
+        <!-- Campo Título -->
         <label for="titulo">Título:</label>
         <input type="text" name="titulo" id="titulo" required>
-
-        <!-- 
-        <label for="category-input">Category:</label>
-        <div class="input_container">
-            <input type="text" id="category-input" name="category" required />
-        </div>
-        -->
-
-        <!-- Línea agregada: campo Mensaje -->
+        
+        <!-- Campo Mensaje (Description) -->
         <label for="mensaje">Mensaje:</label>
         <input type="text" name="mensaje" id="mensaje" required>
-
-        <!-- Línea agregada: campo oculto Canal -->
+        
+        <!-- Campo Canal (readonly) -->
         <label for="canal">Canal:</label>
         <input type="text" name="canal" id="canal" value="general" readonly style="background:#e0ffe0;">
-
+        
+        <!-- Campo Category -->
+        <label for="category">Category:</label>
+        <input type="text" name="category" id="category" required>
+        
         <div class="button-container">
             <button id="guardar-btn" type="submit">Add</button>
-            <!--función JS -->
             <button id="close-btn" type="button" class="close-modal" onclick="closeModal()">Cancel</button>
-            <!-- 
-            <button id="close-btn" type="button" class="close-modal">Cancel</button>
-            -->
         </div>
     </form>
 </div>

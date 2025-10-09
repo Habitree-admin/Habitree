@@ -6,13 +6,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     <title>Notifications</title>
     <link rel="stylesheet" href ="/css/notifications/notifications.css">
-    
-</head>
 </head>
 <body>
     <div class="content">
     <%- include('../partials/navbar') %>
-
         <div class="Dashboard_content">
             <div class="Dashboard__title-container">
                 <h1 class="Dashboard__title">Notifications</h1>
@@ -20,14 +17,15 @@
                     <button class="instrument-sans-bold header__button">Add</button>
                 </div>
             </div>
-
             <div class="table-container instrument-sans-regular">
                 <table>
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Date</th>
+                            <th>Titulo</th>
                             <th>Description</th>
+                            <th>Canal</th>
                             <th>Category</th>
                             <th>Active</th>
                             <th class="actions">Actions</th>
@@ -39,7 +37,9 @@
                                 <tr>
                                     <td><%= notification.IDNotification %></td>
                                     <td><%= notification.dateCreated %></td>
+                                    <td><%= notification.titulo %></td>
                                     <td><%= notification.description %></td>
+                                    <td><%= notification.canal %></td>
                                     <td><%= notification.category %></td>
                                     <td><%= notification.isActive ? 'Sí' : 'No' %></td>
                                     <td class="actions"><button class="table__button">Manage</button></td>
@@ -47,7 +47,7 @@
                             <% }) %>
                         <% } else { %>
                             <tr>
-                                <td colspan="6" style="text-align:center;">No notifications available</td>
+                                <td colspan="8" style="text-align:center;">No notifications available</td>
                             </tr>
                         <% } %>
                     </tbody>
@@ -56,10 +56,8 @@
         </div>
     </div>
     <div id="modal-root"></div>
-
     <div id="backdrop" class="backdrop"></div>
     <script src="/js/notifications/editNotifications.js" defer></script>
     <script src="/js/notifications/addNotifications.js" defer></script>
 </body>
 </html>
-
