@@ -1,0 +1,24 @@
+<div class="modal">
+    <h2 id="modal-title">Add League</h2>
+    <form id="form-add-league" action="/leagues/add" method="POST">
+        <!--campo CSRF -->
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+        <!-- Línea agregada: campo Título -->
+        <label for="titulo">Título de la liga:</label>
+        <input type="text" name="name" id="titulo" required>
+
+        <!-- Línea agregada: campo Mensaje -->
+        <label for="mensaje">Nivel mínimo:</label>
+        <input type="number" aria-label="Número entero" name="lvl" id="lvl" required>
+
+        <div class="button-container">
+            <button id="guardar-btn" type="submit">Add</button>
+            <!--función JS -->
+            <button id="close-btn" type="button" class="close-modal" onclick="closeModal()">Cancel</button>
+            <!-- 
+            <button id="close-btn" type="button" class="close-modal">Cancel</button>
+            -->
+        </div>
+    </form>
+</div>

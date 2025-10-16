@@ -1,0 +1,10 @@
+#Archivos de entorno
+.env
+
+
+#Dependencias de Node.js
+node_modules/
+
+
+#LLaves de firebase
+/util/serviceAccountKey.json

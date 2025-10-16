@@ -1,0 +1,34 @@
+<div class="modal" id="manageLeagueModal">
+    <div class="modal-inner">
+        <div class="modal-header">
+            <h1 class="modal-title">Edit League</h1>
+            <button id="closeManageLeagueModal" class="fa fa-times close-btn"></button>
+        </div>
+        <div class="modal-content">
+            <!-- Formulario para cambiar nombre -->
+            <form id="editLeagueNameForm" action="/leagues/editName" method="POST" style="margin-bottom:2rem;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="nameA" id="editLeagueNameA">
+                <div>
+                    <label for="editLeagueName">Nuevo nombre de la liga</label>
+                    <input type="text" name="name" id="editLeagueName" required>
+                </div>
+                <div class="button-container">
+                    <button type="submit" class="submit-btn">Cambiar nombre</button>
+                </div>
+            </form>
+            <!-- Formulario para cambiar nivel -->
+            <form id="editLeagueLevelForm" action="/leagues/editLevel" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="nameA" id="editLeagueNameA2">
+                <div>
+                    <label for="editLeagueLevel">Nuevo nivel mínimo</label>
+                    <input type="number" name="lvl" id="editLeagueLevel" required>
+                </div>
+                <div class="button-container">
+                    <button type="submit" class="submit-btn">Cambiar nivel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

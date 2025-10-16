@@ -1,0 +1,56 @@
+<!-- Modal Edit Reward -->
+<div class="modal" id="modifyRewardModal">
+  <div class="modal-inner">
+    <nav>
+      <button id="closeModifyRewardModal" class="fa fa-times"></button>
+    </nav>
+    <h1 class="modal-title">Edit Reward</h1>
+    <form id="modifyRewardForm" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <section class="inputs-row">
+        <div class="input-container">
+          <label for="editIDReward">ID</label>
+          <input class="smallInput" type="number" id="editIDReward" name="IDReward" readonly>
+        </div>
+
+        <div class="input-container">
+          <label for="editName">Name</label>
+          <input type="text" id="editName" name="name" required>
+        </div>
+      </section>
+
+      <section class="inputs-row">
+        <div class="input-container">
+          <label for="editType">Type</label>
+          <select id="editType" name="type" required>
+            <option value="monetary">Monetary</option>
+            <option value="nonMonetary">Experience</option>
+          </select>
+        </div>
+
+        <div class="input-container">
+          <label for="editValue">Value</label>
+          <input class="smallInput" type="text" id="editValue" name="value" required>
+        </div>
+      </section>
+
+      <section class="inputs-row">
+        <div class="input-container">
+          <label for="editStatus">Status</label>
+          <select id="editStatus" name="available" required>
+            <option value="1">Available</option>
+            <option value="0">Unavailable</option>
+          </select>
+        </div>
+
+        <div class="input-container">
+          <label for="editDescription">Description</label>
+          <input type="text" id="editDescription" name="description" required>
+        </div>
+      </section>
+
+      <button type="submit" class="submit-btn" id="saveChangesBtn">Save Changes</button>
+    </form>
+  </div>
+</div>

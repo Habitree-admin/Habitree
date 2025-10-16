@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/dashboard/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <title>Dashboard</title>
+</head>
+
+<body> 
+    <div class="content">
+    <%- include('partials/navbar') %>
+
+    <div class="Dashboard_content">
+        <h1 class="Dashboard__title">Dashboard </h1>
+        <div class="Dashboard__gridContent">
+            <div class="Dashboard__gridItem"> 
+                <a href="/leagues" style="color: inherit; text-decoration: none;">
+                <div class="Dashboard__gridItemIcon">
+                    <i class="fa-solid fa-medal Dashboard__gridItemIcon__icon"></i>
+                </div>
+                <h2>League Control</h2>
+                <p class="Dashboard__gridItemIcon__text">Management of existing Leagues in Habitree</p>
+                </a>
+            </div>
+            <div class="Dashboard__gridItem">
+                <a href="/quizzes" style="color: inherit; text-decoration: none;">
+                <div class="Dashboard__gridItemIcon">
+                    <i class="fa-solid fa-question Dashboard__gridItemIcon__icon"></i>
+                </div>
+                <h2>Quizzes Control</h2>
+                <p class="Dashboard__gridItemIcon__text">Management of existing Quizzes in Habitree</p>
+                </a>
+            </div>
+            <div class="Dashboard__gridItem active">
+                 <a href="/notifications" style="color: inherit; text-decoration: none;">
+                <div class="Dashboard__gridItemIcon">
+                    <i class="fa-regular fa-bell Dashboard__gridItemIcon__icon  "></i>
+                </div>
+                <h2>Notification Control</h2>
+                <p class="Dashboard__gridItemIcon__text">Management of existing notifications in Habitree</p>
+                </a>
+            </div>
+            <div class="Dashboard__gridItem">
+                 <a href="/store" style="color: inherit; text-decoration: none;">
+                <div class="Dashboard__gridItemIcon">
+                    <i class="fa-solid fa-bag-shopping Dashboard__gridItemIcon__icon"></i>
+                </div>
+                <h2>Store Control</h2>
+                <p class="Dashboard__gridItemIcon__text">Management of the Store in Habitree </p>
+                </a>
+            </div>
+            <div class="Dashboard__gridItem">
+                <div class="Dashboard__gridItemIcon">
+                    <i class="fa-solid fa-cookie-bite Dashboard__gridItemIcon__icon"></i>
+                </div>
+                <h2>Item Control</h2>
+                <p class="Dashboard__gridItemIcon__text">Management of existing items in Habitree</p>
+            </div>
+            <div class="Dashboard__gridItem">
+                <a href="/missions" style="color: inherit; text-decoration: none;">
+                <div class="Dashboard__gridItemIcon">
+                   <i class="fa-solid fa-map Dashboard__gridItemIcon__icon"></i>
+                </div>
+                <h2>Missions Control</h2>
+                <p class="Dashboard__gridItemIcon__text">Management of existing missions in Habitree</p>
+                </a>
+            </div>
+        </div>
+        
+    </div>
+    </div> 
+    
+</body>
+</html>

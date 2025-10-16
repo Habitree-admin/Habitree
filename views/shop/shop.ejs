@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+        <link rel="stylesheet" href="/css/shop/shop.css">
+        <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
+        <title>Shop</title>
+    </head>
+    <body>
+    <div class="content">
+        <%- include('../partials/navbar') %>
+        <div class="Dashboard_content">
+            <div class="Dashboard__title-container">
+                <h1 class="Dashboard__title">Store</h1>
+                <div class="filter-and-add">
+                    <button id="openModal" class="instrument-sans-bold header__button">Add</button>
+                    <button class="instrument-sans-bold header__button" id="filterToggle">
+                        Filter 
+                    </button>
+                </div>
+            </div>
+
+            <div class="filters hidden" id="filtersSection">
+                <form id="filterForm">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filterState">State</label>
+                            <select id="filterState" class="filter-select">
+                                <option value="">All</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="filterCategory">Category</label>
+                            <select id="filterCategory" class="filter-select">
+                                <option value="">All</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="filterMinPrice">Min Price</label>
+                            <input type="number" id="filterMinPrice" class="filter-input" min="0" step="0.01" placeholder="0.00">
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="filterMaxPrice">Max Price</label>
+                            <input type="number" id="filterMaxPrice" class="filter-input" min="0" step="0.01" placeholder="9999.99">
+                        </div>
+
+                    </div>
+
+                    <div class="filter-actions">
+                        <button type="button" class="filter-btn apply-btn" onclick="applyFilters()">
+                            Apply
+                        </button>
+                        <button type="button" class="filter-btn clear-btn" onclick="clearFilters()">
+                            Clear
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+
+            <div class="table-container instrument-sans-regular">
+                <div class="products-wrapper">
+                    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading products...</p>
+                    </div>
+
+                    <div id="noResults" class="no-results" style="display: none;">
+                        <i class="fas fa-search"></i>
+                        <p>No products found</p>
+                        <button onclick="clearFilters()" class="filter-btn apply-btn">Clear</button>
+                    </div>
+
+                    <div class="product-grid" id="productGrid">
+                        <% for (item of items) { %>
+                            <div class="product-card" data-id="<%= item.id %>">
+                                <div class="product-image" style="background-image: url('<%= item.imageUrl %>')">
+                                </div>
+                                <div class="product-info">
+                                    <div class="product-category"><%= item.category %></div>
+                                    <div class="product-name"><%= item.name %></div>
+                                    <div class="review-count <%= item.state == 1 ? 'active' : 'inactive' %>">
+                                        <%= item.state == 1 ? 'Active' : 'Inactive' %>
+                                    </div>
+                                    
+                                    <div class="price-row">
+                                        <div><span class="price">$<%= item.price %></span></div>
+                                        <button class="edit-item-btn">
+                                            <svg fill="#ffffff" xmlns="http://www.w3.org/2000/svg" 
+                                                width="20" height="20" viewBox="0 0 52 52" enable-background="new 0 0 52 52" xml:space="preserve">
+                                            <g>
+                                                <path d="M9.5,33.4l8.9,8.9c0.4,0.4,1,0.4,1.4,0L42,20c0.4-0.4,0.4-1,0-1.4l-8.8-8.8c-0.4-0.4-1-0.4-1.4,0L9.5,32.1
+                                                    C9.1,32.5,9.1,33.1,9.5,33.4z"/>
+                                                <path d="M36.1,5.7c-0.4,0.4-0.4,1,0,1.4l8.8,8.8c0.4,0.4,1,0.4,1.4,0l2.5-2.5c1.6-1.5,1.6-3.9,0-5.5l-4.7-4.7
+                                                    c-1.6-1.6-4.1-1.6-5.7,0L36.1,5.7z"/>
+                                                <path d="M2.1,48.2c-0.2,1,0.7,1.9,1.7,1.7l10.9-2.6c0.4-0.1,0.7-0.3,0.9-0.5l0.2-0.2c0.2-0.2,0.3-0.9-0.1-1.3l-9-9
+                                                    c-0.4-0.4-1.1-0.3-1.3-0.1s-0.2,0.2-0.2,0.2c-0.3,0.3-0.4,0.6-0.5,0.9L2.1,48.2z"/>
+                                            </g>
+                                            </svg>
+                                        </button>
+                                        <div class="change-btn">
+                                            <p>Change State</p>
+                                            <button class=" change-state-btn <%= item.state == 1 ? 'btm--active' : '' %>" data-id="<%= item.IDItem %>">
+                                                <p class="circle <%= item.state == 1 ? 'active' : '' %>"></p>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+        <div class="modal" id="modal">
+            <div class="modal-inner">
+                <nav>            
+                    <button id="closeModal" class="fa fa-times"></button>
+                </nav>
+                <h1 class ="modal-title">Add Item</h1>
+                <form action="/shop" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <div id="form-message" style="display:none;"></div>
+                    <input type="hidden" id="image_name_current" name="image_name_current" value="">
+
+                    <section class="inputs-row">
+                        <div class="input-container">
+                            <label for="name">Item Name:</label>
+                            <input class="smallInput" type="text" id="name" name="name" placeholder="Hat" required>
+                        </div>
+                        <div class="input-container">
+                            <label for="state">State</label>
+                            <select id="state" name="state" required>
+                                <option value="1">Available</option>
+                                <option value="0">Unavailable</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <section class="inputs-row">
+                        <div class="input-container">
+                            <label for="price">Price:</label>
+                            <input class="smallInput" type="number" id="price" name="price" placeholder="100" required>
+                        </div>
+                        <div class="input-container">
+                            <label for="category">Category</label>
+                            <input class="smallInput" type="text" id="category" name="category" placeholder="Skin" required>
+                        </div>
+                    </section>
+
+                    <section>
+                        <label for="file">Select files</label>
+                        <input id="file" name="file" type="file" multiple />
+                    </section>
+
+                    <button type="submit" class="submit-btn">Add</button>
+                    <button type="submit" class="submit-btn" id="edit-btn" style="display:none;">Edit</button>
+                    <input type="hidden" id="image_name_current" name="image_name_current" value="">
+                </form>  
+            </div>
+        </div>
+        <div id="modal-root"></div>
+        <div id="backdrop" class="backdrop"></div>
+    </div>
+    <script>
+        window.csrfToken = "<%= csrfToken %>";
+    </script>
+    <script src="/js/shop/shop.js"></script>
+    <script src="/js/shop/editItemShop.js"></script>
+</body>
+</html>

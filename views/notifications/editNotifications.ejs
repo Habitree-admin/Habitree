@@ -1,0 +1,36 @@
+<div class="modal">
+    <h2 id="modal-title">Edit Notification</h2>
+
+    <form id="form-edit-notification" action="/notifications/update" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+        <input type="hidden" name="id" value="<%= id %>" />
+
+        <label for="descripcion-input">Description:</label>
+        <div class="input-container">
+            <input type="text" id="descripcion-input" name="description" value="<%= description %>" required />
+        </div>
+
+        <label for="category-input">Category:</label>
+        <div class="input-container">
+            <input type="text" id="category-input" name="category" value="<%= category %>" required />
+        </div>
+        
+        <div class="button-container">
+            <button id="guardar-btn" type="submit">Edit</button>
+
+            <% if (isActive === 'Sí') { %>
+                <button id="delete-btn" type="button" class="close-modal">Deactivate</button>
+            <% } else { %>
+                <button id="delete-btn" type="button" class="close-modal">Activate</button>
+            <% } %>
+
+        </div>
+    </form>
+
+    <form id="form-delete-notification" action="/notifications/delete" method="POST" style="display: none;">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        
+        <input type="hidden" name="id" value="<%= id %>" />
+    </form>
+</div>

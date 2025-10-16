@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <link rel="stylesheet" href ="/css/missions/missions.css">
+    <title>Missions</title>
+</head>
+
+
+<body>
+    <div class="content">
+        <%- include('../partials/navbar') %>
+
+    <div class="Dashboard_content">
+        <div class = "Dashboard__title-container">
+            <h1 class="Dashboard__title">Missions </h1>
+        <div class="container__button">
+            <button id= "openModal" class="instrument-sans-bold header__button">Add</button>
+        </div>
+    </div>
+
+<div class="table-container instrument-sans-regular">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Response Verification</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                    <th>Available</th>
+                    <th>Experience</th>
+                    <th class="actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (missions && missions.length) { %>
+                    <% missions.forEach(function(mission) { %>
+                        <tr>
+                            <td><%= mission.IDMission%></td>
+                            <td><%= mission.responseVerification? 'Yes' : 'No' %></td>
+                            <td><%= mission.category %></td>
+                            <td><%= mission.description %></td>
+                            <td><%= mission.dateOfCreation %></td>
+                            <td><%= mission.available ? 'Yes' : 'No' %></td>
+                            <td><%= mission.experience %></td>
+                            <td class="actions"><button class="table__button">Manage</button></td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="8" style="text-align:center;">No missions available</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+    </div>
+        
+    </div>
+    </div> 
+
+<%# POP UP PARA AGREGAR MISION%>
+
+    <div class="modal" id="modal">
+    <div class="modal-inner">
+    <nav>            
+         <button id="closeModal" class="fa fa-times"></button>
+    </nav>
+        <h1 class ="modal-title">Add Mission</h1>
+         <form action="/missions" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                
+                <section class="inputs-row">
+                    <div class="input-container">
+                        <label for="id">ID</label>
+                        <input class="smallInput" type="number" id="id" name="IDMission" placeholder="ID" required>
+                    </div>
+
+                    <div class="input-container">
+                        <label for="status">Status</label>
+                        <select id="status" name="available" required>
+                            <option value=1>Available</option>
+                            <option value=0>Unavailable</option>
+                        </select>
+                    </div>
+                </section>
+
+                <section class="inputs-row">
+                    <div class="input-container">
+                        <label for="category">Mission Type</label>
+                        <select id="category" name="category" required>
+                            <% const types = ['awareness', 'transport', 'water', 'waste', 'energy', 'consumption', 'nature']; %>
+                            <% types.forEach(function(t){ %>
+                                <option value="<%= t %>"><%= t.charAt(0).toUpperCase() + t.slice(1) %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+
+
+                    <div class="input-container">
+                        <label for="experience">Experience</label>
+                        <input class="smallInput" type="number" id="experience" name="experience" placeholder="100" required>
+                    </div>
+
+                    <div class="input-container">
+                        <label for="responseVerification">Response Verification</label>
+                        <select id="responseVerification" name="responseVerification" required>
+                            <option value=1>Yes</option>
+                            <option value=0>No</option>
+                        </select>
+                    </div>
+                </section>
+
+                <section class="inputs-row">
+                    <div class="input-container">
+                        <label for="value">Value</label>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <input class="smallInput" type="number" id="value" name="value" placeholder="0" step="any">
+                            <span id="value-unit">points</span>
+                        </div>
+                    </div>
+
+                    <div class="input-container">
+                        <label for="reward">Assign Reward</label>
+                        <select id="reward" name="reward">
+                            <option value="">-- None --</option>
+                            <% if (typeof rewards !== 'undefined' && rewards && rewards.length) { %>
+                                <% rewards.forEach(function(r){ %>
+                                    <option value="<%= r.IDReward %>"><%= r.name %> - <%= r.type %></option>
+                                <% }) %>
+                            <% } %>
+                        </select>
+                    </div>
+                </section>
+                
+                <section>
+                    <label for="description">Description</label>
+                    <input class = "description" type="text" id="description" name="description" placeholder="Description" required>
+                    <br style="clear:both;" />
+                </section>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="submit-btn" id="add-edit-btn">Add</button>
+                    <button type="button" class="submit-btn" id="delete-btn" style="background-color: #d35400; color: white; display: none;">Delete</button>
+                </div>
+                <span id="id-readonly-msg" style="display:none; color: #888; font-size: 12px;">ID no editable en edición</span>
+                <div id="form-message" style="display:none; margin-top:10px;"></div>
+        </form>
+    </div>
+    </div>
+    <script src ="/js/missions/missions.js"></script>
+</body>
+</html>

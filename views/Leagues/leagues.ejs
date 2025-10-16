@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <title>Leagues</title>
+    <link rel="stylesheet" href="/css/leagues/leagues.css">
+</head>
+<body>
+<div class="content">
+    <%- include('../partials/navbar') %>
+
+    <div class="Dashboard_content">
+        <div class="Dashboard__title-container">
+            <h1 class="Dashboard__title">Leagues</h1>
+            <div class="container__button">
+                <button class="instrument-sans-bold header__button">Add League</button>
+            </div>
+        </div>
+        <div class="table-container instrument-sans-regular">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID League</th>
+                    <th>Name League</th>
+                    <th>Min Level</th>
+                    <th class="actions">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% if (leagues && leagues[0] && leagues[0][0] && leagues[0][0].ID_league) { %>
+                    <% leagues[0].forEach(function(league) { %>
+                        <tr>
+                            <td><%= league.ID_league %></td>
+                            <td><%= league.league %></td>
+                            <td><%= league.min_level %></td>
+                            <td class="actions">
+                                <button class="table__button "
+                                    data-league-name="<%= league.league %>"
+                                    data-league-level="<%= league.min_level %>">
+                                    Manage
+                                </button>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="6" style="text-align:center;">No leagues available</td>
+                    </tr>
+                <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal Eliminar Liga -->
+        <div class="modal" id="manageModal">
+            <div class="modal-inner">
+                <div class="modal-header">
+                    <h1 class="table__button">Manage League</h1>
+                    <button id="closeManageModal" class="fa fa-times"></button>
+                </div>
+
+                <div class="modal-content">
+                    <div class="form-actions" style="display:flex; gap:10px; justify-content:center;">
+                        <button type="button" class="submit-btn" id="manage-delete-btn" style="background: linear-gradient(to right, #e74c3c, #c0392b); color:white;">Delete</button>
+                        <button type="button" class="submit-btn" id="manage-cancel-btn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="backdrop" class="backdrop"></div>
+    <div id="modal-root"></div>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    
+    <script src="/js/leagues/addLeague.js" defer></script>
+    <script src="/js/leagues/editLeague.js" defer></script>
+    <script src="/js/leagues/manageLeague.js"></script>
+</body>
+</html>

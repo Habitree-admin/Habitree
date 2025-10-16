@@ -1,0 +1,486 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;700&display=swap');
+
+
+/* Eliminar por completo los botones de flecha del scrollbar webkit */
+.Dashboard_content::-webkit-scrollbar-button:single-button,
+.Dashboard_content::-webkit-scrollbar-button:increment,
+.Dashboard_content::-webkit-scrollbar-button:decrement {
+    display: none;
+    width: 0;
+    height: 0;
+    background: transparent;
+}
+/* Ocultar completamente los botones de flecha del scrollbar en webkit */
+.Dashboard_content::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+    display: none;
+}
+/* Ocultar flechas del scrollbar en webkit completamente */
+.Dashboard_content::-webkit-scrollbar-button:single-button {
+    display: none;
+    background: transparent;
+}
+.Dashboard_content::-webkit-scrollbar-button:increment,
+.Dashboard_content::-webkit-scrollbar-button:decrement {
+    display: none;
+    background: transparent;
+}
+/* Ocultar flechas del scrollbar en webkit */
+.Dashboard_content::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+
+
+html, body {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    min-height: 100vh;
+    min-width: 100vw;
+}
+
+
+.content{
+    display: flex;
+    flex-direction: row;
+}
+
+
+
+
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: 'Instrument Sans', sans-serif;
+    background-color: #f4f7f2;
+}
+
+
+.content{
+    width: 100vw;
+    min-height: 100vh;
+    max-width: 100vw;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: row;
+}
+.navbar {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 20px;
+    min-height: 100vh;
+    flex-basis: 15%;
+    flex-shrink: 0;
+    flex-grow: 0;
+    align-items: flex-start;
+    box-sizing: border-box;
+}
+.Dashboard_content {
+    flex-basis: 70%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    outline-offset: 0px;
+    overflow-y: auto;
+    max-height: 90vh;
+    scrollbar-width: thin;
+    scrollbar-color: #2da460 #e0e0e0;
+}
+.Dashboard_content::-webkit-scrollbar {
+    width: 8px;
+}
+.Dashboard_content::-webkit-scrollbar-thumb {
+    background: #2DA460;
+    border-radius: 8px;
+}
+.Dashboard_content::-webkit-scrollbar-track {
+    background: #e0e0e0;
+    border-radius: 8px;
+}
+
+.navbar li {
+    list-style: none;
+}
+
+
+
+.header--Logo {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    color: #0b2f1f;
+    font-size: 24px;
+    gap: 10px;
+
+}
+
+
+.title {
+    color: #0b2f1f;
+    font-size: 32px;
+    text-decoration: none;
+    font-weight: bold;
+    
+}
+
+
+
+.navbar-item{
+    color: black;
+    font-size: 16px;
+    text-decoration: none;
+    font-weight:500;
+    cursor: pointer;
+}
+
+
+.content--navbar {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    width: 100%;
+    align-items: flex-start;
+    padding-left: 50px;
+}
+
+.navbar__logout{
+    margin-top: 120px;
+    width: 100%;
+    align-items: flex-start;
+    padding-left: 30px;
+    padding-left: 50px;
+}
+
+
+.Dashboard__title{
+
+    margin-top: 10px;
+    font-size: 32px;
+    padding: 20px;
+    width: 100%;
+    color: #0b2f1f;
+}
+
+
+.Dashboard__gridContent{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 20px;
+    min-height: 0;
+    height: 70%;
+    justify-items: center;
+    align-items: center;
+}
+
+.Dashboard__gridItem{
+    border: 2px solid #0b2f1f;
+    border-radius: 16px;
+    padding: 16px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.Dashboard__gridItem:hover {
+    border: 2px solid #2DA460;
+    cursor: pointer;
+}
+
+.Dashboard__gridItemIcon__text{
+    margin-top: 8px;
+    font-size: 14px;
+    color: #626262;
+    margin-bottom: 50px;
+
+
+}
+
+.Dashboard__gridItemIcon{
+    background-color: #2ecc702a;
+    border-radius: 8px;
+    padding: 12px;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+    
+i{
+
+    font-size: 32px;
+    margin-bottom: 10px;
+
+}
+
+.navbar--icon {
+    margin-right: 8px;
+    font-size: 18px;
+    color:#0b2f1f ;
+}
+
+.Dashboard__gridItemIcon__icon{
+    color: #2DA460;
+    font-size: 24px;
+    margin-top: 12px;
+}
+
+.table__button {
+font-size: 12px;
+border-radius: 10px;
+background: linear-gradient(to right, #2DA460, #2D9459);
+color: white;
+padding: 6px 20px;
+border: none;
+cursor: pointer;
+}  
+.table-container {
+    border-radius: 8px;
+    overflow-x: auto;
+    border: 2px solid #0B2F1F;
+    margin: 24px 32px 24px 32px;
+    box-sizing: border-box;
+    padding: 16px;
+    }
+    
+.table-container table {
+    border: none;
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0;
+    table-layout: fixed;
+}
+
+.table-container th,
+.table-container td {
+    padding: 12px 16px;
+    text-align: left;
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 12px;
+}
+
+.table-container .actions {
+    text-align: center;
+}
+
+.header__button {
+    font-size: 16px;
+    border-radius: 10px;
+    background: linear-gradient(to right, #2DA460, #2D9459);
+    color: white;
+    padding: 6px 30px;
+    border: none;
+    cursor: pointer;
+}
+
+.Dashboard__title-container{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+}
+
+
+.header__button{
+    margin-right: 32px;
+}
+
+
+.Dashboard_content::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+.Dashboard_content::-webkit-scrollbar-button:single-button,
+.Dashboard_content::-webkit-scrollbar-button:increment,
+.Dashboard_content::-webkit-scrollbar-button:decrement {
+  display: none;
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+/*CSS PARA POP UP*/
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.modal.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-inner {
+    background-color: #f4f7f2;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    width: 654px;
+    height: 600px;
+    max-width: 90%;
+    position: relative;
+}
+
+.modal-title{
+    font-size: 48px;
+    text-align: center;
+    padding-bottom: 15px;
+}
+
+.container__button {
+    position: relative;
+}
+
+.header__button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+
+#closeModal {
+    background-color:#f4f7f2 ;
+    color: rgb(77, 76, 76);
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+    font-size: 30px;
+}
+
+
+
+/*FORM DEL POP UP*/
+
+input, label {
+    display: block;
+}
+
+label {
+    font-weight: 600;
+    color: #000000;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+input {
+    align-items: center;
+    padding: 12px 30px;
+    border: 2px solid #e1e8ed;
+    border-radius: 20px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    background-color: #f8f9fa;
+    margin-bottom: 15px;
+    border: none;
+    box-shadow: 10px 5px 5px rgb(153, 152, 152);
+
+}
+
+.inputs-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    margin-right: 0; /* Elimina margen individual */
+    float: none;     /* Elimina float */
+}
+        
+
+input.smallInput{
+    
+    padding: 12px 30px;
+    width: 100%;
+
+}
+
+input.description{
+    width: 100%;
+    padding: 20px ;
+}
+
+input, select {
+    align-items: center;
+    padding: 12px 30px;
+    border: 2px solid #e1e8ed;
+    border-radius: 20px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    background-color: #f8f9fa;
+    margin-bottom: 15px;
+    width: 100%;  /* para que se comporte igual que input.smallInput */
+    box-sizing: border-box;
+    box-shadow: 10px 5px 5px rgb(153, 152, 152);
+
+}
+
+select:focus {
+    outline: none;
+    border-color: #353535;
+    background-color: white;
+}
+
+input:focus {
+    outline: none;
+    border-color: #353535;
+    background-color: white;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+    box-shadow: 10px 5px 5px rgb(153, 152, 152);
+
+}
+
+.submit-btn:hover {
+    background-color: #3f9342;
+
+}
+
