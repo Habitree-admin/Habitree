@@ -10,7 +10,7 @@ router.get("/add-league", isAuth, leaguesController.getAddLeague);
 // Endpoint usado por el cliente para obtener el HTML del modal via fetch
 router.get('/add-modal', isAuth, leaguesController.getAddLeagueModal);
 
-router.get('/edit-modal', leaguesController.getEditLeagueModal);
+router.get('/edit-modal', isAuth, leaguesController.getEditLeagueModal);
 
 router.post("/add", isAuth, leaguesController.postAddLeague);
 

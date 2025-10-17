@@ -3,8 +3,7 @@ const db = require('../../util/database');
 // Clase Reward
 module.exports = class Reward {
 
-    constructor(IDReward, name, description, type, available, value) {
-        this.IDReward = IDReward;
+    constructor(name, description, type, available, value) {
         this.name = name;
         this.description = description;
         this.type = type;        // monetary / nonMonetary
@@ -17,8 +16,8 @@ module.exports = class Reward {
      */
     save() {
         return db.execute(
-            'INSERT INTO rewards (IDReward, name, description, type, available, value) VALUES (?, ?, ?, ?, ?, ?)',
-            [this.IDReward, this.name, this.description, this.type, this.available, this.value]
+            'INSERT INTO rewards (name, description, type, available, value) VALUES (?, ?, ?, ?, ?)',
+            [this.name, this.description, this.type, this.available, this.value]
         );
     }
 

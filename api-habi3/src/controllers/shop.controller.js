@@ -19,4 +19,31 @@ const getShopItemsForUser = async (req, res) => {
   }
 };
 
-module.exports = { getShopItemsForUser };
+const buyShopItem = async (req, res) => {
+  try {
+    const { IDUser, IDItem } = req.body;
+
+    if (!IDUser || !IDItem) {
+      return res.status(400).json({
+        success: false,
+        message: "IDUser and IDItem are required"
+      });
+    }
+
+    const result = await shopService.buyShopItemForUser(IDUser, IDItem);
+
+    res.status(201).json({
+      success: true,
+      message: "Item purchased successfully",
+      data: result
+    });
+  } catch (error) {
+    console.error("Error in buyShopItem:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error purchasing item"
+    });
+  }
+};
+
+module.exports = { getShopItemsForUser, buyShopItem };

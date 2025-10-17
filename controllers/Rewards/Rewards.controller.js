@@ -19,10 +19,9 @@ exports.getRewards = async (req, res) => {
 
 /** Registrar nueva recompensa
  */
-exports.postRewards = async (req, res, next) => {
+exports.postRewards = async (req, res) => {
     try {
         const addReward = new Reward(
-            req.body.IDReward,
             req.body.name,          // ahora sí coincide con form
             req.body.description,
             req.body.type || "nonMonetary", // por si no envías

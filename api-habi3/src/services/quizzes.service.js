@@ -49,6 +49,7 @@ const getAllQuizzes = async (userId) => {
         ON r.IDReward = ir.IDReward
     LEFT JOIN question ques
         ON q.IDQuiz = ques.IDQuiz
+    WHERE q.available = 1
     ORDER BY q.IDQuiz, r.IDReward, ques.IDQuestion
     `,
     [userId]

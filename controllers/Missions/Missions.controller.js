@@ -18,7 +18,6 @@ exports.getMissions = async (req, res) => {
 exports.postMissions = async(req,res,next) => {
     try {
         const addMissions = new Mission (
-            req.body.IDMission,
             req.body.responseVerification,
             req.body.category,
             req.body.description,

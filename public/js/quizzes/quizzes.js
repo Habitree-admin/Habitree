@@ -18,7 +18,8 @@ const manageDeleteBtn = document.getElementById("manage-delete-btn");
 
 // Modal control
 openBtn.addEventListener("click", () => {
-    console.log("Botón Add clickeado");
+    console.log("Add new quiz");
+    resetFormState(); // Limpiar completamente el estado
     modal.classList.add("open");
     initializeQuestionType();
 });
@@ -190,6 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Reemplazar los event listeners duplicados del botón manage con uno solo
 document.querySelectorAll('.manage-button').forEach(button => {
     button.addEventListener('click', async (e) => {
+        console.log("Edit existing quiz");
         const row = e.target.closest('tr');
         const quizId = row.cells[0].textContent;
         currentQuizId = quizId;
@@ -200,15 +202,16 @@ document.querySelectorAll('.manage-button').forEach(button => {
             const data = await response.json();
             
             if (data.success) {
+                // Actualizar UI para modo "Edit"
+                document.getElementById('add-edit-btn').textContent = 'Update';
+                document.querySelector('.modal-title').textContent = 'Edit Quiz';
+                
                 fillFormWithQuizData(data.quiz);
                 modal.classList.add("open");
-                document.getElementById('add-edit-btn').textContent = 'Update';
-                document.getElementById('delete-btn').style.display = 'block';
-                document.getElementById('id-readonly-msg').style.display = 'block';
-                document.querySelector('.modal-title').textContent = 'Edit Quiz';
             }
         } catch (error) {
             console.error('Error fetching quiz details:', error);
+            alert('Error loading quiz details');
         }
     });
 });
@@ -461,7 +464,7 @@ function getAllQuestionsData() {
 }
 
 // Modificar el event listener del formulario
-form.addEventListener("submit", function(e) {
+form.addEventListener("submit", async function(e) {
     e.preventDefault();
 
     const questionsData = getAllQuestionsData();
@@ -482,37 +485,34 @@ form.addEventListener("submit", function(e) {
     const url = isEditing ? `/quizzes/${currentQuizId}` : '/quizzes';
     const method = isEditing ? 'PUT' : 'POST';
 
-    // Mostrar loading overlay
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    loadingOverlay.style.display = 'flex';
+    try {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        loadingOverlay.style.display = 'flex';
 
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-            'CSRF-Token': formData.get('_csrf')
-        },
-        body: JSON.stringify(data)
-    })
-    .then(res => res.json())
-    .then(data => {
-        // Ocultar loading overlay
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'CSRF-Token': formData.get('_csrf')
+            },
+            body: JSON.stringify(data)
+        });
+
+        const responseData = await response.json();
         loadingOverlay.style.display = 'none';
-        
-        if (data.success) {
+
+        if (responseData.success) {
+            resetFormState();
             modal.classList.remove("open");
-            form.reset();
             location.reload();
         } else {
-            alert(isEditing ? "Error updating quiz: " : "Error creating quiz: " + data.message);
+            alert(isEditing ? "Error updating quiz: " : "Error creating quiz: " + responseData.message);
         }
-    })
-    .catch(error => {
-        // Ocultar loading overlay en caso de error
-        loadingOverlay.style.display = 'none';
+    } catch (error) {
+        document.getElementById('loadingOverlay').style.display = 'none';
         alert("Error: " + error.message);
         console.error(error);
-    });
+    }
 });
 
 closeManageBtn.addEventListener("click", () => {
@@ -564,31 +564,62 @@ manageEditBtn.addEventListener("click", () => {
 
 });
 
-// Reset form state when opening modal for new quiz
+// Modificar el openBtn click handler
 openBtn.addEventListener("click", () => {
+    console.log("Add new quiz");
+    resetFormState(); // Limpiar completamente el estado
+    modal.classList.add("open");
+    initializeQuestionType();
+});
+
+// Actualizar resetFormState para asegurar una limpieza completa
+function resetFormState() {
     isEditing = false;
     currentQuizId = null;
     form.reset();
     questionCounter = 0;
+    
+    // Limpiar todos los campos del formulario
+    document.getElementById('category').value = '';
+    document.getElementById('description').value = '';
+    document.getElementById('experience').value = '';
+    document.getElementById('available').value = '1'; // Valor por defecto
+    
+    // Actualizar UI para modo "Add"
     document.getElementById('add-edit-btn').textContent = 'Add';
-    document.getElementById('delete-btn').style.display = 'none';
-    document.getElementById('id-readonly-msg').style.display = 'none';
     document.querySelector('.modal-title').textContent = 'Add New Quiz';
     
-    // Limpiar el contenedor de preguntas guardadas
+    // Limpiar contenedor de preguntas guardadas
     const savedQuestionsContainer = document.getElementById('savedQuestionsContainer');
     if (savedQuestionsContainer) {
         savedQuestionsContainer.innerHTML = '';
     }
-
-    // Restablecer el formulario de pregunta
+    
+    // Resetear formulario de pregunta
+    const questionFormContainer = document.getElementById('questionFormContainer');
+    questionFormContainer.style.display = 'none';
+    document.getElementById('addQuestionBtn').style.display = 'block';
     document.getElementById('questionText').value = '';
     document.getElementById('questionType').value = 'Multiple Choice';
     updateOptionsContainer('Multiple Choice');
 
-    // Limpiar las opciones de respuesta
+    // Limpiar las opciones
     const optionInputs = document.querySelectorAll('.option-text');
     optionInputs.forEach(input => input.value = '');
     const radios = document.querySelectorAll('input[name="correct_answer"]');
     radios.forEach(radio => radio.checked = false);
+}
+
+// Modificar el closeBtn click handler
+closeBtn.addEventListener("click", () => {
+    resetFormState();
+    modal.classList.remove("open");
+});
+
+// Modificar el window click handler
+window.addEventListener("click", (e) => {
+    if (e.target === modal) {
+        resetFormState();
+        modal.classList.remove("open");
+    }
 });

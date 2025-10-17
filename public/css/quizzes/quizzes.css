@@ -215,12 +215,12 @@ i {
     position: relative;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
 }
 
 .modal-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-bottom: 20px;
     padding-bottom: 15px;
@@ -247,9 +247,17 @@ i {
 }
 
 .modal-content {
-    flex-grow: 1;
+    flex: 1;
     overflow-y: auto;
-    padding-right: 5px;
+    display: block !important;
+}
+
+.form-content {
+    display: block !important;
+}
+
+#quizForm {
+    display: block !important;
 }
 
 .modal-content::-webkit-scrollbar {
@@ -268,18 +276,6 @@ i {
 
 .modal-content::-webkit-scrollbar-thumb:hover {
     background: #2D9459;
-}
-
-#quizForm {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.form-content {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding-right: 5px;
 }
 
 input, label {

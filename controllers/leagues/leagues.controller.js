@@ -8,11 +8,11 @@ exports.getLeagues = async (req, res) => {
 }
 
 exports.getAddLeague = (req, res) => {
-    res.render('leagues/addLeague', { csrfToken: req.csrfToken() });
+    res.render('Leagues/addLeague', { csrfToken: req.csrfToken() });
 }
 
 exports.getAddLeagueModal = (req, res) => {
-    res.render('leagues/addLeague', { csrfToken: req.csrfToken() });
+    res.render('Leagues/addLeague', { csrfToken: req.csrfToken() });
 }
 
 exports.getEditLeagueModal = (req, res) => {

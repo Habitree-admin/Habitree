@@ -38,8 +38,8 @@ openBtn.addEventListener("click", () => {
     form.reset();
     editMode = false;
     currentMissionId = null;
-    form.IDMission.removeAttribute("readonly");
-    document.getElementById("id-readonly-msg").style.display = "none";
+    const idMsg = document.getElementById("id-readonly-msg");
+    if (idMsg) idMsg.style.display = "none";
     document.getElementById("delete-btn").style.display = "none";
     document.getElementById("add-edit-btn").textContent = "Add";
     // reset unit
@@ -67,26 +67,31 @@ document.querySelectorAll(".table__button").forEach(btn => {
         fetch(`/missions/${missionId}`)
             .then(res => res.json())
             .then(mission => {
-                form.IDMission.value = mission.IDMission;
-                form.responseVerification.value = mission.responseVerification;
-                const radios = document.querySelectorAll('input[name="category"]');
-                radios.forEach(r => { r.checked = (r.value === mission.category); });
+                form.responseVerification.value = mission.responseVerification ? 1 : 0;
+                const categorySelect = document.getElementById('category');
+                if (categorySelect) categorySelect.value = mission.category;
+
                 form.description.value = mission.description;
-                form.available.value = mission.available;
+                form.available.value = mission.available ? 1 : 0;
                 form.experience.value = mission.experience;
-                form.value.value = mission.value || '';
+                if (form.value) form.value.value = mission.value || 0;
+
                 if (mission.assignedReward) {
                     try { rewardSelect.value = mission.assignedReward; } catch(e){}
-                } else { rewardSelect.value = '' }
+                } else {
+                    rewardSelect.value = '';
+                }
+
                 updateUnitForCategory(mission.category);
+
                 modalTitle.textContent = "Edit Mission";
                 form.action = `/missions/edit/${mission.IDMission}`;
                 modal.classList.add("open");
                 editMode = true;
                 currentMissionId = mission.IDMission;
-                form.IDMission.setAttribute("readonly", true);
-                document.getElementById("id-readonly-msg").style.display = "inline";
-                document.getElementById("delete-btn").style.display = "inline-block";
+
+                const delBtn = document.getElementById("delete-btn");
+                if (delBtn) delBtn.style.display = "inline-block";
                 document.getElementById("add-edit-btn").textContent = "Edit";
             })
             .catch(() => {
@@ -143,29 +148,38 @@ form.addEventListener("submit", function(e) {
 });
 
 // Manejar eliminación de misión
-document.getElementById('delete-btn').addEventListener('click', function() {
+document.getElementById('delete-btn').addEventListener('click', function () {
+    if (!currentMissionId) {
+        showMessage('No mission selected', true);
+        return;
+    }
+
     if (confirm('¿Seguro que quieres eliminar esta misión?')) {
-        const missionId = document.getElementById('id').value;
         const csrfToken = document.querySelector('input[name="_csrf"]').value;
-        fetch(`/missions/${missionId}`, {
+
+        fetch(`/missions/${currentMissionId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'CSRF-Token': csrfToken
+                'csrf-token': csrfToken
             }
         })
-        .then(res => res.json())
-        .then(data => {
-            showMessage(data.message || 'Misión eliminada');
-            setTimeout(() => { window.location.reload(); }, 1200);
-        })
-        .catch(err => {
-            showMessage('Error eliminando misión', true);
-            console.error(err);
-        });
+            .then(async (res) => {
+                if (!res.ok) {
+                    const txt = await res.text().catch(() => '');
+                    throw new Error(`DELETE /missions/${currentMissionId} -> ${res.status} ${res.statusText} ${txt}`);
+                }
+                return res.json();
+            })
+            .then((data) => {
+                showMessage(data.message || 'Misión eliminada');
+                setTimeout(() => { window.location.reload(); }, 1200);
+            })
+            .catch((err) => {
+                console.error(err);
+                showMessage('Error eliminando misión', true);
+            });
     }
-
-    
 });
 
 document.addEventListener("DOMContentLoaded", function() {

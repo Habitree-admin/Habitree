@@ -3,9 +3,8 @@ const db = require('../../util/database');
 // Clase mission
 module.exports = class Mission{
 
-    constructor(IDMission,responseVerification,category,description,dateOfCreation,available,experience,value){
+    constructor(responseVerification,category,description,dateOfCreation,available,experience,value){
 
-        this.IDMission = IDMission;
         this.responseVerification = responseVerification;
         this.category = category; 
         this.description = description; 
@@ -22,8 +21,8 @@ module.exports = class Mission{
  
         const currentDate = new Date();
         return db.execute(
-            'INSERT INTO mission (IDMission,responseVerification,category,description,dateOfCreation,available,experience,value) VALUES(?,?,?,?,?,?,?,?)',
-            [this.IDMission, this.responseVerification, this.category, this.description, currentDate, this.available, this.experience, this.value]
+            'INSERT INTO mission (responseVerification,category,description,dateOfCreation,available,experience,value) VALUES(?,?,?,?,?,?,?)',
+            [ this.responseVerification, this.category, this.description, currentDate, this.available, this.experience, this.value]
         );
     }
 

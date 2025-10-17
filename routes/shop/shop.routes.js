@@ -4,10 +4,10 @@ const isAuth = require('../../util/is-auth');
 const shopController = require("../../controllers/shop/shop.controller")
 
 
-router.get("/api/filter-options", shopController.getFilterOptions);
-router.get("/api/filter", shopController.filterItems);
+router.get("/api/filter-options", isAuth, shopController.getFilterOptions);
+router.get("/api/filter", isAuth, shopController.filterItems);
 
-router.get("/", shopController.getItems);
+router.get("/", isAuth, shopController.getItems);
 
 router.post("/", isAuth, shopController.postItem)
 

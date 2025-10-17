@@ -39,3 +39,64 @@ exports.getShopItemsForUser = async (id) => {
 
   return itemsWithUrls;
 };
+
+exports.buyShopItemForUser = async (IDUser, IDItem) => {
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // Obtener precio del ítem
+    const [itemRows] = await connection.execute(
+      "SELECT price FROM shop WHERE IDItem = ?",
+      [IDItem]
+    );
+
+    if (itemRows.length === 0) throw new Error("Item not found");
+
+    const price = itemRows[0].price;
+
+    // Verificar que el usuario tenga monedas suficientes
+    const [userRows] = await connection.execute(
+      "SELECT coins FROM user WHERE IDUser = ?",
+      [IDUser]
+    );
+
+    if (userRows.length === 0) throw new Error("User not found");
+
+    const userCoins = userRows[0].coins;
+    if (userCoins < price) throw new Error("Not enough coins");
+
+    // Actualizar monedas del usuario
+    await connection.execute(
+      "UPDATE user SET coins = coins - ? WHERE IDUser = ?",
+      [price, IDUser]
+    );
+
+    // Registrar compra en userShop
+    const [purchaseResult] = await connection.execute(
+      `INSERT INTO userShop (IDUser, IDItem, transaction, purchaseAmount, pointsEarned, purchaseDate)
+       VALUES (?, ?, UUID(), 1, 1, NOW())`,
+      [IDUser, IDItem]
+    );
+
+    // Agregar ítem al inventario
+    await connection.execute(
+      `INSERT INTO inventory (IDUser, IDItem, Quantity, status)
+       VALUES (?, ?, 1, 0)`,
+      [IDUser, IDItem]
+    );
+
+    await connection.commit();
+
+    return {
+      IDUserShop: purchaseResult.insertId,
+      message: "Purchase completed successfully"
+    };
+  } catch (error) {
+    await connection.rollback();
+    console.error(" Error in buyShopItemForUser:", error);
+    throw error;
+  } finally {
+    connection.release();
+  }
+};

@@ -17,7 +17,7 @@ router.post("/delete", isAuth, notificationController.postDelete);
 
 router.post("/update", isAuth, notificationController.postUpdate);
 
-router.post("/create", notificationController.createNotification);
+router.post("/create", isAuth, notificationController.createNotification);
 
 
 module.exports = router

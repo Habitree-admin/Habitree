@@ -353,3 +353,43 @@ input:focus {
     transition: background-color 0.3s ease;
     box-shadow: 10px 5px 5px rgb(153, 152, 152);
 }
+
+.modal-header {
+    display: grid !important;
+    grid-template-columns: 40px 1fr 40px;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+}
+
+.modal-header .modal-title {
+    grid-column: 2;
+    text-align: center !important;
+    margin: 0 !important;
+}
+
+.modal-close {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    cursor: pointer;
+    color: #4d4c4c;
+    font-size: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+}
+
+
+#closeManageModal.modal-close {
+    margin-left: 0 !important;
+}
+
+.modal-close:hover {
+    background: rgba(0,0,0,0.06);
+}

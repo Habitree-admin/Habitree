@@ -1,5 +1,20 @@
 const db = require("../../../util/database");
 const bcrypt = require("bcrypt");
+const AWS = require("aws-sdk");
+
+const AWS_BUCKET = process.env.AWS_BUCKET;
+const AWS_REGION = process.env.AWS_REGION;
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+
+AWS.config.update({
+  signatureVersion: "v4",
+  region: AWS_REGION,
+  accessKeyId: AWS_ACCESS_KEY_ID,
+  secretAccessKey: AWS_SECRET_ACCESS_KEY
+});
+
+const s3 = new AWS.S3();
 
 const getAllUsers = async () => {
   const [rows] = await db.execute("SELECT * FROM user");
@@ -29,7 +44,7 @@ const getLoginUser = async (email, password) => {
 
   // 3. Retornar datos del usuario (sin contraseña)
   return {
-    id: user.IDUser,
+    userId: user.IDUser,
     name: user.Name,
     email: user.email,
     gender: user.gender,
@@ -51,7 +66,7 @@ const getLoginUserGoogle = async (email) => {
   const user = rows[0];
 
   return {
-    userId: user.IDUser,
+    id: user.IDUser,
     name: user.Name,
     email: user.email,
     coins: user.coins
@@ -73,7 +88,6 @@ const getStatsUser = async (id) => {
   );
   return rows;
 };
-
 
 
 const postSignupUser = async (name, email, gender, dateOfBirth, coins, password) => {
@@ -137,6 +151,7 @@ const changeUserPassword = async (id, password) => {
     throw new Error(err.message);
   }
 };
+
 const getMissionsSummaryByUser = async (id) => {
   const [rows] = await db.execute(
     `SELECT 
@@ -144,22 +159,40 @@ const getMissionsSummaryByUser = async (id) => {
         SUM(m.value) AS total_value
      FROM userMissions um
      INNER JOIN mission m ON um.IDMission = m.IDMission
-     WHERE um.IDUser = ? 
-       AND um.status = 1
-       AND m.category IN ('Awareness', 'Consumption', 'Energy', 'Nature', 'Transport', 'Waste', 'Water')
+     WHERE um.IDUser = ? AND um.status = 1
      GROUP BY m.category
      ORDER BY m.category`,
     [id]
   );
-  
-  // Transformar el resultado en un objeto plano
-  const summary = rows.reduce((acc, row) => {
-    acc[row.category] = row.total_value;
-    return acc;
-  }, {});
-  
+
+  // Valores por defecto - siempre se retornan todas las categorías
+  const summary = {
+    Awareness: "0",
+    Consumption: "0",
+    Energy: "0",
+    Nature: "0",
+    Transport: "0",
+    Waste: "0",
+    Water: "0"
+  };
+
+  // Actualizar con los valores reales de la base de datos
+  rows.forEach(row => {
+    if (row.category) {
+      // Normalizar la categoría: primera letra mayúscula, resto minúsculas
+      const normalizedCategory = row.category.charAt(0).toUpperCase() + row.category.slice(1).toLowerCase();
+      
+      // Solo actualizar si la categoría normalizada existe en nuestro objeto summary
+      if (summary.hasOwnProperty(normalizedCategory)) {
+        summary[normalizedCategory] = (row.total_value || 0).toString();
+      }
+    }
+  });
+
   return summary;
 };
+
+
 
 const getUserRewardsById = async (id) => {
   const [rows] = await db.execute(
@@ -181,5 +214,120 @@ const getUserRewardsById = async (id) => {
   return rows;
 };
 
-module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser, editUserInfo, changeUserPassword,  getMissionsSummaryByUser, getUserRewardsById, getLoginUserGoogle};
+const getLeaderboardS = async () => {
+  const [rows] = await db.execute(`
+    SELECT 
+      u.name,
+      t.level,
+      l.league
+    FROM user u
+    INNER JOIN tree t ON u.IDUser = t.IDUser
+    LEFT JOIN ranking r ON t.IDTree = r.IDTree
+    LEFT JOIN Leagues l ON r.ID_league = l.ID_league
+    WHERE u.deleted = 0
+    ORDER BY t.level DESC, u.name ASC
+    LIMIT 10
+  `);
 
+  return rows;
+};
+
+const getInventoryByUser = async (userId) => {
+  const query = `
+    SELECT 
+      i.IDInventory,
+      i.IDUser,
+      i.IDItem,
+      i.Quantity,
+      i.status,
+      s.name AS item_name,
+      s.state,
+      s.category,
+      s.price,
+      s.image_name
+    FROM inventory i
+    INNER JOIN shop s ON i.IDItem = s.IDItem
+    WHERE i.IDUser = ?
+  `;
+
+  const [rows] = await db.execute(query, [userId]);
+
+  // Generar URL firmada de S3
+  const inventoryWithUrls = await Promise.all(
+    rows.map(async (item) => {
+      if (!item.image_name) return { ...item, imageUrl: null };
+
+      const params = { Bucket: AWS_BUCKET, Key: item.image_name, Expires: 3600 };
+      const signedUrl = s3.getSignedUrl("getObject", params);
+      return { ...item, imageUrl: signedUrl };
+    })
+  );
+
+  return inventoryWithUrls;
+};
+
+const useItemByUser = async (idUser, idItem) => {
+
+  await db.execute(
+    `UPDATE inventory 
+     SET status = 0 
+     WHERE IDUser = ? AND status = 1`,
+    [idUser]
+  );
+
+  const [updateResult] = await db.execute(
+    `UPDATE inventory 
+     SET status = 1 
+     WHERE IDUser = ? AND IDItem = ?`,
+    [idUser, idItem]
+  );
+
+  if (updateResult.affectedRows === 0) {
+    throw new Error("El ítem no existe en el inventario del usuario");
+  }
+
+  const [rows] = await db.execute(
+    `SELECT image_name FROM shop WHERE IDItem = ?`,
+    [idItem]
+  );
+
+  if (rows.length === 0) {
+    throw new Error("El ítem no existe en la tienda");
+  }
+
+  const imageName = rows[0].image_name;
+
+  await db.execute(
+    `UPDATE user 
+     SET item = ? 
+     WHERE IDUser = ?`,
+    [imageName, idUser]
+  );
+
+  return { idUser, idItem, imageName };
+};
+
+const getActiveItemByUser = async (idUser) => {
+  const [rows] = await db.execute(
+    `SELECT item FROM user WHERE IDUser = ? AND deleted = 0`,
+    [idUser]
+  );
+
+  if (rows.length === 0 || !rows[0].item) return null;
+
+  const imageName = rows[0].item;
+
+  // Generar signed URL
+  const params = { Bucket: AWS_BUCKET, Key: imageName, Expires: 3600 };
+  const signedUrl = s3.getSignedUrl("getObject", params);
+
+  return {
+    image_name: imageName,
+    signedUrl
+  };
+};
+
+module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser, 
+                  editUserInfo, changeUserPassword,  getMissionsSummaryByUser, 
+                  getUserRewardsById, getLoginUserGoogle, getLeaderboardS, getInventoryByUser,
+                  useItemByUser, getActiveItemByUser};
