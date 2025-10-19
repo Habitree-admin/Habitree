@@ -199,7 +199,7 @@ const useItem = async (req, res) => {
   try {
     const { IDUser, IDItem } = req.body;
 
-    if (!IDUser || !IDItem) {
+    if (!IDUser || IDItem === undefined || IDItem === null) {
       return res.status(400).json({
         success: false,
         message: "Faltan parámetros: IDUser o IDItem",

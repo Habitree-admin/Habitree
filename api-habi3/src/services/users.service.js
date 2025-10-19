@@ -268,6 +268,30 @@ const getInventoryByUser = async (userId) => {
 
 const useItemByUser = async (idUser, idItem) => {
 
+  // Caso especial: quitar el ítem actual
+  if (idItem === 0) {
+    console.log(`Desequipando item para usuario ${idUser}`);  
+   // Desactivar cualquier ítem activo
+    await db.execute(
+      `UPDATE inventory 
+       SET status = 0 
+       WHERE IDUser = ? AND status = 1`,
+      [idUser]
+    );
+  
+      // Limpiar el campo item en la tabla user
+    await db.execute(
+      `UPDATE user 
+       SET item = NULL 
+       WHERE IDUser = ?`,
+      [idUser]
+    );
+  
+    return { idUser, idItem: 0, imageName: null };
+  }
+  
+    // Si no es 0, seguir con la lógica normal
+
   await db.execute(
     `UPDATE inventory 
      SET status = 0 
