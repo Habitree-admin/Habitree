@@ -39,6 +39,7 @@ const getAllMissions = async (userId) => {
         ON r.IDReward = br.IDReward
     LEFT JOIN impactReward ir 
         ON r.IDReward = ir.IDReward
+    WHERE m.available = 1
     ORDER BY m.IDMission, r.IDReward
     `,
     [userId]
