@@ -115,16 +115,18 @@ exports.postDelete = (req, res) => {
     }
 };
 
-exports.postUpdate = (req, res) => {
-    const { id, titulo, description, canal, category } = req.body;
-    try {
-        // Actualiza con todos los campos nuevos
-        Notification.update(titulo, description, canal, category, id);
-        console.log("Success update");
-        res.redirect('/notifications');
-    }
-    catch (error) {
-        console.error(error);
-        res.status(500).send("Error al actualizar la notificación");
-    }
-}
+exports.postUpdate = async (req, res) => {
+  const { id, canal, titulo, mensaje, category } = req.body;
+  try {
+    await Notification.update(titulo, mensaje, canal, category, id);
+    console.log("Success update");
+
+    await sendNotificationToTopic(canal, titulo, mensaje);
+    console.log("Success: Notificación enviada por FCM");
+
+    res.redirect('/notifications');
+  } catch (error) {
+    console.error("Error al actualizar la notificación:", error);
+    res.status(500).send("Error al actualizar la notificación");
+  }
+};
