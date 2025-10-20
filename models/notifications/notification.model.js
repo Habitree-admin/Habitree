@@ -31,12 +31,15 @@ module.exports = class notification {
             [newIsActive, id]);
     }
     
-    static update(description, category, id) {
-        return db.execute(`UPDATE notification
-             SET description = ?, category = ?
-             WHERE idNotification = ?`,
-            [description, category, id]);
-    }
+    static update(titulo, mensaje, canal, category, id) {
+  return db.execute(
+    `UPDATE notification
+     SET titulo = ?, description = ?, canal = ?, category = ?
+     WHERE idNotification = ?`,
+    [titulo, mensaje, canal, category, id]
+  );
+}
+
     
     static fetchById(id) {
         return db.execute('SELECT * FROM notification WHERE IDNotification = ?', [id]);

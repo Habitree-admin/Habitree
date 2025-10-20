@@ -1,36 +1,38 @@
 <div class="modal">
-    <h2 id="modal-title">Edit Notification</h2>
+  <h2 id="modal-title">Edit Notification</h2>
+  <form id="form-edit-notification" action="/notifications/update" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <input type="hidden" name="id" value="<%= id %>" />
 
-    <form id="form-edit-notification" action="/notifications/update" method="POST">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <!-- Campo Título -->
+    <label for="titulo">Tittle:</label>
+    <input type="text" name="titulo" id="titulo" value="<%= titulo %>" required />
 
-        <input type="hidden" name="id" value="<%= id %>" />
+    <!-- Campo Mensaje -->
+    <label for="mensaje">Message:</label>
+    <input type="text" name="mensaje" id="mensaje" value="<%= description %>" required />
 
-        <label for="descripcion-input">Description:</label>
-        <div class="input-container">
-            <input type="text" id="descripcion-input" name="description" value="<%= description %>" required />
-        </div>
+    <!-- Campo Canal -->
+    <label for="canal">Channel:</label>
+    <input type="text" name="canal" id="canal" value="<%= canal %>" readonly style="background:#e0ffe0;" />
 
-        <label for="category-input">Category:</label>
-        <div class="input-container">
-            <input type="text" id="category-input" name="category" value="<%= category %>" required />
-        </div>
-        
-        <div class="button-container">
-            <button id="guardar-btn" type="submit">Edit</button>
+    <!-- Campo Category -->
+    <label for="category">Category:</label>
+    <input type="text" name="category" id="category" value="<%= category %>" required />
 
-            <% if (isActive === 'Sí') { %>
-                <button id="delete-btn" type="button" class="close-modal">Deactivate</button>
-            <% } else { %>
-                <button id="delete-btn" type="button" class="close-modal">Activate</button>
-            <% } %>
+    <div class="button-container">
+      <button id="guardar-btn" type="submit">Edit</button>
 
-        </div>
-    </form>
+      <% if (isActive === 'Sí') { %>
+        <button id="delete-btn" type="button" class="close-modal">Deactivate</button>
+      <% } else { %>
+        <button id="delete-btn" type="button" class="close-modal">Activate</button>
+      <% } %>
+    </div>
+  </form>
 
-    <form id="form-delete-notification" action="/notifications/delete" method="POST" style="display: none;">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        
-        <input type="hidden" name="id" value="<%= id %>" />
-    </form>
+  <form id="form-delete-notification" action="/notifications/delete" method="POST" style="display: none;">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <input type="hidden" name="id" value="<%= id %>" />
+  </form>
 </div>
