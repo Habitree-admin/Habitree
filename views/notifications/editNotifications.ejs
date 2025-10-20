@@ -22,7 +22,12 @@
 
     <div class="button-container">
       <button id="guardar-btn" type="submit">Edit</button>
-      <button id="close-btn" type="button" class="close-modal" onclick="closeModal()">Cancel</button>
+
+      <% if (isActive === 'Sí') { %>
+        <button id="delete-btn" type="button" class="close-modal">Deactivate</button>
+      <% } else { %>
+        <button id="delete-btn" type="button" class="close-modal">Activate</button>
+      <% } %>
     </div>
   </form>
 
