@@ -54,23 +54,30 @@ const getLoginUser = async (email, password) => {
 };
 
 const getLoginUserGoogle = async (email) => {
-  const [rows] = await db.execute(
-    "SELECT IDUser, Name, email, coins FROM user WHERE email = ?",
-    [email]
-  );
+  try {
+    const [rows] = await db.execute(
+      "SELECT IDUser, Name, email, gender, dateOfBirth, coins FROM user WHERE email = ?",
+      [email]
+    );
 
-  if (rows.length === 0) {
-    throw new Error("Usuario no encontrado");
+    if (rows.length === 0) {
+      throw new Error("Usuario no encontrado");
+    }
+
+    const user = rows[0];
+
+    return {
+      userId: user.IDUser,
+      name: user.Name,
+      email: user.email,
+      gender: user.gender,
+      dateOfBirth: user.dateOfBirth,
+      coins: user.coins
+    };
+  } catch (error) {
+    console.error('Error en getLoginUserGoogle:', error.message);
+    throw error;
   }
-
-  const user = rows[0];
-
-  return {
-    id: user.IDUser,
-    name: user.Name,
-    email: user.email,
-    coins: user.coins
-  };
 };
 
 const getStatsUser = async (id) => {

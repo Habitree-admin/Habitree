@@ -4,9 +4,10 @@ const { getMissions } = require("../controllers/mission.controller");
 const { getUserMissions } = require("../controllers/mission.controller");
 const { getUserMission } = require("../controllers/mission.controller");
 const { postCompleteMission } = require("../controllers/mission.controller");
+const authMiddleware = require('../utils/tokenmiddleware');
 
 // GET /api/missions
-router.get("/:id", getMissions);
+router.get("/:id", authMiddleware, getMissions);
 
 //GET /api/userMissions
 
