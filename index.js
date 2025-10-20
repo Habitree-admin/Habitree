@@ -97,6 +97,10 @@ app.use('/leagues', leaguesRoutes)
 
 const missionsRoutes = require('./routes/Missions/missions.routes');
 app.use(missionsRoutes);
+
+// Ruta de Indicators
+const indicatorsRoutes = require('./routes/indicators/indicators.routes');
+app.use('/indicators', indicatorsRoutes);
  
 const quizzesRoutes = require ('./routes/quizzes/quizzes.routes');
 app.use(quizzesRoutes);
