@@ -98,35 +98,58 @@ document.getElementById('delete-btn').addEventListener('click', function() {
 });
 
 // Interceptar el submit en modo edición para enviar por AJAX
-form.addEventListener("submit", function(e) {
+form.addEventListener("submit", async function (e) {
+    const submitBtn = document.getElementById("add-edit-btn");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Processing...";
+
     if (editMode) {
         e.preventDefault();
+
         const data = {
             name: form.name.value,
             email: form.email.value,
             gender: form.gender.value,
             dateOfBirth: form.dateOfBirth.value
         };
-        fetch(`/users/edit/${currentUserId}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "CSRF-Token": form._csrf.value
-            },
-            body: JSON.stringify(data)
-        })
-        .then(res => res.json())
-        .then(result => {
+
+        try {
+            const res = await fetch(`/users/edit/${currentUserId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "CSRF-Token": form._csrf.value
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+
             if (result.success) {
                 showMessage(result.message);
-                setTimeout(() => { window.location.reload(); }, 1200);
+                setTimeout(() => window.location.reload(), 1200);
             } else {
                 showMessage(result.message, true);
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Edit";
             }
-        })
-        .catch(() => {
+
+        } catch (err) {
             showMessage("Error updating user", true);
-        });
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Edit";
+        }
+
+    } else {
+        // Si es modo "Add", bloquea clics rápidos
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Adding...";
+
+        // Reactiva el botón después de unos segundos preventivos
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Add";
+        }, 4000);
     }
 });
 

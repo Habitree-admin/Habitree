@@ -268,6 +268,30 @@ const getInventoryByUser = async (userId) => {
 
 const useItemByUser = async (idUser, idItem) => {
 
+  // Caso especial: quitar el ítem actual
+  if (idItem === 0) {
+    console.log(`Desequipando item para usuario ${idUser}`);  
+   // Desactivar cualquier ítem activo
+    await db.execute(
+      `UPDATE inventory 
+       SET status = 0 
+       WHERE IDUser = ? AND status = 1`,
+      [idUser]
+    );
+  
+      // Limpiar el campo item en la tabla user
+    await db.execute(
+      `UPDATE user 
+       SET item = NULL 
+       WHERE IDUser = ?`,
+      [idUser]
+    );
+  
+    return { idUser, idItem: 0, imageName: null };
+  }
+  
+    // Si no es 0, seguir con la lógica normal
+
   await db.execute(
     `UPDATE inventory 
      SET status = 0 
@@ -307,8 +331,27 @@ const useItemByUser = async (idUser, idItem) => {
   return { idUser, idItem, imageName };
 };
 
+const getActiveItemByUser = async (idUser) => {
+  const [rows] = await db.execute(
+    `SELECT item FROM user WHERE IDUser = ? AND deleted = 0`,
+    [idUser]
+  );
+
+  if (rows.length === 0 || !rows[0].item) return null;
+
+  const imageName = rows[0].item;
+
+  // Generar signed URL
+  const params = { Bucket: AWS_BUCKET, Key: imageName, Expires: 3600 };
+  const signedUrl = s3.getSignedUrl("getObject", params);
+
+  return {
+    image_name: imageName,
+    signedUrl
+  };
+};
 
 module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser, 
                   editUserInfo, changeUserPassword,  getMissionsSummaryByUser, 
                   getUserRewardsById, getLoginUserGoogle, getLeaderboardS, getInventoryByUser,
-                  useItemByUser};
+                  useItemByUser, getActiveItemByUser};

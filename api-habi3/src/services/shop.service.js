@@ -45,6 +45,16 @@ exports.buyShopItemForUser = async (IDUser, IDItem) => {
   try {
     await connection.beginTransaction();
 
+    // verificar que el item ya esta comprado
+    const [existingPurchase] = await connection.execute(
+      "SELECT IDUserShop FROM userShop WHERE IDUser = ? AND IDItem = ?",
+      [IDUser, IDItem]
+    );
+
+    if (existingPurchase.length > 0) {
+      throw new Error("Item already purchased");
+    }
+
     // Obtener precio del ítem
     const [itemRows] = await connection.execute(
       "SELECT price FROM shop WHERE IDItem = ?",
@@ -94,7 +104,7 @@ exports.buyShopItemForUser = async (IDUser, IDItem) => {
     };
   } catch (error) {
     await connection.rollback();
-    console.error(" Error in buyShopItemForUser:", error);
+    console.error("Error in buyShopItemForUser:", error);
     throw error;
   } finally {
     connection.release();

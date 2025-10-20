@@ -1,129 +1,157 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const csrfToken = document.querySelector('input[name="_csrf"]').value;
-    const manageButtons = document.querySelectorAll(".table__button");
-    const modalRoot = document.getElementById("modal-root");
+    const csrfToken = document.querySelector('input[name="_csrf"]')?.value || "";
+
+    // Modal y controles
+    const modal = document.getElementById("manageModal");
     const backdrop = document.getElementById("backdrop");
+    const closeBtn = document.getElementById("closeManageModal");
 
-    manageButtons.forEach(button => {
+    // Labels / botones
+    const selectedLeagueLabel = document.getElementById("selectedLeagueLabel");
+    const deleteBtn = document.getElementById("deleteLeagueBtn");
+    const editBtn = document.getElementById("editLeagueBtn");
+
+    // Inputs del formulario único
+    const editLeagueNameInput = document.getElementById("editLeagueName");
+    const editLeagueLevelInput = document.getElementById("editLeagueLevel");
+
+    // Botones "Manage" de la tabla
+    const manageButtons = document.querySelectorAll(".manage-league-btn");
+
+    let currentLeagueName = null;
+    let currentLeagueLevel = null;
+
+    const openModal = ({ name, level }) => {
+        currentLeagueName  = name;
+        currentLeagueLevel = level;
+
+        // Prefill y etiqueta
+        selectedLeagueLabel.textContent = `"${name}"`;
+        editLeagueNameInput.value = name;
+        editLeagueLevelInput.value = level;
+
+        modal.classList.add("active");
+        backdrop.classList.add("active");
+    };
+
+    const closeModal = () => {
+        modal.classList.remove("active");
+        backdrop.classList.remove("active");
+        selectedLeagueLabel.textContent = "";
+        currentLeagueName = null;
+        currentLeagueLevel = null;
+        editLeagueNameInput.value = "";
+        editLeagueLevelInput.value = "";
+    };
+
+    // Abrir modal
+    manageButtons.forEach((button) => {
         button.addEventListener("click", (e) => {
-            const row = e.target.closest("tr");
-            const leagueName = row.querySelector("td:nth-child(2)").textContent.trim();
-            const leagueLevel = row.querySelector("td:nth-child(3)").textContent.trim();
+            const row = e.currentTarget.closest("tr");
+            if (!row) return;
 
-            // Crear modal de opciones (Manage)
-            modalRoot.innerHTML = `
-                <div class="modal active" id="manageModal">
-                    <div class="modal-inner">
-                        <h2>Manage League</h2>
-                        <p style="text-align:center;">"${leagueName}"</p>
-                        <div class="button-container">
-                            <button id="editLeagueBtn" class="submit-btn">Edit</button>
-                            <button id="deleteLeagueBtn" class="submit-btn" style="background-color:#d9534f;">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            const nameCell  = row.querySelector("td:nth-child(2)");
+            const levelCell = row.querySelector("td:nth-child(3)");
 
-            backdrop.classList.add("active");
+            const leagueName  = (button.dataset.leagueName || nameCell?.textContent || "").trim();
+            const leagueLevel = (levelCell?.textContent || "").trim();
 
-            const manageModal = document.getElementById("manageModal");
-            const editBtn = document.getElementById("editLeagueBtn");
-            const deleteBtn = document.getElementById("deleteLeagueBtn");
-
-            // Función para cerrar modal
-            const closeModal = () => {
-                manageModal.classList.remove("active");
-                backdrop.classList.remove("active");
-                modalRoot.innerHTML = "";
-            };
-
-            backdrop.addEventListener("click", (event) => {
-                if (event.target === backdrop) closeModal();
-            });
-
-            // Acción DELETE
-            deleteBtn.addEventListener("click", async () => {
-                if (!confirm(`Are you sure you want to delete "${leagueName}"?`)) return;
-
-                try {
-                    const res = await fetch("/leagues/delete", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "CSRF-Token": csrfToken
-                        },
-                        body: JSON.stringify({ leagueName })
-                    });
-
-                    const data = await res.json();
-                    alert(data.message || "Unknown response from server");
-
-                    if (data.success) {
-                        closeModal();
-                        window.location.reload();
-                    }
-                } catch (err) {
-                    console.error("Error deleting league:", err);
-                    alert("Error deleting league");
-                }
-            });
-
-            // Acción EDIT: Abrir modal de edición completo
-            editBtn.addEventListener("click", () => {
-                closeModal(); // cerrar el modal corto
-                // Cargar modal de edición completo
-                modalRoot.innerHTML = `
-                    <div class="modal active" id="manageLeagueModal">
-                        <div class="modal-inner">
-                            <div class="modal-header">
-                                <h1 class="modal-title">Edit League</h1>
-                                <button id="closeManageLeagueModal" class="fa fa-times close-btn"></button>
-                            </div>
-                            <div class="modal-content">
-                                <form id="editLeagueNameForm" action="/leagues/editName" method="POST" style="margin-bottom:2rem;">
-                                    <input type="hidden" name="_csrf" value="${csrfToken}">
-                                    <input type="hidden" name="nameA" id="editLeagueNameA" value="${leagueName}">
-                                    <div>
-                                        <label for="editLeagueName">Nuevo nombre de la liga</label>
-                                        <input type="text" name="name" id="editLeagueName" required value="${leagueName}">
-                                    </div>
-                                    <div class="button-container">
-                                        <button type="submit" class="submit-btn">Cambiar nombre</button>
-                                    </div>
-                                </form>
-                                <form id="editLeagueLevelForm" action="/leagues/editLevel" method="POST">
-                                    <input type="hidden" name="_csrf" value="${csrfToken}">
-                                    <input type="hidden" name="nameA" id="editLeagueNameA2" value="${leagueName}">
-                                    <div>
-                                        <label for="editLeagueLevel">Nuevo nivel mínimo</label>
-                                        <input type="number" name="lvl" id="editLeagueLevel" required value="${leagueLevel}">
-                                    </div>
-                                    <div class="button-container">
-                                        <button type="submit" class="submit-btn">Cambiar nivel</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                const editModal = document.getElementById("manageLeagueModal");
-                const closeEditBtn = document.getElementById("closeManageLeagueModal");
-
-                closeEditBtn.addEventListener("click", () => {
-                    editModal.classList.remove("active");
-                    backdrop.classList.remove("active");
-                    modalRoot.innerHTML = "";
-                });
-
-                backdrop.addEventListener("click", (event) => {
-                    if (event.target === backdrop) {
-                        editModal.classList.remove("active");
-                        backdrop.classList.remove("active");
-                        modalRoot.innerHTML = "";
-                    }
-                });
-            });
+            if (!leagueName) return;
+            openModal({ name: leagueName, level: leagueLevel });
         });
+    });
+
+    // Cerrar
+    closeBtn?.addEventListener("click", closeModal);
+    backdrop?.addEventListener("click", (evt) => { if (evt.target === backdrop) closeModal(); });
+
+    // Helper: post x-www-form-urlencoded y tolerar respuestas no-JSON
+    async function postForm(url, params) {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "CSRF-Token": csrfToken
+            },
+            body: new URLSearchParams(params)
+        });
+        let data = null;
+        try { data = await res.json(); } catch { }
+        return { ok: res.ok, data };
+    }
+
+    // EDIT
+    editBtn?.addEventListener("click", async (e) => {
+        e.preventDefault();
+        if (!currentLeagueName) return;
+
+        const newName = editLeagueNameInput.value.trim();
+        const newLevel = editLeagueLevelInput.value.trim();
+
+        if (!newName) {
+            alert("El nuevo nombre es requerido.");
+            return;
+        }
+        if (newLevel === "") {
+            alert("El nivel mínimo es requerido.");
+            return;
+        }
+
+        const nameChanged  = newName !== currentLeagueName;
+        const levelChanged = newLevel !== String(currentLeagueLevel);
+
+        if (!nameChanged && !levelChanged) {
+            alert("No hay cambios por guardar.");
+            return;
+        }
+
+        try {
+            if (nameChanged) {
+                const { ok, data } = await postForm("/leagues/editName", {
+                    nameA: currentLeagueName,
+                    name: newName
+                });
+                if (!ok) throw new Error(data?.message || "Error al cambiar el nombre");
+                currentLeagueName = newName; // importante para el siguiente paso
+            }
+
+            if (levelChanged) {
+                const { ok, data } = await postForm("/leagues/editLevel", {
+                    nameA: currentLeagueName, // si se cambió nombre arriba, ya es el nuevo
+                    lvl: newLevel
+                });
+                if (!ok) throw new Error(data?.message || "Error al cambiar el nivel");
+            }
+
+            alert("Liga actualizada correctamente.");
+            closeModal();
+            window.location.reload();
+        } catch (err) {
+            console.error(err);
+            alert(err.message || "Error al editar la liga");
+        }
+    });
+
+    // DELETE
+    deleteBtn?.addEventListener("click", async () => {
+        if (!currentLeagueName) return;
+        if (!confirm(`Are you sure you want to delete "${currentLeagueName}"?`)) return;
+
+        try {
+            const res = await fetch("/leagues/delete", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "CSRF-Token": csrfToken },
+                body: JSON.stringify({ leagueName: currentLeagueName })
+            });
+            const data = await res.json().catch(() => null);
+            if (data?.message) alert(data.message);
+            if (data?.success) {
+                closeModal();
+                window.location.reload();
+            }
+        } catch (err) {
+            console.error("Error deleting league:", err);
+            alert("Error deleting league");
+        }
     });
 });

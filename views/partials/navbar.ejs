@@ -3,16 +3,17 @@
 
 <nav class="navbar">
     <ul>
-       <div class="header--Logo">
-            <i class="fa-solid fa-hand-holding-droplet"></i>
-            <li><a href="#" class="title">HabiTree</a></li>
-       </div>
+        <div class="header--Logo">
+            <a href="/" style="text-decoration: none;">
+                <img src="/img/LogoHabitree2.png" alt="HabiTree Logo" class="navbar-logo">
+            </a>
+        </div>
 
 
        <div class="content--navbar">
            <li class="navbar-item" >
             <a href="/leagues" style="color: inherit; text-decoration: none;">
-                <i class="fa-solid fa-user-group navbar--icon"></i>Leagues
+                <i class="fa-solid fa-medal navbar--icon"></i>Leagues
             </a>
            </li>
            <li class="navbar-item" >
@@ -41,6 +42,11 @@
                 <i class="fa-solid fa-bullseye navbar--icon"></i>Missions
             </a>
            </li>
+           <li class="navbar-item">
+            <a href="/indicators" style="color: inherit; text-decoration: none;">
+            <i class="fa-solid fa-chart-line navbar--icon"></i>Indicators
+            </a>
+            </li>
            <li class="navbar-item" >
             <a href="/users" style="color: inherit; text-decoration: none;">
                 <i class="fa-solid fa-user navbar--icon"></i>User
@@ -49,7 +55,7 @@
        </div>
 
        <div class="navbar__logout">
-           <li class="navbar-item"><i class="fa-solid fa-right-from-bracket navbar--icon"></i>Logout</li>
+           <li class="navbar-item"><a href="/users/logout" style="color: inherit; text-decoration: none;"><i class="fa-solid fa-right-from-bracket navbar--icon"></i>Logout</a></li>
        </div>
     </ul>
 </nav>

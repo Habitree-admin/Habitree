@@ -12,6 +12,7 @@ const { getLoginGoogle } = require("../controllers/users.controller");
 const { getLeaderboard } = require("../controllers/users.controller");
 const { getInventory } = require("../controllers/users.controller");
 const { useItem } = require("../controllers/users.controller");
+const { getActiveItem } = require("../controllers/users.controller");
 
 // GET /api/users
 router.get("/", getUsers);
@@ -26,6 +27,7 @@ router.get("/rewards/:id", getUserRewards)
 router.get("/leaderboard", getLeaderboard)
 router.get("/inventory/:id", getInventory)
 router.post("/useitem", useItem);
+router.get("/activeitem/:id", getActiveItem)
 
 
 module.exports = router;

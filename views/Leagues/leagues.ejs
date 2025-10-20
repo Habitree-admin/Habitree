@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Leagues</title>
-    <link rel="stylesheet" href="/css/leagues/leagues.css">
+    <link rel="icon" type="image/png" href="/img/LogoHabitree.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <link rel="stylesheet" href="/css/leagues/leagues.css" />
 </head>
 <body>
 <div class="content">
@@ -18,6 +19,7 @@
                 <button class="instrument-sans-bold header__button">Add League</button>
             </div>
         </div>
+
         <div class="table-container instrument-sans-regular">
             <table>
                 <thead>
@@ -36,9 +38,9 @@
                             <td><%= league.league %></td>
                             <td><%= league.min_level %></td>
                             <td class="actions">
-                                <button class="table__button "
-                                    data-league-name="<%= league.league %>"
-                                    data-league-level="<%= league.min_level %>">
+                                <button
+                                        class="table__button manage-league-btn"
+                                        data-league-name="<%= league.league %>">
                                     Manage
                                 </button>
                             </td>
@@ -52,31 +54,54 @@
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
 
-        <!-- Modal Eliminar Liga -->
-        <div class="modal" id="manageModal">
-            <div class="modal-inner">
-                <div class="modal-header">
-                    <h1 class="table__button">Manage League</h1>
-                    <button id="closeManageModal" class="fa fa-times"></button>
-                </div>
+<div id="backdrop" class="backdrop"></div>
 
-                <div class="modal-content">
-                    <div class="form-actions" style="display:flex; gap:10px; justify-content:center;">
-                        <button type="button" class="submit-btn" id="manage-delete-btn" style="background: linear-gradient(to right, #e74c3c, #c0392b); color:white;">Delete</button>
-                        <button type="button" class="submit-btn" id="manage-cancel-btn">Cancel</button>
-                    </div>
+<div id="modal-root"></div>
+
+<div class="modal" id="manageModal" role="dialog" aria-modal="true" aria-labelledby="manageModalTitle">
+    <div class="modal-inner">
+        <div class="modal-header">
+            <button id="closeManageModal" class="modal-close" aria-label="Close">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+            <h1 class="modal-title" id="manageModalTitle">Manage League</h1>
+            <span aria-hidden="true"></span>
+        </div>
+
+        <div class="modal-content">
+            <p id="selectedLeagueLabel" style="text-align:center; margin-bottom:1rem;"></p>
+
+
+            <form id="editLeagueForm" style="margin-bottom:1rem;">
+                <div style="margin-bottom:1rem;">
+                    <label for="editLeagueName">Nuevo nombre de la liga</label>
+                    <input type="text" id="editLeagueName" required />
                 </div>
+                <div>
+                    <label for="editLeagueLevel">Nuevo nivel mínimo</label>
+                    <input type="number" id="editLeagueLevel" required />
+                </div>
+            </form>
+            
+            <div class="button-container" style="display:flex; gap:.75rem; justify-content:space-between; margin-top:1rem;">
+                <button id="editLeagueBtn" class="submit-btn" style="flex:1;">
+                    Edit
+                </button>
+                <button id="deleteLeagueBtn" class="submit-btn" style="flex:1; background: linear-gradient(to right, #e74c3c, #c0392b); color:white;">
+                    Delete
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <div id="backdrop" class="backdrop"></div>
-    <div id="modal-root"></div>
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    
-    <script src="/js/leagues/addLeague.js" defer></script>
-    <script src="/js/leagues/editLeague.js" defer></script>
-    <script src="/js/leagues/manageLeague.js"></script>
+
+<input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+
+<script src="/js/leagues/addLeague.js" defer></script>
+<script src="/js/leagues/manageLeague.js" defer></script>
 </body>
 </html>

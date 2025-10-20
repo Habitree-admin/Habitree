@@ -3,126 +3,112 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rewards | HabiTree</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <title>Rewards</title>
+  <link rel="icon" type="image/png" href="/img/LogoHabitree.png">
+
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
   <link rel="stylesheet" href="/css/rewards/rewards.css">
 </head>
+
 <body>
-  <div class="content">
-    <!-- Navbar -->
-    <%- include('../partials/navbar') %>
+<div class="content">
+  <%- include('../partials/navbar') %>
 
-    <!-- Contenido principal -->
-    <div class="Dashboard_content">
-      <div class="Dashboard-navbar">
-        <h1 class="Dashboard__title">Rewards</h1>
-        <div class="Dashboard__add">
-          <button id="addRewardBtn" class="Dashboard__addButton">
-             Add
-          </button>
-        </div>
+  <div class="Dashboard_content">
+    <div class="Dashboard__title-container">
+      <h1 class="Dashboard__title">Rewards</h1>
+      <div class="container__button">
+        <button id="openModal" class="instrument-sans-bold header__button">Add</button>
       </div>
+    </div>
 
-
-
-<div class="table-container instrument-sans-regular">
+    <div class="table-container instrument-sans-regular">
       <table>
-          <thead>
-              <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>Type</th>
-                  <th>Available</th>
-                  <th>Value</th>
-                  <th class="actions">Actions</th>
-              </tr>
-          </thead>
-            <tbody>
-              <% if (rewards && rewards.length > 0) { %>
-                <% rewards.forEach(function(reward) { %>
-                  <tr>
-                    <td><%= reward.IDReward %></td>
-                    <td><%= reward.name %></td>
-                    <td><%= reward.description %></td>
-                    <td><%= reward.type === "monetary" ? "Monetary" : "Experience" %></td>
-                    <td><%= reward.available ? 'Yes' : 'No' %></td>
-                    <td><%= reward.value %></td>
-                    <td class="actions">
-                      <!-- usar data-id evita depender de la posición de columnas -->
-                      <button class="table__button table__button--edit edit-btn" data-id="<%= reward.IDReward %>">
-                        <i class="fa fa-edit"></i> Edit
-                      </button>
-                    </td>
-                  </tr>
-                <% }) %>
-              <% } else { %>
-                <tr>
-                  <td colspan="7" style="text-align:center;">No rewards available</td>
-                </tr>
-              <% } %>
-            </tbody>
-
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Type</th>
+          <th>Available</th>
+          <th>Value</th>
+          <th class="actions">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% if (rewards && rewards.length > 0) { %>
+          <% rewards.forEach(function(reward) { %>
+            <tr>
+              <td><%= reward.IDReward %></td>
+              <td><%= reward.name %></td>
+              <td><%= reward.description %></td>
+              <td><%= reward.type === "monetary" ? "Monetary" : "Experience" %></td>
+              <td><%= reward.available ? 'Yes' : 'No' %></td>
+              <td><%= reward.value %></td>
+              <td class="actions">
+                <button class="table__button table__button--edit edit-btn" data-id="<%= reward.IDReward %>">
+                  Manage
+                </button>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="7" style="text-align:center;">No rewards available</td>
+          </tr>
+        <% } %>
+        </tbody>
       </table>
+    </div>
   </div>
-  </div>
-      
-  </div>
-  </div> 
+</div>
 
-
-  <!-- Modal Rewards -->
-<div class="modal" id="rewardModal">
+<!-- Modal Add Reward  -->
+<div class="modal" id="modal">
   <div class="modal-inner">
     <nav>
-      <button id="closeRewardModal" class="fa fa-times"></button>
+      <button id="closeModal" class="fa fa-times"></button>
     </nav>
     <h1 class="modal-title">Add Reward</h1>
+
     <form id="rewardForm" action="/rewards" method="POST">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
       <section class="inputs-row">
         <div class="input-container">
-          <label for="IDReward">ID</label>
-          <input class="smallInput" type="number" id="IDReward" name="IDReward" placeholder="ID" required>
-        </div>
-
-        <div class="input-container">
           <label for="name">Name</label>
           <input type="text" id="name" name="name" placeholder="Reward Name" required>
         </div>
 
-      </section>
-
-      <section class="inputs-row">
         <div class="input-container">
           <label for="type">Type</label>
           <select id="type" name="type" required>
-            <option value=monetary >Monetary</option>
-            <option value=nonMonetary >Experience</option>
+            <option value="monetary">Monetary</option>
+            <option value="nonMonetary">Experience</option>
           </select>
         </div>
+      </section>
 
+      <section class="inputs-row">
         <div class="input-container">
           <label for="value">Value</label>
           <input class="smallInput" type="text" id="value" name="value" placeholder="35 or CODE" required>
         </div>
-      </section>
-
-      <section class="inputs-row">
 
         <div class="input-container">
           <label for="status">Status</label>
           <select id="status" name="available" required>
-            <option value=1>Available</option>
-            <option value=0>Unavailable</option>
+            <option value="1">Available</option>
+            <option value="0">Unavailable</option>
           </select>
         </div>
+      </section>
 
-
-        <div class="input-container">
+      <section class="inputs-row">
+        <div class="input-container" style="flex:1 1 100%;">
           <label for="description">Description</label>
-          <input type="text" id="description" name="description" placeholder="Description" required>
+          <input type="text" id="description" name="description" placeholder="Description" required class="description">
         </div>
       </section>
 
@@ -134,15 +120,12 @@
   </div>
 </div>
 
-
-  <script>
-    window.csrfToken = "<%= csrfToken %>";
-  </script>
-  <script src="/js/rewards.js" defer></script>
-  <%- include('ModifyReward') %>
+<script>
+  window.csrfToken = "<%= csrfToken %>";
+</script>
+<script src="/js/rewards.js" defer></script>
+<%- include('ModifyReward') %>
 <link rel="stylesheet" href="/css/rewards/ModifyReward.css">
 <script src="/js/Rewards/ModifyReward.js" defer></script>
-
 </body>
 </html>
-

@@ -199,7 +199,7 @@ const useItem = async (req, res) => {
   try {
     const { IDUser, IDItem } = req.body;
 
-    if (!IDUser || !IDItem) {
+    if (!IDUser || IDItem === undefined || IDItem === null) {
       return res.status(400).json({
         success: false,
         message: "Faltan parámetros: IDUser o IDItem",
@@ -223,6 +223,33 @@ const useItem = async (req, res) => {
   }
 };
 
+const getActiveItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const activeItem = await userService.getActiveItemByUser(id);
+
+    if (!activeItem) {
+      return res.status(404).json({
+        success: false,
+        message: "El usuario no tiene un ítem activo."
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: activeItem
+    });
+  } catch (err) {
+    console.error("❌ Error en getActiveItem:", err);
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener ítem activo del usuario",
+      details: err.message
+    });
+  }
+};
+
 module.exports = { getUsers, getLogin, postSignup, getStats, editUser, 
                     changepasswd, getMissionsSummary, getUserRewards, 
-                    getLoginGoogle, getLeaderboard, getInventory, useItem};
+                    getLoginGoogle, getLeaderboard, getInventory, useItem,
+                    getActiveItem};
