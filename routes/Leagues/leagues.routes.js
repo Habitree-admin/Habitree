@@ -17,7 +17,9 @@ router.post("/add", isAuth, leaguesController.postAddLeague);
 router.post("/editName", isAuth, leaguesController.postEditLeagueName);
 router.post("/editLevel", isAuth, leaguesController.postEditLeagueLevel);
 
-// Route to delete the league
+/**
+ * This is the route to delete the league
+ */
 router.post('/delete', isAuth, leaguesController.deleteLeague);
 
 module.exports = router

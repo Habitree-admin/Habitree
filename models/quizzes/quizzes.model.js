@@ -38,7 +38,7 @@ module.exports = class Quiz {
 
     /**
      *
-     * This function allows the user to consult all the quizzes availables in the database
+     * This function allows the user to consult all the quizzes availables in the database with theri questions
      *
      * This function returns all the quizzes from the data base
      *

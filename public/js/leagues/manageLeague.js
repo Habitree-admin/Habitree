@@ -132,7 +132,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // DELETE
+    /**
+     * This function delete the league by pressing the button delete
+     *
+     *  Also shows a message to confirm the deletion of the quizz
+     */
     deleteBtn?.addEventListener("click", async () => {
         if (!currentLeagueName) return;
         if (!confirm(`Are you sure you want to delete "${currentLeagueName}"?`)) return;
