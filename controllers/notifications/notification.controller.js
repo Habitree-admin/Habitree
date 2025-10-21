@@ -2,6 +2,11 @@ const Notification = require('../../models/notifications/notification.model');
 const { sendNotificationToTopic } = require('../../util/fcm');
 
 
+/**
+ * Renderiza la vista de notificaciones con los datos obtenidos de la base.
+ * @param {import('express').Request} req - Objeto de solicitud HTTP.
+ * @param {import('express').Response} res - Objeto de respuesta HTTP.
+ */
 exports.getNotifications = async (req, res) => {
     const notifications = await Notification.fetchAll();
     res.render('notifications/notifications', { 
@@ -18,7 +23,11 @@ exports.getAddNotification = (req, res) => {
 }
 
 
-// Nuevo endpoint para enviar notificación por canal (topic)
+/**
+ * Envía una notificación push a un canal específico usando FCM.
+ * @param {import('express').Request} req - Objeto de solicitud HTTP con canal, título y mensaje.
+ * @param {import('express').Response} res - Objeto de respuesta HTTP.
+ */
 exports.sendPushNotification = async (req, res) => {
     const { canal, titulo, mensaje } = req.body;
     try {
@@ -32,7 +41,11 @@ exports.sendPushNotification = async (req, res) => {
 };
 
 
-// Crear notificación en la base de datos y envia
+/**
+ * Crea una notificación en la base de datos y la envía por FCM.
+ * @param {import('express').Request} req - Objeto de solicitud HTTP con datos de la notificación.
+ * @param {import('express').Response} res - Objeto de respuesta HTTP.
+ */
 exports.createNotification = async (req, res) => {
     const { canal, titulo, mensaje, category } = req.body;
     try {
@@ -53,6 +66,11 @@ exports.createNotification = async (req, res) => {
 };
 
 
+/**
+ * Renderiza el formulario de edición para una notificación específica.
+ * @param {import('express').Request} req - Objeto de solicitud HTTP con el ID de la notificación.
+ * @param {import('express').Response} res - Objeto de respuesta HTTP.
+ */
 exports.getNotificationEditor = async (req, res) => {
     const { id } = req.params;
 
@@ -94,6 +112,11 @@ exports.postAddNotification = async (req, res) => {
     }
 };
 
+/**
+ * Cambia el estado activo/inactivo de una notificación.
+ * @param {import('express').Request} req - Objeto de solicitud HTTP con ID y estado actual.
+ * @param {import('express').Response} res - Objeto de respuesta HTTP.
+ */
 exports.postDelete = (req, res) => {
     const { id, currentState } = req.body;
     
@@ -115,6 +138,12 @@ exports.postDelete = (req, res) => {
     }
 };
 
+
+/**
+ * Cambia el contenido de una notificación y la reenvía.
+ * @param {import('express').Request} req - Objeto de solicitud HTTP con ID y estado actual.
+ * @param {import('express').Response} res - Objeto de respuesta HTTP.
+ */
 exports.postUpdate = async (req, res) => {
   const { id, canal, titulo, mensaje, category } = req.body;
   try {

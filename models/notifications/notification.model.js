@@ -12,11 +12,27 @@ module.exports = class notification {
     }
     
     //Este método servirá para devolver los objetos del almacenamiento persistente.
+    /**
+     * Consulta todas las notificaciones
+     *
+     * @static
+     * @returns {*} 
+     */
     static fetchAll() {
         return db.execute('SELECT * FROM notification');
     }
     
-    //Funcion para añadir una nueva notificación tomando titulo, mensaje, canal y categoria del formulario
+    
+    /**
+     * Funcion para añadir una nueva notificación tomando titulo, mensaje, canal y categoria del formulario
+     *
+     * @static
+     * @param {*} titulo 
+     * @param {*} mensaje 
+     * @param {*} canal 
+     * @param {*} category 
+     * @returns {*} 
+     */
     static add(titulo, mensaje, canal, category) {
         return db.execute(`INSERT INTO notification
             (dateCreated, titulo, description, canal, category, isActive)
@@ -24,6 +40,14 @@ module.exports = class notification {
             [titulo, mensaje, canal, category]);
     }
     
+    /**
+     * Actualiza el estado de una notificación a 0 o 1
+     *
+     * @static
+     * @param {*} id 
+     * @param {*} newIsActive 
+     * @returns {*} 
+     */
     static updateIsActive(id, newIsActive) {
         return db.execute(`UPDATE notification
              SET isActive = ?
@@ -31,6 +55,17 @@ module.exports = class notification {
             [newIsActive, id]);
     }
     
+    /**
+     * Actualiza el contenido de una notificación
+     *
+     * @static
+     * @param {*} titulo 
+     * @param {*} mensaje 
+     * @param {*} canal 
+     * @param {*} category 
+     * @param {*} id 
+     * @returns {*} 
+     */
     static update(titulo, mensaje, canal, category, id) {
   return db.execute(
     `UPDATE notification
@@ -41,11 +76,27 @@ module.exports = class notification {
 }
 
     
+    /**
+     * Consulta el contenido de una notificación específica
+     *
+     * @static
+     * @param {*} id 
+     * @returns {*} 
+     */
     static fetchById(id) {
         return db.execute('SELECT * FROM notification WHERE IDNotification = ?', [id]);
     }
     
-    // Método para crear una nueva notificación (actualizado con los nuevos campos)
+    /**
+     * Método para crear una nueva notificación (actualizado con los nuevos campos)
+     *
+     * @static
+     * @param {*} titulo 
+     * @param {*} mensaje 
+     * @param {*} canal 
+     * @param {*} category 
+     * @returns {*} 
+     */
     static create(titulo, mensaje, canal, category) {
         return db.execute(
             'INSERT INTO notification (dateCreated, titulo, description, canal, category, isActive) VALUES (NOW(), ?, ?, ?, ?, 1)',
