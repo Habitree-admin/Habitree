@@ -67,7 +67,11 @@ exports.postEditLeagueLevel = async (req, res) => {
     }
 };
 
-// Eliminar liga
+/**
+ * This function delete the league by its name information on the ejs view
+ *
+ *  deleteLeague Delete an available league and renderize it in the route
+ */
 exports.deleteLeague = async (req, res) => {
     const { leagueName } = req.body;
 

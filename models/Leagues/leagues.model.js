@@ -50,7 +50,13 @@ async function cambiarMinLevelLiga(nombre_liga, nuevo_min_level) {
     return db.execute('CALL CambiarMinLevelLiga(?, ?)', [nombre_liga, nuevo_min_level]);
 }
 
-
+/**
+ *
+ * This function allows the user to delete a league available in the database
+ *
+ * This function calls a procedure on the data base that uses the league name
+ *
+ */
 async function deleteLeagueByName(leagueName) {
     try {
         const [rows] = await db.query(`CALL EliminarLigaCompleta(?)`, [leagueName]);

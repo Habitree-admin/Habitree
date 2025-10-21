@@ -6,6 +6,7 @@ const db = require('../../util/database');
 * Error handling included
 * Shows only unique quizzes based on IDQuiz
 */
+
 exports.getQuizzes = async (req, res) => {
     try {
         const [quizzes] = await Quiz.fetchAll();
@@ -91,66 +92,6 @@ exports.postAddQuiz = async (req, res) => {
     }
 };
 
-/*
-* Delete a quiz by ID
-* If the quiz is in use, set its 'available' status to 0 instead
-* Uses a transaction to ensure data integrity
-* Error handling included
-*/
-exports.deleteQuiz = async (req, res) => {
-    let connection;
-    try {
-        const quizId = req.params.id;
-
-        connection = await db.getConnection();
-
-
-        const [rows] = await connection.execute('SELECT available FROM quiz WHERE IDQuiz = ?', [quizId]);
-        if (rows.length === 0) {
-            return res.status(404).json({ success: false, message: "Quiz not found" });
-        }
-
-        const isAvailable = rows[0].available;
-
-        if (isAvailable === 0) {
-            return res.json({
-                success: false,
-                message: "This quiz has already been deleted or is inactive."
-            });
-        }
-        await connection.beginTransaction();
-
-        // Delete questions associated with the quiz
-        await connection.execute('DELETE FROM question WHERE IDQuiz = ?', [quizId]);
-
-        // Then delete the quiz
-        await connection.execute('DELETE FROM quiz WHERE IDQuiz = ?', [quizId]);
-
-        await connection.commit();
-
-        res.json({ success: true, message: "Quiz deleted successfully" });
-    } catch (error) {
-        if (error.code === 'ER_ROW_IS_REFERENCED_2') {
-            try {
-                console.warn(`Quiz ${req.params.id} it is in use, updating 'available' to 0...`);
-                await connection.execute('UPDATE quiz SET available = 0 WHERE IDQuiz = ?', [req.params.id]);
-                await connection.commit();
-                res.json({
-                    success: true,
-                    message: "Quiz deactivated (cannot be deleted because it is in use)"
-                });
-            } catch (updateError) {
-                if (connection) await connection.rollback();
-                res.status(500).json({ success: false, message: "Error updating quiz availability: " + updateError.message });
-            }
-        } else {
-            if (connection) await connection.rollback();
-            res.status(500).json({ success: false, message: "Error deleting quiz: " + error.message });
-        }
-    } finally {
-        if (connection) connection.release();
-    }
-};
 
 /*
 * Get a quiz by its ID, including its questions
@@ -221,27 +162,4 @@ exports.updateQuiz = async (req, res) => {
     }
 };
 
-exports.deleteQuiz = async (req, res) => {
-    let connection;
-    try {
-        connection = await db.getConnection();
-        await connection.beginTransaction();
 
-        const quizId = req.params.id;
-
-        // First delete the questions of the quiz
-        await connection.execute('DELETE FROM question WHERE IDQuiz = ?', [quizId]);
-        
-        // Then delete the quiz
-        await connection.execute('DELETE FROM quiz WHERE IDQuiz = ?', [quizId]);
-
-        await connection.commit();
-        res.json({ success: true, message: 'Quiz deleted successfully' });
-    } catch (error) {
-        if (connection) await connection.rollback();
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Error deleting quiz' });
-    } finally {
-        if (connection) connection.release();
-    }
-};
