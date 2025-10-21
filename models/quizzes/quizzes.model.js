@@ -1,5 +1,9 @@
 const db = require('../../util/database');
 
+/*
+* Quiz model
+* Gets all quiz data
+*/
 module.exports = class Quiz {
     constructor(responseVerification, category, description, dateOfCreation, available, experience) {
         this.responseVerification = responseVerification || 1;
