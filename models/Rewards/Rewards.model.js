@@ -22,11 +22,16 @@ module.exports = class Reward {
     }
 
     /**
-     * Devuelve todas las recompensas
-     * @returns {Promise}
+     * 
+     * This function allows the user to consult all the rewards in the database
+     * 
+     * This function returns all the rewards from the data base
+     * 
      */
     static fetchAll() {
-        return db.execute('SELECT * FROM rewards WHERE available = 1'); // Muestra solo las activas
+
+        //this return a promise that resolves with an array of rewards where `available = 1`
+        return db.execute('SELECT * FROM rewards WHERE available = 1'); 
     }
 
     /**

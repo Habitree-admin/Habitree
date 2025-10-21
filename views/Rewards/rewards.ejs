@@ -16,6 +16,8 @@
   <%- include('../partials/navbar') %>
 
   <div class="Dashboard_content">
+
+     <!-- Page header with title and Add button -->
     <div class="Dashboard__title-container">
       <h1 class="Dashboard__title">Rewards</h1>
       <div class="container__button">
@@ -23,6 +25,8 @@
       </div>
     </div>
 
+
+    <!-- Table showing all rewards -->
     <div class="table-container instrument-sans-regular">
       <table>
         <thead>
@@ -38,6 +42,8 @@
         </thead>
         <tbody>
         <% if (rewards && rewards.length > 0) { %>
+
+         <!--Loop through rewards array and display each reward-->
           <% rewards.forEach(function(reward) { %>
             <tr>
               <td><%= reward.IDReward %></td>
@@ -55,6 +61,8 @@
           <% }) %>
         <% } else { %>
           <tr>
+
+              <!--Display message if no rewards exist -->
             <td colspan="7" style="text-align:center;">No rewards available</td>
           </tr>
         <% } %>
