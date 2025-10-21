@@ -12,7 +12,7 @@ exports.getRewards = async (req, res) => {
         // Fetch all available rewards
         const [rewards] = await Reward.fetchAll();
 
-        //Renders the information in the route
+        //Renders the information in the route 
         res.render('Rewards/rewards', { 
             title: 'Rewards', 
             rewards, 
