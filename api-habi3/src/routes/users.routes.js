@@ -15,23 +15,23 @@ const { useItem } = require("../controllers/users.controller");
 const { refreshToken } = require("../controllers/users.controller");
 const { logout } = require("../controllers/users.controller");
 const { getActiveItem } = require("../controllers/users.controller");
+const authMiddleware = require('../utils/tokenmiddleware');
 
 // GET /api/users
-router.get("/", getUsers);
 router.post("/login", getLoginJWT);
 router.post("/login/google", getLoginGoogleJWT);
 router.post('/refresh-token', refreshToken);
-router.get("/stats/:id", getStats);
+router.get("/stats/:id", authMiddleware, getStats);
 router.post("/signup", postSignup)
-router.put("/edit/:id", editUser);
-router.patch("/changepasswd/:id", changepasswd)
-router.get("/stats2/:id", getMissionsSummary)
-router.get("/rewards/:id", getUserRewards)
-router.get("/leaderboard", getLeaderboard)
-router.get("/inventory/:id", getInventory)
-router.post("/useitem", useItem);
+router.put("/edit/:id", authMiddleware, editUser);
+router.patch("/changepasswd/:id", authMiddleware,changepasswd)
+router.get("/stats2/:id", authMiddleware, getMissionsSummary)
+router.get("/rewards/:id", authMiddleware, getUserRewards)
+router.get("/leaderboard", authMiddleware, getLeaderboard)
+router.get("/inventory/:id", authMiddleware, getInventory)
+router.post("/useitem", authMiddleware, useItem);
 router.post('/users/logout', logout);
-router.get("/activeitem/:id", getActiveItem)
+router.get("/activeitem/:id", authMiddleware, getActiveItem)
 
 
 module.exports = router;

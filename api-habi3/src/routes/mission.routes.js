@@ -13,7 +13,7 @@ router.get("/:id", authMiddleware, getMissions);
 
 router.get("/user", getUserMission );
 router.get("/user/:id", getUserMissions);
-router.post("/complete", postCompleteMission);
+router.post("/complete", authMiddleware, postCompleteMission);
 
 
 module.exports = router;
