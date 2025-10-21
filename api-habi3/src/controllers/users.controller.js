@@ -191,11 +191,7 @@ const postSignup = async (req, res) => {
       safePassword
     );
 
-    res.status(201).json({
-      success: true,
-      message: "Usuario registrado correctamente",
-      data: rows,
-    });
+    res.status(201).json(rows);
   } catch (err) {
     res.status(500).json({
       success: false,
