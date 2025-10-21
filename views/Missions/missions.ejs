@@ -64,21 +64,30 @@
     </div>
     </div> 
 
-<%# POP UP PARA AGREGAR MISION%>
+<%# POP-UP MODAL FORM TO ADD OR EDIT A MISSIONN
+    This modal allows users to add or edit missions.
+
+%>
 
     <div class="modal" id="modal">
     <div class="modal-inner">
+
+        <!-- Modal header with close button -->
     <nav>            
          <button id="closeModal" class="fa fa-times"></button>
     </nav>
         <h1 class ="modal-title">Add Mission</h1>
          <form action="/missions" method="POST">
+
+            <!-- CSRF protection for secure POST -->
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
                 
                 <section class="inputs-row">
 
                     <div class="input-container">
+
+                        <!-- Row 1: Status -->
                         <label for="status">Status</label>
                         <select id="status" name="available" required>
                             <option value=1>Available</option>
@@ -87,6 +96,8 @@
                     </div>
                 </section>
 
+
+                <!-- Row 2: Category, Experience, Response Verification -->
                 <section class="inputs-row">
                     <div class="input-container">
                         <label for="category">Mission Type</label>
@@ -114,6 +125,8 @@
                     </div>
                 </section>
 
+
+                <!-- Row 3: Value and Reward -->
                 <section class="inputs-row">
                     <div class="input-container">
                         <label for="value">Value</label>
@@ -136,19 +149,26 @@
                     </div>
                 </section>
                 
+                <!-- Row 4: Description -->
                 <section>
                     <label for="description">Description</label>
                     <input class = "description" type="text" id="description" name="description" placeholder="Description" required>
                     <br style="clear:both;" />
                 </section>
+
+                <!-- Form buttons -->
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="submit" class="submit-btn" id="add-edit-btn">Add</button>
                     <button type="button" class="submit-btn" id="delete-btn" style="background-color: #d35400; color: white; display: none;">Delete</button>
                 </div>
+
+                <!-- Placeholder for success/error messages -->
                 <div id="form-message" style="display:none; margin-top:10px;"></div>
         </form>
     </div>
     </div>
+
+    <!-- Script for handling script -->
     <script src ="/js/missions/missions.js"></script>
 </body>
 </html>

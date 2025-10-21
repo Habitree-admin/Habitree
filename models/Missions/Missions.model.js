@@ -15,12 +15,21 @@ module.exports = class Mission{
 
     } 
 
-//Guardar el registro de una mision 
+/**
+ * This function allows the application to save new missions for the users.
+ *
+ * This function is responsible for storing a new mission record in the database
+ * 
+ */
 
     save(){
  
         const currentDate = new Date();
+
+        // Runs a SQL query against the database
         return db.execute(
+
+        //It inserts the values of the mission instance into the mission table.
             'INSERT INTO mission (responseVerification,category,description,dateOfCreation,available,experience,value) VALUES(?,?,?,?,?,?,?)',
             [ this.responseVerification, this.category, this.description, currentDate, this.available, this.experience, this.value]
         );
