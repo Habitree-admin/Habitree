@@ -37,11 +37,10 @@ module.exports = class Mission{
 
 
     /**
-     * Devuelve todas las misiones.
-     * @returns {Promise}
+     * Retrieves all available missions from the database.
+     * Only missions with available = 1 are returned.
      */
     static fetchAll() {
-    // Solo misiones activas (borrado lógico)
     return db.execute('SELECT * FROM mission WHERE available=1');
     }
 

@@ -2,6 +2,9 @@ const Notification = require('../../models/notifications/notification.model');
 const { sendNotificationToTopic } = require('../../util/fcm');
 
 
+/**
+ * Retrieves all notifications from the database and renders the notifications view.
+ */
 exports.getNotifications = async (req, res) => {
     const notifications = await Notification.fetchAll();
     res.render('notifications/notifications', { 
