@@ -79,7 +79,7 @@ app.use('/shop', shopRoutes);
 const userRoutes = require('./routes/users.routes');
 app.use('/users', userRoutes);
 
-const loginRoutes = require('./routes/login.routes');
+const loginRoutes = require('./routes/login.routes.js');
 app.use('/login', loginRoutes);
 
 const rewardsRoutes = require('./routes/Rewards/Rewards.routes');
