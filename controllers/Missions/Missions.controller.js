@@ -2,6 +2,10 @@ const { response } = require('express');
 const Mission = require('../../models/Missions/Missions.model');
 const Reward = require('../../models/Rewards/Rewards.model');
 
+
+/**
+ * Retrieves all missions from the database and renders the missions view.
+ */
 exports.getMissions = async (req, res) => {
     try {
         const missionsResult = await Mission.fetchAll();

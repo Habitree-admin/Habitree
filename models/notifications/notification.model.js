@@ -28,7 +28,7 @@ module.exports = class notification {
     *
      */
     
-    // get all notifications from database
+    // Retrieves all notifications from database
     static fetchAll() {
         return db.execute('SELECT * FROM notification');
     }

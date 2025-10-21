@@ -9,6 +9,9 @@ getNotifications retrieves all notifications from database and renders them in t
 *
  */
 
+/**
+ * Retrieves all notifications from the database and renders the notifications view.
+ */
 exports.getNotifications = async (req, res) => {
     
     // fetch all notifications from database

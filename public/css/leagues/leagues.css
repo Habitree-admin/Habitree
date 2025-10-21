@@ -1,4 +1,4 @@
-/* CSS específico para leagues - sin estilos del navbar */
+/* CSS specific for leagues*/
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap');
 
 html, body {
@@ -19,7 +19,7 @@ body {
     box-sizing: border-box;
 }
 
-/* ----------------- TABLA Y DASHBOARD ----------------- */
+/* ----------------- TABLE & DASHBOARD ----------------- */
 .content{
     width: 100vw;
     height: 100vh;
@@ -188,7 +188,6 @@ i {
     position: relative;
 }
 
-/* ----------------- MODAL ACTUALIZADO ----------------- */
 #backdrop {
     position: fixed;
     top: 0;
@@ -263,7 +262,7 @@ i {
     font-size: 30px;
 }
 
-/* ----------------- FORM POPUP ACTUALIZADO ----------------- */
+/* ----------------- FORM POPUP  ----------------- */
 input, label {
     display: block;
 }
