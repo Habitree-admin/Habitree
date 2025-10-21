@@ -15,8 +15,9 @@ module.exports = class notification {
     }
 
 
-
-    //Este método servirá para devolver los objetos del almacenamiento persistente.
+    /**
+     * Retrieves all notifications from the database.
+     */
     static fetchAll() {
         return db.execute('SELECT * FROM notification');
     }
