@@ -6,7 +6,12 @@ const questionTypeSelect = document.getElementById("questionType");
 const optionsContainer = document.getElementById("optionsContainer");
 const questionInput = document.getElementById("questionText");
 
-// Variables globales
+/**
+ * Global Variables
+ * Manages the state of quiz creation/editing throughout the application
+ * Tracks question count, editing mode, and current quiz being modified
+ */
+
 let questionCounter = 0;
 let isEditing = false;
 let currentQuizId = null;
@@ -16,10 +21,13 @@ const closeManageBtn = document.getElementById("closeManageModal");
 const manageEditBtn = document.getElementById("manage-edit-btn");
 const manageDeleteBtn = document.getElementById("manage-delete-btn");
 
-// Modal control
+/*
+ * Event listener for the open button
+ */
+
 openBtn.addEventListener("click", () => {
     console.log("Add new quiz");
-    resetFormState(); // Limpiar completamente el estado
+    resetFormState(); // Clear all state
     modal.classList.add("open");
     initializeQuestionType();
 });
@@ -34,7 +42,9 @@ window.addEventListener("click", (e) => {
     }
 });
 
-// Question type handling
+/*
+* Initializes the question type selection
+*/
 function initializeQuestionType() {
     updateOptionsContainer(questionTypeSelect.value);
     questionTypeSelect.addEventListener('change', (e) => {
@@ -42,6 +52,11 @@ function initializeQuestionType() {
     });
 }
 
+/**
+ * Updates the question options container based on question type
+ * Generates input fields for Multiple Choice or True/False questions
+ * Manages the UI for different question types in the quiz creation form
+ */
 function updateOptionsContainer(selectedType) {
     optionsContainer.innerHTML = '';
 
@@ -78,7 +93,7 @@ function updateOptionsContainer(selectedType) {
     }
 }
 
-// Modificar addNewOption para quitar required
+// Modify addNewOption to remove duplicate function definition
 function addNewOption() {
     const optionCount = optionsContainer.querySelectorAll('.option-input-group').length;
     const newOptionNumber = optionCount + 1;
@@ -96,6 +111,11 @@ function addNewOption() {
     setupOptionTextHandlers();
 }
 
+/**
+ * Sets up event handlers for Multiple Choice questions
+ * Initializes add and remove text change handlers for multiple choice options
+ * Manages the interactive elements of Multiple Choice question creation
+ */
 function setupMultipleChoiceHandlers() {
     const addOptionBtn = document.querySelector('.add-option-btn');
     if (addOptionBtn) {
@@ -122,6 +142,9 @@ function addNewOption() {
     setupOptionTextHandlers();
 }
 
+/*
+* Sets up event listeners for removing options buttons
+*/
 function setupRemoveOptionListeners() {
     const removeButtons = optionsContainer.querySelectorAll('.remove-option');
     removeButtons.forEach(button => {
@@ -130,6 +153,11 @@ function setupRemoveOptionListeners() {
     });
 }
 
+
+
+/*
+* Sets up event listeners for option text inputs
+*/
 function setupOptionTextHandlers() {
     const optionTexts = optionsContainer.querySelectorAll('.option-text');
     optionTexts.forEach((input, index) => {
@@ -140,6 +168,11 @@ function setupOptionTextHandlers() {
     });
 }
 
+/**
+ * Handles the removal of options
+ * Ensures there is at least 2 options remain in the question
+ * Manages the minimum requirements for Multiple Choice questions
+ */
 function handleRemoveOption(event) {
     const optionsCount = optionsContainer.querySelectorAll('.option-input-group').length;
     if (optionsCount > 2) {
@@ -149,13 +182,17 @@ function handleRemoveOption(event) {
     }
 }
 
-// Función para obtener la respuesta correcta seleccionada
+/*
+ *Function to get the correct saved answer 
+ */
 function getCorrectAnswer() {
     const selectedRadio = optionsContainer.querySelector('input[name="correct_answer"]:checked');
     return selectedRadio ? selectedRadio.value : null;
 }
 
-// Función para obtener todas las preguntas y respuestas del formulario
+/*
+ *Function to get all questions and answers from the form
+ */
 function getQuestionsData() {
     const questionText = questionInput.value.trim();
     const questionType = questionTypeSelect.value;
@@ -163,7 +200,7 @@ function getQuestionsData() {
     let wrongAnswers = [];
 
     if (questionType === 'Multiple Choice') {
-        // Obtener todas las opciones que no son la respuesta correcta
+        // Get all the options that are not the correct answer
         const optionTexts = document.querySelectorAll('.option-text');
         optionTexts.forEach(input => {
             if (input.value !== correctAnswer) {
@@ -183,12 +220,16 @@ function getQuestionsData() {
     }];
 }
 
-// Initialize when DOM is loaded
+/*
+* Initializes the question type selection
+*/
 document.addEventListener('DOMContentLoaded', function() {
     initializeQuestionType();
 });
 
-// Reemplazar los event listeners duplicados del botón manage con uno solo
+/*
+* Replace duplicate event listeners for the manage button with a single one
+*/
 document.querySelectorAll('.manage-button').forEach(button => {
     button.addEventListener('click', async (e) => {
         console.log("Edit existing quiz");
@@ -216,17 +257,21 @@ document.querySelectorAll('.manage-button').forEach(button => {
     });
 });
 
+/**
+ * Fills in all quiz fields and recreates saved questions
+ * When editing an existing quiz in the application
+ */
 function fillFormWithQuizData(quiz) {
     document.getElementById('category').value = quiz.category;
     document.getElementById('description').value = quiz.description;
     document.getElementById('experience').value = quiz.experience;
     document.getElementById('available').value = quiz.available;
 
-    // Limpiar el contenedor de preguntas guardadas
+    // Clear the saved questions container
     const savedQuestionsContainer = document.getElementById('savedQuestionsContainer');
     savedQuestionsContainer.innerHTML = '';
 
-    // Mostrar las preguntas existentes
+    // Show existing questions
     if (quiz.questions && quiz.questions.length > 0) {
         quiz.questions.forEach((question, index) => {
             const wrongAnswersArray = question.wrongAnswers ? question.wrongAnswers.split(',') : [];
@@ -254,13 +299,17 @@ function fillFormWithQuizData(quiz) {
         questionCounter = quiz.questions.length;
     }
 
-    // Limpiar el formulario de nueva pregunta
+    // Clear the new question form
     document.getElementById('questionText').value = '';
     document.getElementById('questionType').value = 'Multiple Choice';
     updateOptionsContainer('Multiple Choice');
 }
 
-// Agregar función para editar pregunta
+/**
+ * Handles editing of an existing question in the quiz
+ * Loads question data back into the form for modification
+ * Manages the edit functionality for individual questions
+ */
 function editQuestion(button) {
     const questionDiv = button.closest('.saved-question');
     const questionText = questionDiv.querySelector('p:nth-child(2)').textContent.replace('Question: ', '');
@@ -268,22 +317,22 @@ function editQuestion(button) {
     const wrongAnswersText = questionDiv.querySelector('p:nth-child(4)').textContent.replace('Wrong Answers: ', '');
     const questionType = questionDiv.querySelector('.question-type').value;
 
-    // Llenar el formulario
+    // Fill the form with existing question data
     document.getElementById('questionText').value = questionText;
     document.getElementById('questionType').value = questionType;
     updateOptionsContainer(questionType);
 
     if (questionType === 'Multiple Choice') {
-        // Procesar respuestas incorrectas
+        // Process wrong answers
         const wrongAnswers = wrongAnswersText === 'None' ? [] : wrongAnswersText.split(',').map(ans => ans.trim());
         const allAnswers = [answer, ...wrongAnswers];
 
-        // Agregar opciones necesarias
+        // Add necessary options
         while (document.querySelectorAll('.option-input-group').length < allAnswers.length) {
             addNewOption();
         }
 
-        // Actualizar valores y marcar respuesta correcta
+        // Update values and mark correct answer
         document.querySelectorAll('.option-text').forEach((input, index) => {
             if (index < allAnswers.length) {
                 input.value = allAnswers[index];
@@ -295,7 +344,7 @@ function editQuestion(button) {
             }
         });
     } else {
-        // Para True/False
+        // For True/False
         const radios = document.querySelectorAll('input[name="correct_answer"]');
         radios.forEach(radio => {
             if (radio.value === answer) {
@@ -304,17 +353,17 @@ function editQuestion(button) {
         });
     }
 
-    // Mostrar el formulario y cambiar el texto del botón
+    // Show the form and change the button text
     const questionFormContainer = document.getElementById('questionFormContainer');
     questionFormContainer.style.display = 'block';
     document.getElementById('addQuestionBtn').style.display = 'none';
 
-    // Remover la pregunta anterior
+    // Remove the previous question
     questionDiv.remove();
     updateQuestionNumbers();
 }
 
-// Función para actualizar números de preguntas
+// Function to update question numbers
 function updateQuestionNumbers() {
     document.querySelectorAll('.saved-question').forEach((q, index) => {
         q.querySelector('h4').textContent = `Question ${index + 1}`;
@@ -322,20 +371,24 @@ function updateQuestionNumbers() {
     questionCounter = document.querySelectorAll('.saved-question').length;
 }
 
-// Modificar addQuestionBtn event listener
+/*
+* Modify addQuestionBtn event listener
+*/
 addQuestionBtn.addEventListener('click', () => {
     const questionFormContainer = document.getElementById('questionFormContainer');
     questionFormContainer.style.display = 'block';
     document.getElementById('addQuestionBtn').style.display = 'none';
 });
 
-// Añadir event listener para el botón cancelar
+/*
+* Add event listener for the cancel button
+*/
 document.getElementById('cancelQuestionBtn').addEventListener('click', () => {
     const questionFormContainer = document.getElementById('questionFormContainer');
     questionFormContainer.style.display = 'none';
     document.getElementById('addQuestionBtn').style.display = 'block';
-    
-    // Limpiar el formulario
+
+    // Clear the form
     document.getElementById('questionText').value = '';
     const optionInputs = document.querySelectorAll('.option-text');
     optionInputs.forEach(input => input.value = '');
@@ -343,7 +396,9 @@ document.getElementById('cancelQuestionBtn').addEventListener('click', () => {
     radios.forEach(radio => radio.checked = false);
 });
 
-// Añadir event listener para el botón guardar
+/*
+* Add event listener for the save button
+*/
 document.getElementById('saveQuestionBtn').addEventListener('click', () => {
     const questionText = document.getElementById('questionText').value.trim();
     const selectedAnswer = document.querySelector('input[name="correct_answer"]:checked');
@@ -361,17 +416,17 @@ document.getElementById('saveQuestionBtn').addEventListener('click', () => {
     }
 
     if (questionType === 'Multiple Choice') {
-        // Recolectar todas las respuestas que no son la correcta
+        // Collect all answers that are not the correct one
         document.querySelectorAll('.option-text').forEach(input => {
             const value = input.value.trim();
-            // Verificar que el input tenga un valor antes de procesarlo
+            // Check that the input has a value before processing it
             if (value && value !== selectedAnswer.value) {
                 wrongAnswers.push(value);
             }
         });
     }
 
-    // Guardar la pregunta en el contenedor de preguntas guardadas
+    // Save the question in the saved questions container
     const savedQuestionsContainer = document.getElementById('savedQuestionsContainer');
     const questionDiv = document.createElement('div');
     questionDiv.className = 'saved-question';
@@ -395,7 +450,7 @@ document.getElementById('saveQuestionBtn').addEventListener('click', () => {
     savedQuestionsContainer.appendChild(questionDiv);
     questionCounter++;
 
-    // Limpiar y ocultar el formulario
+    // Clear and hide the form
     document.getElementById('questionText').value = '';
     const optionInputs = document.querySelectorAll('.option-text');
     optionInputs.forEach(input => input.value = '');
@@ -405,11 +460,14 @@ document.getElementById('saveQuestionBtn').addEventListener('click', () => {
     document.getElementById('addQuestionBtn').style.display = 'block';
 });
 
-// Agregar función para remover preguntas
+/**
+ * Function to remove a question from the saved questions list
+ * 
+ */
 function removeQuestion(button) {
     const questionDiv = button.closest('.saved-question');
     questionDiv.remove();
-    // Actualizar los números de las preguntas restantes
+    // Update the numbers of the remaining questions
     const questions = document.querySelectorAll('.saved-question');
     questions.forEach((q, index) => {
         q.querySelector('h4').textContent = `Question ${index + 1}`;
@@ -417,11 +475,15 @@ function removeQuestion(button) {
     questionCounter--;
 }
 
-// Modificar getAllQuestionsData para incluir las preguntas guardadas
+/**
+ * Collects all questions data from the form
+ * Gathers both saved questions and any current unsaved question
+ * Prepares the complete quiz data for submission to the server
+ */
 function getAllQuestionsData() {
     const questions = [];
     
-    // Obtener preguntas guardadas
+    // Get saved questions
     document.querySelectorAll('.saved-question').forEach(questionDiv => {
         const questionText = questionDiv.querySelector('p:nth-child(2)').textContent.replace('Question: ', '').trim();
         const answer = questionDiv.querySelector('p:nth-child(3)').textContent.replace('Correct Answer: ', '').trim();
@@ -434,7 +496,7 @@ function getAllQuestionsData() {
         });
     });
 
-    // Obtener pregunta actual si existe
+    // Get current unsaved question
     const currentQuestionForm = document.getElementById('questionFormContainer');
     if (currentQuestionForm.style.display !== 'none') {
         const questionText = document.getElementById('questionText').value.trim();
@@ -444,7 +506,7 @@ function getAllQuestionsData() {
         if (questionText && selectedAnswer) {
             let wrongAnswers = [];
             if (questionType === 'Multiple Choice') {
-                // Recolectar todas las respuestas que no son la correcta
+                // Collect all answers that are not the correct one
                 document.querySelectorAll('.option-text').forEach(input => {
                     if (input.value.trim() !== selectedAnswer) {
                         wrongAnswers.push(input.value.trim());
@@ -463,7 +525,9 @@ function getAllQuestionsData() {
     return questions;
 }
 
-// Modificar el event listener del formulario
+/*
+ * Event listener for the form submission
+*/
 form.addEventListener("submit", async function(e) {
     e.preventDefault();
 
@@ -519,7 +583,9 @@ closeManageBtn.addEventListener("click", () => {
     manageModal.classList.remove("open");
 });
 
-// Botón eliminar
+/* 
+* Delete quiz event listener
+*/
 manageDeleteBtn.addEventListener("click", () => {
     if (!currentQuizId) return;
 
@@ -564,38 +630,44 @@ manageEditBtn.addEventListener("click", () => {
 
 });
 
-// Modificar el openBtn click handler
+// Modify the openBtn click handler
 openBtn.addEventListener("click", () => {
     console.log("Add new quiz");
-    resetFormState(); // Limpiar completamente el estado
+    resetFormState(); // Clear all state
     modal.classList.add("open");
     initializeQuestionType();
 });
 
-// Actualizar resetFormState para asegurar una limpieza completa
+
+/**
+ * Resets the entire form to its initial state
+ * Clears all form fields, questions, and state variables
+ * Used when closing the form or after successful submission
+ */
+
 function resetFormState() {
     isEditing = false;
     currentQuizId = null;
     form.reset();
     questionCounter = 0;
-    
-    // Limpiar todos los campos del formulario
+
+    // Clear all form fields
     document.getElementById('category').value = '';
     document.getElementById('description').value = '';
     document.getElementById('experience').value = '';
-    document.getElementById('available').value = '1'; // Valor por defecto
-    
-    // Actualizar UI para modo "Add"
+    document.getElementById('available').value = '1'; // Default value
+
+    // Update UI for "Add" mode
     document.getElementById('add-edit-btn').textContent = 'Add';
     document.querySelector('.modal-title').textContent = 'Add New Quiz';
-    
-    // Limpiar contenedor de preguntas guardadas
+
+    // Clear saved questions container
     const savedQuestionsContainer = document.getElementById('savedQuestionsContainer');
     if (savedQuestionsContainer) {
         savedQuestionsContainer.innerHTML = '';
     }
-    
-    // Resetear formulario de pregunta
+
+    // Reset question form
     const questionFormContainer = document.getElementById('questionFormContainer');
     questionFormContainer.style.display = 'none';
     document.getElementById('addQuestionBtn').style.display = 'block';
@@ -603,20 +675,20 @@ function resetFormState() {
     document.getElementById('questionType').value = 'Multiple Choice';
     updateOptionsContainer('Multiple Choice');
 
-    // Limpiar las opciones
+    // Clear options
     const optionInputs = document.querySelectorAll('.option-text');
     optionInputs.forEach(input => input.value = '');
     const radios = document.querySelectorAll('input[name="correct_answer"]');
     radios.forEach(radio => radio.checked = false);
 }
 
-// Modificar el closeBtn click handler
+// Modify the closeBtn click handler
 closeBtn.addEventListener("click", () => {
     resetFormState();
     modal.classList.remove("open");
 });
 
-// Modificar el window click handler
+// Modify the window click handler
 window.addEventListener("click", (e) => {
     if (e.target === modal) {
         resetFormState();

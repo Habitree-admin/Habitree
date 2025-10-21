@@ -1,6 +1,11 @@
 const Quiz = require('../../models/quizzes/quizzes.model');
 const db = require('../../util/database');
 
+/*
+* Get all quizzes and render the quizzes page
+* Error handling included
+* Shows only unique quizzes based on IDQuiz
+*/
 exports.getQuizzes = async (req, res) => {
     try {
         const [quizzes] = await Quiz.fetchAll();
@@ -18,27 +23,33 @@ exports.getQuizzes = async (req, res) => {
     }
 };
 
+
+/*
+* Handle POST request to add a new quiz with questions
+* Uses a transaction to ensure data integrity
+* Error handling included
+*/
 exports.postAddQuiz = async (req, res) => {
     let connection;
 
     try {
-        // Obtener conexión con la base de datos
+        // Get database connection
         connection = await db.getConnection();
         await connection.beginTransaction();
 
         const { category, description, experience, questions } = req.body;
         const dateOfCreation = new Date().toISOString().slice(0, 10);
 
-        // 1. Crear el quiz
+        // 1. Create the quiz
         const [quizResult] = await connection.execute(
             'INSERT INTO quiz (responseVerification, category, description, dateOfCreation, available, experience) VALUES (?, ?, ?, ?, ?, ?)',
             [1, category, description, dateOfCreation, 1, experience]
         );
 
-        // 2. Obtener el ID del quiz recién creado
+        // 2. Get the ID of the newly created quiz
         const newQuizId = quizResult.insertId;
 
-        // 3. Guardar las preguntas usando la misma conexión
+        // 3. Save the questions using the same connection
         if (questions && questions.length > 0) {
 
             for (const questionData of questions) {
@@ -80,7 +91,12 @@ exports.postAddQuiz = async (req, res) => {
     }
 };
 
-
+/*
+* Delete a quiz by ID
+* If the quiz is in use, set its 'available' status to 0 instead
+* Uses a transaction to ensure data integrity
+* Error handling included
+*/
 exports.deleteQuiz = async (req, res) => {
     let connection;
     try {
@@ -104,10 +120,10 @@ exports.deleteQuiz = async (req, res) => {
         }
         await connection.beginTransaction();
 
-        // Eliminar primero las preguntas del quiz
+        // Delete questions associated with the quiz
         await connection.execute('DELETE FROM question WHERE IDQuiz = ?', [quizId]);
 
-        // Luego el quiz
+        // Then delete the quiz
         await connection.execute('DELETE FROM quiz WHERE IDQuiz = ?', [quizId]);
 
         await connection.commit();
@@ -136,7 +152,10 @@ exports.deleteQuiz = async (req, res) => {
     }
 };
 
-
+/*
+* Get a quiz by its ID, including its questions
+* Error handling included
+*/
 exports.getQuizById = async (req, res) => {
     try {
         const [quiz] = await Quiz.findById(req.params.id);
@@ -161,6 +180,12 @@ exports.getQuizById = async (req, res) => {
     }
 };
 
+/*
+* Update a quiz and its questions
+* Inserts new questions after deleting existing ones
+* Uses a transaction to ensure data integrity
+* Error handling included
+*/
 exports.updateQuiz = async (req, res) => {
     let connection;
     try {
@@ -204,10 +229,10 @@ exports.deleteQuiz = async (req, res) => {
 
         const quizId = req.params.id;
 
-        // Primero eliminar las preguntas asociadas
+        // First delete the questions of the quiz
         await connection.execute('DELETE FROM question WHERE IDQuiz = ?', [quizId]);
         
-        // Luego eliminar el quiz
+        // Then delete the quiz
         await connection.execute('DELETE FROM quiz WHERE IDQuiz = ?', [quizId]);
 
         await connection.commit();
