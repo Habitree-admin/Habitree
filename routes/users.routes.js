@@ -6,6 +6,8 @@ const usersController = require("../controllers/users.controller")
 
 router.get("/", isAuth, usersController.getUsers)
 router.post("/", isAuth, usersController.postUsers)
+// Logout
+router.get('/logout', isAuth, usersController.logout)
 // Obtener usuario por ID (para edición)
 router.get("/:id", isAuth, usersController.getUserById)
 // Editar usuario

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indicators | HabiTree</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="/css/indicators/indicators.css">
+ 
+</head>
+<body>
+  <div class="content">
+    <!-- Navbar -->
+    <%- include('../partials/navbar') %>
+
+    <!-- Contenido principal -->
+    <div class="Dashboard_content">
+      <div class="Dashboard-navbar">
+        <h1 class="Dashboard__title">Sustainability Indicators</h1>
+      </div>
+
+      <!-- SECCIÓN 1: TOTALES GLOBALES CON CARDS -->
+      <div class="global-indicators-section">
+        <h2 class="section-title">
+          <i class="fa-solid fa-globe"></i> Global Impact Summary
+        </h2>
+        
+        <div class="global-cards">
+          <% if (globalTotals && globalTotals.length > 0) { %>
+            <% globalTotals.forEach(function(cat) { %>
+              <div class="impact-card <%= cat.category %>-card">
+                <div class="card-icon">
+                  <% if (cat.category === 'water') { %>
+                    <i class="fa-solid fa-droplet"></i>
+                  <% } else if (cat.category === 'energy') { %>
+                    <i class="fa-solid fa-bolt"></i>
+                  <% } else if (cat.category === 'transport') { %>
+                    <i class="fa-solid fa-car"></i>
+                  <% } else if (cat.category === 'waste') { %>
+                    <i class="fa-solid fa-recycle"></i>
+                  <% } else if (cat.category === 'consumption') { %>
+                    <i class="fa-solid fa-shopping-cart"></i>
+                  <% } else if (cat.category === 'awareness') { %>
+                    <i class="fa-solid fa-lightbulb"></i>
+                  <% } %>
+                </div>
+                <h3 class="card-title"><%= cat.category.charAt(0).toUpperCase() + cat.category.slice(1) %></h3>
+                <div class="card-value">
+                  <%= cat.totalValue %>
+                  <% if (cat.category === 'water') { %>
+                    <span class="unit">liters saved</span>
+                  <% } else if (cat.category === 'energy') { %>
+                    <span class="unit">watts saved</span>
+                  <% } else if (cat.category === 'transport') { %>
+                    <span class="unit">kg CO₂ saved</span>
+                  <% } else if (cat.category === 'waste') { %>
+                    <span class="unit">kg recycled</span>
+                  <% } else if (cat.category === 'consumption') { %>
+                    <span class="unit">items reduced</span>
+                  <% } else if (cat.category === 'awareness') { %>
+                    <span class="unit">actions taken</span>
+                  <% } %>
+                </div>
+                <p class="card-missions"><%= cat.totalMissions %> missions completed</p>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p class="no-data">No global data available yet</p>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 2: GRÁFICAS -->
+      <div class="charts-section">
+        <!-- Gráfica de barras -->
+        <div class="chart-container">
+          <h3 class="chart-title">Impact by Category</h3>
+          <canvas id="impactChart"></canvas>
+        </div>
+
+        <!-- Gráfica de radar -->
+        <div class="chart-container radar-chart">
+          <h3 class="chart-title">Impact Performance Overview</h3>
+          <canvas id="radarChart"></canvas>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 3: TABLA POR USUARIO (AL FINAL) 
+      <div class="user-indicators-section">
+        <h2 class="section-title">
+          <i class="fa-solid fa-users"></i> Individual User Breakdown
+        </h2>
+        
+        <div class="table-container instrument-sans-regular">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Category</th>
+                <th>Missions Completed</th>
+                <th>Total Value</th>
+                <th>Total Experience</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (indicators && indicators.length > 0) { %>
+                <% indicators.forEach(function(user) { %>
+                  <% if (user.categories && user.categories.length > 0) { %>
+                    <% user.categories.forEach(function(category, index) { %>
+                      <tr>
+                        <% if (index === 0) { %>
+                          <td rowspan="<%= user.categories.length + 1 %>"><%= user.userName %></td>
+                          <td rowspan="<%= user.categories.length + 1 %>"><%= user.email %></td>
+                        <% } %>
+                        <td><%= category.category %></td>
+                        <td><%= category.missionCount %></td>
+                        <td><%= category.totalValue %></td>
+                        <td><%= category.totalExperience %></td>
+                      </tr>
+                    <% }) %>
+                    <tr class="total-row">
+                      <td><strong>USER TOTAL</strong></td>
+                      <td><strong><%= user.totals.totalMissions %></strong></td>
+                      <td><strong><%= user.totals.totalValue %></strong></td>
+                      <td><strong><%= user.totals.totalExperience %></strong></td>
+                    </tr>
+                  <% } %>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="6" style="text-align:center;">No indicators available</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    -->
+  </div>
+
+  
+  <!-- Datos en atributos data -->
+  <div id="indicatorsData" style="display:none;" 
+       data-indicators='<%= JSON.stringify(globalTotals || []) %>'
+       data-metrics='<%= JSON.stringify(impactMetrics || []) %>'>
+  </div>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  
+  <!-- Script de indicators -->
+  <script src="/js/indicators/indicators.js"></script>
+
+</body>
+</html>

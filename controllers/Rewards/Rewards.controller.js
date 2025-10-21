@@ -2,27 +2,36 @@ const { response } = require('express');
 const Reward = require('../../models/Rewards/Rewards.model');
 
 /**
- * Listar todas las recompensas
+ * This function renders all the rewards information on the ejs view
+ * 
+ *  getRewards Retrieves all available rewards and renderize it in the route
  */
 exports.getRewards = async (req, res) => {
     try {
+
+        // Fetch all available rewards
         const [rewards] = await Reward.fetchAll();
+
+        //Renders the information in the route 
         res.render('Rewards/rewards', { 
             title: 'Rewards', 
             rewards, 
+
+             // CSRF protection for forms
             csrfToken: req.csrfToken() 
         });
     } catch (err) {
+
+        // Handle database errors
         res.status(500).json({ error: 'Error fetching rewards' });
     }
 };
 
 /** Registrar nueva recompensa
  */
-exports.postRewards = async (req, res, next) => {
+exports.postRewards = async (req, res) => {
     try {
         const addReward = new Reward(
-            req.body.IDReward,
             req.body.name,          // ahora sí coincide con form
             req.body.description,
             req.body.type || "nonMonetary", // por si no envías

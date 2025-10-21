@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     <link rel="stylesheet" href ="/css/missions/missions.css">
     <title>Missions</title>
+    <link rel="icon" type="image/png" href="/img/LogoHabitree.png">
 </head>
 
 
@@ -37,24 +38,24 @@
                 </tr>
             </thead>
             <tbody>
-                                <% if (missions && missions[0] && missions[0][0] && missions[0][0].IDMission) { %>
-                                    <% missions[0].forEach(function(mission) { %>
-                                        <tr>
-                                            <td><%= mission.IDMission%></td>
-                                            <td><%= mission.responseVerification? 'Yes' : 'No' %></td>
-                                            <td><%= mission.category %></td>
-                                            <td><%= mission.description %></td>
-                                            <td><%= mission.dateOfCreation %></td>
-                                            <td><%= mission.available ? 'Yes' : 'No' %></td>
-                                            <td><%= mission.experience %></td>
-                                            <td class="actions"><button class="table__button">Manage</button></td>
-                                        </tr>
-                                    <% }) %>
-                                <% } else { %>
-                                    <tr>
-                                        <td colspan="6" style="text-align:center;">No notifications available</td>
-                                    </tr>
-                                <% } %>
+                <% if (missions && missions.length) { %>
+                    <% missions.forEach(function(mission) { %>
+                        <tr>
+                            <td><%= mission.IDMission%></td>
+                            <td><%= mission.responseVerification? 'Yes' : 'No' %></td>
+                            <td><%= mission.category %></td>
+                            <td><%= mission.description %></td>
+                            <td><%= mission.dateOfCreation %></td>
+                            <td><%= mission.available ? 'Yes' : 'No' %></td>
+                            <td><%= mission.experience %></td>
+                            <td class="actions"><button class="table__button">Manage</button></td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="8" style="text-align:center;">No missions available</td>
+                    </tr>
+                <% } %>
             </tbody>
         </table>
     </div>
@@ -63,41 +64,53 @@
     </div>
     </div> 
 
-<%# POP UP PARA AGREGAR MISION%>
+<%# POP-UP MODAL FORM TO ADD OR EDIT A MISSIONN
+    This modal allows users to add or edit missions.
+
+%>
 
     <div class="modal" id="modal">
     <div class="modal-inner">
+
+        <!-- Modal header with close button -->
     <nav>            
          <button id="closeModal" class="fa fa-times"></button>
     </nav>
         <h1 class ="modal-title">Add Mission</h1>
          <form action="/missions" method="POST">
+
+            <!-- CSRF protection for secure POST -->
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
                 
                 <section class="inputs-row">
-                    
+
                     <div class="input-container">
-                        <label for="id">ID</label>
-                        <input class="smallInput" type="number" id="id" name="IDMission" placeholder="ID" required>
+
+                        <!-- Row 1: Status -->
+                        <label for="status">Status</label>
+                        <select id="status" name="available" required>
+                            <option value=1>Available</option>
+                            <option value=0>Unavailable</option>
+                        </select>
                     </div>
-
-                    <div class="input-container">
-                    <label for="status">Status</label>
-                    <select id="status" name="available" required>
-                        <option value=1>Available</option>
-                        <option value=0>Unavailable</option>
-                </select>
-                </div>
-
                 </section>
 
+
+                <!-- Row 2: Category, Experience, Response Verification -->
                 <section class="inputs-row">
-                    
                     <div class="input-container">
-                        <label for="type">Type</label>
-                        <input class="smallInput" type="text" id="type" name="category" placeholder="Water" required>
+                        <label for="category">Mission Type</label>
+                        <select id="category" name="category" required>
+                            <% const types = ['awareness', 'transport', 'water', 'waste', 'energy', 'consumption', 'nature']; %>
+                            <% types.forEach(function(t){ %>
+                                <option value="<%= t %>"><%= t.charAt(0).toUpperCase() + t.slice(1) %></option>
+                            <% }) %>
+                        </select>
                     </div>
+
+
+
                     <div class="input-container">
                         <label for="experience">Experience</label>
                         <input class="smallInput" type="number" id="experience" name="experience" placeholder="100" required>
@@ -110,23 +123,52 @@
                             <option value=0>No</option>
                         </select>
                     </div>
+                </section>
 
+
+                <!-- Row 3: Value and Reward -->
+                <section class="inputs-row">
+                    <div class="input-container">
+                        <label for="value">Value</label>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <input class="smallInput" type="number" id="value" name="value" placeholder="0" step="any">
+                            <span id="value-unit">points</span>
+                        </div>
+                    </div>
+
+                    <div class="input-container">
+                        <label for="reward">Assign Reward</label>
+                        <select id="reward" name="reward">
+                            <option value="">-- None --</option>
+                            <% if (typeof rewards !== 'undefined' && rewards && rewards.length) { %>
+                                <% rewards.forEach(function(r){ %>
+                                    <option value="<%= r.IDReward %>"><%= r.name %> - <%= r.type %></option>
+                                <% }) %>
+                            <% } %>
+                        </select>
+                    </div>
                 </section>
                 
+                <!-- Row 4: Description -->
                 <section>
                     <label for="description">Description</label>
                     <input class = "description" type="text" id="description" name="description" placeholder="Description" required>
                     <br style="clear:both;" />
                 </section>
+
+                <!-- Form buttons -->
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="submit" class="submit-btn" id="add-edit-btn">Add</button>
                     <button type="button" class="submit-btn" id="delete-btn" style="background-color: #d35400; color: white; display: none;">Delete</button>
                 </div>
-                <span id="id-readonly-msg" style="display:none; color: #888; font-size: 12px;">ID no editable en edición</span>
+
+                <!-- Placeholder for success/error messages -->
                 <div id="form-message" style="display:none; margin-top:10px;"></div>
         </form>
     </div>
     </div>
+
+    <!-- Script for handling script -->
     <script src ="/js/missions/missions.js"></script>
 </body>
 </html>

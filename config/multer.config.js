@@ -7,7 +7,7 @@ const storage = multer.diskStorage({
         callback(null, './bucket/');
     },
     filename: function (req, file, callback) {
-        callback(null, file.originalname);
+        callback(null, new Date().getMilliseconds() + file.originalname);
     }
 });
 

@@ -39,6 +39,7 @@ const getAllMissions = async (userId) => {
         ON r.IDReward = br.IDReward
     LEFT JOIN impactReward ir 
         ON r.IDReward = ir.IDReward
+    WHERE m.available = 1
     ORDER BY m.IDMission, r.IDReward
     `,
     [userId]
@@ -160,7 +161,7 @@ const getUserMissions = async (userId) => {
     JOIN notification n ON um.IDNotification = n.IDNotification
     LEFT JOIN missionRewards mr ON m.IDMission = mr.IDMission
     LEFT JOIN rewards r ON mr.IDReward = r.IDReward
-    WHERE u.IDUser = ?;
+    WHERE u.IDUser = ? AND m.available = 1;
     `,
     [userId]
   );
@@ -172,7 +173,6 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
   
   try {
     await connection.beginTransaction();
-    console.log(`Starting mission completion for User: ${IDUser}, Mission: ${IDMission}`);
 
     // 1. Verificar si el usuario ya completó esta misión
     const [existingMission] = await connection.execute(
@@ -183,7 +183,6 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
     if (existingMission.length > 0) {
       throw new Error("El usuario ya completó esta misión");
     }
-    console.log("✅ Mission not completed before");
 
     // 2. Verificar que la misión existe y obtener su experiencia
     const [mission] = await connection.execute(
@@ -198,25 +197,22 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
     if (!mission[0].available) {
       throw new Error("La misión no está disponible");
     }
-    console.log("✅ Mission exists and is available");
 
     // 3. Verificar que el usuario existe
     const [user] = await connection.execute(
-      "SELECT IDUser FROM user WHERE IDUser = ?",
+      "SELECT IDUser, coins FROM user WHERE IDUser = ?",
       [IDUser]
     );
 
     if (user.length === 0) {
       throw new Error("El usuario no existe");
     }
-    console.log("✅ User exists");
 
     // 4. Insertar registro en userMissions (status = 1 = completed)
-    const [userMissionResult] = await connection.execute(
+    await connection.execute(
       "INSERT INTO userMissions (IDUser, IDMission, status) VALUES (?, ?, 1)",
       [IDUser, IDMission]
     );
-    console.log("✅ UserMission inserted with ID:", userMissionResult.insertId);
 
     // 5. Obtener todas las rewards de la misión
     const [rewards] = await connection.execute(
@@ -226,18 +222,18 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
        WHERE mr.IDMission = ? AND r.available = 1`,
       [IDMission]
     );
-    console.log(`Found ${rewards.length} rewards for mission ${IDMission}`);
 
-    // 6. Insertar rewards en userRewards para cada reward de la misión
+    // 6. Insertar rewards en userRewards y sumar coins si es monetary
     const userRewards = [];
+    let totalCoinsAdded = 0;
+
     for (const reward of rewards) {
       try {
+        // Insertar en userRewards
         const [insertResult] = await connection.execute(
           "INSERT INTO userRewards (IDUser, IDReward) VALUES (?, ?)",
           [IDUser, reward.IDReward]
         );
-        
-        console.log(`✅ Reward ${reward.IDReward} inserted with ID: ${insertResult.insertId}`);
         
         userRewards.push({
           IDUserReward: insertResult.insertId,
@@ -247,9 +243,24 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
           type: reward.type,
           value: reward.value
         });
+
+        // Normalizar el tipo para comparación
+        const rewardType = reward.type ? String(reward.type).trim().toLowerCase() : '';
+        const rewardValue = parseInt(reward.value) || 0;
+
+        // Si la recompensa es de tipo "monetary", sumar el value a las coins del usuario
+        if (rewardType === "monetary" && rewardValue > 0) {
+          await connection.execute(
+            "UPDATE user SET coins = coins + ? WHERE IDUser = ?",
+            [rewardValue, IDUser]
+          );
+          
+          totalCoinsAdded += rewardValue;
+        }
+
       } catch (rewardError) {
         // Si hay error (por ejemplo, reward duplicada), continúa con la siguiente
-        console.log(`❌ Warning: Could not insert reward ${reward.IDReward} for user ${IDUser}:`, rewardError.message);
+        continue;
       }
     }
 
@@ -260,31 +271,31 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
     );
 
     if (existingTree.length === 0) {
-      // Crear árbol inicial con la experiencia de la misión
       await connection.execute(
         "INSERT INTO tree (IDUser, level) VALUES (?, ?)",
         [IDUser, mission[0].experience]
       );
-      console.log("✅ New tree created for user");
     } else {
-      // 8. Actualizar experiencia del árbol del usuario
       await connection.execute(
         "UPDATE tree SET level = level + ? WHERE IDUser = ?",
         [mission[0].experience, IDUser]
       );
-      console.log("✅ Tree level updated");
     }
 
-    // 9. Obtener el nuevo nivel del árbol
+    // 8. Obtener el nuevo nivel del árbol
     const [updatedTree] = await connection.execute(
       "SELECT level FROM tree WHERE IDUser = ?",
       [IDUser]
     );
 
-    await connection.commit();
-    console.log("✅ Transaction committed successfully");
+    // 9. Obtener las coins actualizadas del usuario
+    const [updatedUser] = await connection.execute(
+      "SELECT coins FROM user WHERE IDUser = ?",
+      [IDUser]
+    );
 
-    // Retornar información de la misión completada
+    await connection.commit();
+
     return {
       success: true,
       message: "Misión completada exitosamente",
@@ -294,13 +305,14 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
         experienceGained: mission[0].experience,
         newTreeLevel: updatedTree[0].level,
         rewardsObtained: userRewards,
-        totalRewards: rewards.length
+        totalRewards: rewards.length,
+        coinsAdded: totalCoinsAdded,
+        currentCoins: updatedUser[0].coins
       }
     };
 
   } catch (error) {
     await connection.rollback();
-    console.log("❌ Transaction rolled back due to error:", error.message);
     throw error;
   } finally {
     connection.release();

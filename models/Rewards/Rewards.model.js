@@ -3,8 +3,7 @@ const db = require('../../util/database');
 // Clase Reward
 module.exports = class Reward {
 
-    constructor(IDReward, name, description, type, available, value) {
-        this.IDReward = IDReward;
+    constructor(name, description, type, available, value) {
         this.name = name;
         this.description = description;
         this.type = type;        // monetary / nonMonetary
@@ -17,17 +16,22 @@ module.exports = class Reward {
      */
     save() {
         return db.execute(
-            'INSERT INTO rewards (IDReward, name, description, type, available, value) VALUES (?, ?, ?, ?, ?, ?)',
-            [this.IDReward, this.name, this.description, this.type, this.available, this.value]
+            'INSERT INTO rewards (name, description, type, available, value) VALUES (?, ?, ?, ?, ?)',
+            [this.name, this.description, this.type, this.available, this.value]
         );
     }
 
     /**
-     * Devuelve todas las recompensas
-     * @returns {Promise}
+     * 
+     * This function allows the user to consult all the rewards in the database
+     * 
+     * This function returns all the rewards from the data base
+     * 
      */
     static fetchAll() {
-        return db.execute('SELECT * FROM rewards');
+
+        //this return a promise that resolves with an array of rewards where `available = 1`
+        return db.execute('SELECT * FROM rewards WHERE available = 1'); 
     }
 
     /**
@@ -59,10 +63,4 @@ module.exports = class Reward {
         );
     }
 
-    /**
-     * Elimina una recompensa por su ID
-     */
-    static deleteRewardById(id) {
-        return db.execute('DELETE FROM rewards WHERE IDReward = ?', [id]);
-    }
 };
