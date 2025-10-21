@@ -20,7 +20,13 @@ async function createLeagueViaProcedure({ name, lvl}, connection) {
     }
 }
 
-// Renombra la clase a League para mayor claridad
+
+/**
+ * Description placeholder
+ *
+ * @class League
+ * @typedef {League}
+ */
 class League {
     constructor(ID_league, league, min_level){
         this.ID_league = ID_league;
