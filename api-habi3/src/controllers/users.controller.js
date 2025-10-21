@@ -1,4 +1,5 @@
 const userService = require("../services/users.service");
+const tokenService = require('../services/token.service');
 
 const getUsers = async (req, res) => {
   try {
@@ -12,12 +13,86 @@ const getUsers = async (req, res) => {
   }
 };
 
+const getLoginJWT = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Faltan credenciales',
+            });
+        }
+
+        const user = await userService.getLoginUser(email, password);
+        const accessToken = tokenService.generateAccessToken(user);
+        const { refreshToken, expiresAt } = await tokenService.generateRefreshToken(user);
+
+        res.json({
+            success: true,
+            message: '✅ Login exitoso',
+            user,
+            accessToken,
+            refreshToken,
+            refreshTokenExpiresAt: expiresAt.getTime()
+        });
+    } catch (err) {
+        res.status(401).json({
+            success: false,
+            message: '❌ Credenciales inválidas',
+            details: err.message,
+        });
+    }
+};
+
+const getLoginGoogleJWT = async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Faltan credenciales',
+            });
+        }
+
+        const user = await userService.getLoginUserGoogle(email);
+        
+        if (!user || !user.userId) {
+            throw new Error('User data is invalid or missing userId');
+        }
+
+        const accessToken = tokenService.generateAccessToken(user);
+        const { refreshToken, expiresAt } = await tokenService.generateRefreshToken(user);
+
+        res.json({
+            success: true,
+            message: '✅ Login exitoso',
+            user: {
+                userId: user.userId,
+                name: user.name,
+                email: user.email,
+                gender: user.gender,
+                dateOfBirth: user.dateOfBirth,
+                coins: user.coins
+            },
+            accessToken,
+            refreshToken,
+            refreshTokenExpiresAt: expiresAt.getTime()
+        });
+    } catch (err) {
+        console.error('Error en Google login:', err.message);
+        res.status(401).json({
+            success: false,
+            message: '❌ Credenciales inválidas',
+            details: err.message,
+        });
+    }
+};
 
 const getLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validar que vengan datos
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -25,10 +100,8 @@ const getLogin = async (req, res) => {
       });
     }
 
-    // Llamar al servicio
     const user = await userService.getLoginUser(email, password);
 
-    // Respuesta exitosa
     res.json({
       success: true,
       message: "✅ Login exitoso",
@@ -39,7 +112,7 @@ const getLogin = async (req, res) => {
     res.status(401).json({
       success: false,
       message: "❌ Credenciales inválidas",
-      details: err.message, // opcional
+      details: err.message,
     });
   }
 };
@@ -48,7 +121,6 @@ const getLoginGoogle = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Validar que venga el correo
     if (!email) {
       return res.status(400).json({
         success: false,
@@ -56,18 +128,15 @@ const getLoginGoogle = async (req, res) => {
       });
     }
 
-    // Llamar al servicio
     const user = await userService.getLoginUserGoogle(email);
 
-    // Filtrar manualmente los campos que deseas retornar
     const responseUser = {
-      userId: user.id,
+      userId: user.userId,
       name: user.name,
       email: user.email,
       coins: user.coins
     };
 
-    // Enviar respuesta limpia
     res.json({
       success: true,
       message: "✅ Login exitoso",
@@ -98,12 +167,35 @@ const getStats = async (req, res) => {
 
 const postSignup = async (req, res) => {
   try {
-    const {name, email, gender, dateOfBirth, coins, password} = req.body;
-    const rows = await userService.postSignupUser(name, email, gender, dateOfBirth, coins, password);
-    res.json(rows);
+    const { name, email, gender, dateOfBirth, coins, password } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "El campo 'email' es obligatorio.",
+      });
+    }
+
+    const safeName = name ?? null;
+    const safeGender = gender ?? null;
+    const safeDateOfBirth = dateOfBirth ?? null;
+    const safeCoins = coins ?? null;
+    const safePassword = password ?? null;
+
+    const rows = await userService.postSignupUser(
+      safeName,
+      email,
+      safeGender,
+      safeDateOfBirth,
+      safeCoins,
+      safePassword
+    );
+
+    res.status(201).json(rows);
   } catch (err) {
     res.status(500).json({
-      error: "Error al obtener usuarios",
+      success: false,
+      message: "Error al registrar usuario",
       details: err.message,
     });
   }
@@ -186,7 +278,7 @@ const getInventory = async (req, res) => {
       data: inventory
     });
   } catch (err) {
-    console.error("❌ Error en getInventory:", err);
+    console.error("Error en getInventory:", err);
     res.status(500).json({
       success: false,
       message: "Error al obtener inventario",
@@ -249,7 +341,87 @@ const getActiveItem = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getLogin, postSignup, getStats, editUser, 
-                    changepasswd, getMissionsSummary, getUserRewards, 
-                    getLoginGoogle, getLeaderboard, getInventory, useItem,
-                    getActiveItem};
+
+const refreshToken = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+        
+        if (!refreshToken) {
+            return res.status(400).json({
+                success: false,
+                message: 'Falta el refresh token',
+            });
+        }
+
+        const { decoded, expiresAt } = await tokenService.verifyRefreshToken(refreshToken);
+        const user = { userId: decoded.userId, email: decoded.email };
+        const newAccessToken = tokenService.generateAccessToken(user);
+        let newRefreshToken = refreshToken;
+        let newExpiresAt = expiresAt;
+
+        if (tokenService.shouldRenewRefreshToken(expiresAt)) {
+            await tokenService.invalidateRefreshToken(refreshToken);
+            const { refreshToken: newToken, expiresAt: tokenExpiresAt } = await tokenService.generateRefreshToken(user);
+            newRefreshToken = newToken;
+            newExpiresAt = tokenExpiresAt;
+        }
+
+        res.json({
+            success: true,
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+            refreshTokenExpiresAt: newExpiresAt.getTime()
+        });
+    } catch (err) {
+        console.error('Error al refrescar token:', err.message);
+        res.status(401).json({
+            success: false,
+            message: '❌ Refresh token inválido o expirado',
+            details: err.message,
+        });
+    }
+};
+
+const logout = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+
+        if (!refreshToken) {
+            return res.status(400).json({
+                success: false,
+                message: 'Falta el refresh token',
+            });
+        }
+
+        await tokenService.invalidateRefreshToken(refreshToken);
+        res.json({
+            success: true,
+            message: '✅ Sesión cerrada exitosamente',
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al cerrar sesión',
+            details: err.message,
+        });
+    }
+};
+
+module.exports = { 
+    getUsers, 
+    getLogin, 
+    postSignup, 
+    getStats, 
+    editUser, 
+    changepasswd, 
+    getMissionsSummary, 
+    getUserRewards, 
+    getLoginGoogle, 
+    getLeaderboard, 
+    getInventory, 
+    useItem,
+    getLoginGoogleJWT, 
+    getLoginJWT, 
+    refreshToken, 
+    logout, getActiveItem
+};

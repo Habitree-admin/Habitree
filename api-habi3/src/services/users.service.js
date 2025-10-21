@@ -1,6 +1,7 @@
 const db = require("../../../util/database");
 const bcrypt = require("bcrypt");
 const AWS = require("aws-sdk");
+const { encrypt, decrypt, encryptUserData, decryptUserData, decryptUsersArray } = require("../../../util/encryption");
 
 const AWS_BUCKET = process.env.AWS_BUCKET;
 const AWS_REGION = process.env.AWS_REGION;
@@ -18,34 +19,50 @@ const s3 = new AWS.S3();
 
 const getAllUsers = async () => {
   const [rows] = await db.execute("SELECT * FROM user");
-  return rows;
+  // Desencriptar todos los usuarios
+  return decryptUsersArray(rows);
 };
 
-
 const getLoginUser = async (email, password) => {
-  //Buscar usuario por correo
+  const emailToFind = email.toLowerCase();
+  
+  // 1. Obtener TODOS los usuarios
   const [rows] = await db.execute(
-    "SELECT IDUser, Name, email, gender, dateOfBirth, coins, password FROM user WHERE email = ?",
-    [email]
+    "SELECT IDUser, name AS name, email, gender, dateOfBirth, coins, password FROM user WHERE deleted = 0"
   );
 
   if (rows.length === 0) {
     throw new Error("Usuario no encontrado");
   }
 
-  const user = rows[0];
+  // 2. Desencriptar cada email hasta encontrar coincidencia
+  let matchedUser = null;
+  for (const row of rows) {
+    const decryptedEmail = decrypt(row.email);
+    if (decryptedEmail && decryptedEmail.toLowerCase() === emailToFind) {
+      matchedUser = row;
+      break;
+    }
+  }
 
-  //Comparar contraseñas con bcrypt
-  const isMatch = await bcrypt.compare(password, user.password); // OJO: usar "user.password"
+  if (!matchedUser) {
+    throw new Error("Usuario no encontrado");
+  }
+
+  // 3. Comparar contraseña con bcrypt
+  const isMatch = await bcrypt.compare(password, matchedUser.password);
 
   if (!isMatch) {
     throw new Error("Contraseña incorrecta");
   }
 
-  // 3. Retornar datos del usuario (sin contraseña)
+  // 4. Desencriptar datos del usuario
+  const user = decryptUserData(matchedUser);
+
+  // 5. Retornar datos del usuario (sin contraseña)
   return {
     userId: user.IDUser,
-    name: user.Name,
+    name: user.name,
     email: user.email,
     gender: user.gender,
     dateOfBirth: user.dateOfBirth,
@@ -54,23 +71,47 @@ const getLoginUser = async (email, password) => {
 };
 
 const getLoginUserGoogle = async (email) => {
-  const [rows] = await db.execute(
-    "SELECT IDUser, Name, email, coins FROM user WHERE email = ?",
-    [email]
-  );
+  try {
+    const emailToFind = email.toLowerCase();
+    
+    // Obtener TODOS los usuarios
+    const [rows] = await db.execute(
+      "SELECT IDUser, name, email, gender, dateOfBirth, coins FROM user WHERE deleted = 0"
+    );
 
-  if (rows.length === 0) {
-    throw new Error("Usuario no encontrado");
+    if (rows.length === 0) {
+      throw new Error("Usuario no encontrado");
+    }
+
+    // Desencriptar cada email hasta encontrar coincidencia
+    let matchedUser = null;
+    for (const row of rows) {
+      const decryptedEmail = decrypt(row.email);
+      if (decryptedEmail && decryptedEmail.toLowerCase() === emailToFind) {
+        matchedUser = row;
+        break;
+      }
+    }
+
+    if (!matchedUser) {
+      throw new Error("Usuario no encontrado");
+    }
+
+    // Desencriptar datos del usuario
+    const user = decryptUserData(matchedUser);
+
+    return {
+      userId: user.IDUser,
+      name: user.name,
+      email: user.email,
+      gender: user.gender,
+      dateOfBirth: user.dateOfBirth,
+      coins: user.coins
+    };
+  } catch (error) {
+    console.error('Error en getLoginUserGoogle:', error.message);
+    throw error;
   }
-
-  const user = rows[0];
-
-  return {
-    id: user.IDUser,
-    name: user.Name,
-    email: user.email,
-    coins: user.coins
-  };
 };
 
 const getStatsUser = async (id) => {
@@ -86,33 +127,61 @@ const getStatsUser = async (id) => {
      WHERE u.IDUser = ?`,
     [id]
   );
-  return rows;
+  
+  // Desencriptar los datos
+  return decryptUsersArray(rows);
 };
-
 
 const postSignupUser = async (name, email, gender, dateOfBirth, coins, password) => {
   try {
-    
     let hashedPassword = null;
     if (password) {
       hashedPassword = await bcrypt.hash(password, 12);
     }
 
+    // Verificar que el email no exista (requiere desencriptar todos)
+    const emailToCheck = email.toLowerCase();
+    const [existingUsers] = await db.execute(
+      "SELECT email FROM user WHERE deleted = 0"
+    );
     
+    for (const user of existingUsers) {
+      const decryptedEmail = decrypt(user.email);
+      if (decryptedEmail && decryptedEmail.toLowerCase() === emailToCheck) {
+        throw new Error("El email ya está registrado");
+      }
+    }
+
+    // Encriptar datos sensibles (incluyendo email)
+    const encryptedData = encryptUserData({
+      name,
+      email: emailToCheck,
+      gender,
+      dateOfBirth
+    });
+
     const [result] = await db.execute(
       "INSERT INTO user (name, email, gender, dateOfBirth, coins, password, deleted) VALUES (?,?,?,?,?,?,?)",
-      [name, email, gender, dateOfBirth, coins, hashedPassword, 0]
+      [
+        encryptedData.name,
+        encryptedData.email,
+        encryptedData.gender,
+        encryptedData.dateOfBirth,
+        coins,
+        hashedPassword,
+        0
+      ]
     );
 
-    const userId = result.insertId; // ID del usuario recién creado
+    const userId = result.insertId;
 
     // Insertar en tree vinculado a ese usuario
     await db.execute(
       "INSERT INTO tree (IDUser, level) VALUES (?, ?)",
-      [userId, 1] // Por defecto nivel 1
+      [userId, 1]
     );
 
-    return { userId }; // Devuelve el ID del usuario creado
+    return { userId };
   } catch (err) {
     throw new Error(err.message);
   }
@@ -120,14 +189,36 @@ const postSignupUser = async (name, email, gender, dateOfBirth, coins, password)
 
 const editUserInfo = async (id, name, email, gender, dateOfBirth) => {
   try {
+    // Verificar que el email no exista en otro usuario
+    const emailToCheck = email.toLowerCase();
+    const [existingUsers] = await db.execute(
+      "SELECT IDUser, email FROM user WHERE deleted = 0 AND IDUser <> ?",
+      [id]
+    );
+    
+    for (const user of existingUsers) {
+      const decryptedEmail = decrypt(user.email);
+      if (decryptedEmail && decryptedEmail.toLowerCase() === emailToCheck) {
+        throw new Error("El email ya está registrado en otro usuario");
+      }
+    }
+
+    // Encriptar los datos antes de actualizar
+    const encryptedData = encryptUserData({
+      name,
+      email: emailToCheck,
+      gender,
+      dateOfBirth
+    });
+
     const [result] = await db.execute(
       `UPDATE user 
        SET name = ?, email = ?, gender = ?, dateOfBirth = ? 
        WHERE IDUser = ?`,
-      [name, email, gender, dateOfBirth, id]
+      [encryptedData.name, encryptedData.email, encryptedData.gender, encryptedData.dateOfBirth, id]
     );
 
-    return { affectedRows: result.affectedRows }; // Te dice cuántos registros se actualizaron
+    return { affectedRows: result.affectedRows };
   } catch (err) {
     throw new Error(err.message);
   }
@@ -138,7 +229,6 @@ const changeUserPassword = async (id, password) => {
     // Hashear nueva contraseña
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Actualizar solo el campo password
     const [result] = await db.execute(
       `UPDATE user 
        SET password = ? 
@@ -146,7 +236,7 @@ const changeUserPassword = async (id, password) => {
       [hashedPassword, id]
     );
 
-    return { affectedRows: result.affectedRows }; // 1 si se actualizó, 0 si no encontró el usuario
+    return { affectedRows: result.affectedRows };
   } catch (err) {
     throw new Error(err.message);
   }
@@ -165,7 +255,6 @@ const getMissionsSummaryByUser = async (id) => {
     [id]
   );
 
-  // Valores por defecto - siempre se retornan todas las categorías
   const summary = {
     Awareness: "0",
     Consumption: "0",
@@ -176,13 +265,9 @@ const getMissionsSummaryByUser = async (id) => {
     Water: "0"
   };
 
-  // Actualizar con los valores reales de la base de datos
   rows.forEach(row => {
     if (row.category) {
-      // Normalizar la categoría: primera letra mayúscula, resto minúsculas
       const normalizedCategory = row.category.charAt(0).toUpperCase() + row.category.slice(1).toLowerCase();
-      
-      // Solo actualizar si la categoría normalizada existe en nuestro objeto summary
       if (summary.hasOwnProperty(normalizedCategory)) {
         summary[normalizedCategory] = (row.total_value || 0).toString();
       }
@@ -191,8 +276,6 @@ const getMissionsSummaryByUser = async (id) => {
 
   return summary;
 };
-
-
 
 const getUserRewardsById = async (id) => {
   const [rows] = await db.execute(
@@ -229,7 +312,8 @@ const getLeaderboardS = async () => {
     LIMIT 10
   `);
 
-  return rows;
+  // Desencriptar los nombres
+  return decryptUsersArray(rows);
 };
 
 const getInventoryByUser = async (userId) => {
@@ -252,7 +336,6 @@ const getInventoryByUser = async (userId) => {
 
   const [rows] = await db.execute(query, [userId]);
 
-  // Generar URL firmada de S3
   const inventoryWithUrls = await Promise.all(
     rows.map(async (item) => {
       if (!item.image_name) return { ...item, imageUrl: null };
@@ -267,30 +350,25 @@ const getInventoryByUser = async (userId) => {
 };
 
 const useItemByUser = async (idUser, idItem) => {
-
-  // Caso especial: quitar el ítem actual
   if (idItem === 0) {
-    console.log(`Desequipando item para usuario ${idUser}`);  
-   // Desactivar cualquier ítem activo
+    console.log(`Desequipando item para usuario ${idUser}`);
+    
     await db.execute(
       `UPDATE inventory 
        SET status = 0 
        WHERE IDUser = ? AND status = 1`,
       [idUser]
     );
-  
-      // Limpiar el campo item en la tabla user
+
     await db.execute(
       `UPDATE user 
        SET item = NULL 
        WHERE IDUser = ?`,
       [idUser]
     );
-  
+
     return { idUser, idItem: 0, imageName: null };
   }
-  
-    // Si no es 0, seguir con la lógica normal
 
   await db.execute(
     `UPDATE inventory 
@@ -341,7 +419,6 @@ const getActiveItemByUser = async (idUser) => {
 
   const imageName = rows[0].item;
 
-  // Generar signed URL
   const params = { Bucket: AWS_BUCKET, Key: imageName, Expires: 3600 };
   const signedUrl = s3.getSignedUrl("getObject", params);
 
@@ -351,7 +428,18 @@ const getActiveItemByUser = async (idUser) => {
   };
 };
 
-module.exports = { getAllUsers, getLoginUser, postSignupUser, getStatsUser, 
-                  editUserInfo, changeUserPassword,  getMissionsSummaryByUser, 
-                  getUserRewardsById, getLoginUserGoogle, getLeaderboardS, getInventoryByUser,
-                  useItemByUser, getActiveItemByUser};
+module.exports = {
+  getAllUsers,
+  getLoginUser,
+  postSignupUser,
+  getStatsUser,
+  editUserInfo,
+  changeUserPassword,
+  getMissionsSummaryByUser,
+  getUserRewardsById,
+  getLoginUserGoogle,
+  getLeaderboardS,
+  getInventoryByUser,
+  useItemByUser,
+  getActiveItemByUser
+};
