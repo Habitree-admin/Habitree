@@ -1,4 +1,6 @@
-//FUNCIÓN PARA CREAR POP UP
+/**
+ * References to main modal DOM elements
+ */
 
 const openBtn = document.getElementById("openModal");
 const closeBtn = document.getElementById("closeModal");
@@ -31,6 +33,11 @@ function updateUnitForCategory(cat) {
     }
 }
 
+/**
+ * Opens the modal "Add Mission" mode.
+ * Resets the form, hides delete button, and restores default values.
+ */
+
 openBtn.addEventListener("click", () => {
     modal.classList.add("open");
     modalTitle.textContent = "Add Mission";
@@ -42,15 +49,26 @@ openBtn.addEventListener("click", () => {
     if (idMsg) idMsg.style.display = "none";
     document.getElementById("delete-btn").style.display = "none";
     document.getElementById("add-edit-btn").textContent = "Add";
-    // reset unit
+
+
+   // Reset unit label
     updateUnitForCategory('');
 });
+
+/**
+ * Closes the modal when the close button "X" is clicked.
+ */
 
 closeBtn.addEventListener("click", () => {
     modal.classList.remove("open");
 });
 
-// Cerrar al hacer clic fuera del modal
+/**
+ * Closes the modal when clicking outside the modal content.
+ *
+ * @param {MouseEvent} e - The click event on the modal overlay.
+ */
+
 modal.addEventListener("click", (e) => {
     if (e.target === modal) {
         modal.classList.remove("open");
