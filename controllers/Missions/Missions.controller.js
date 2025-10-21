@@ -1,6 +1,10 @@
 const { response } = require('express');
 const Mission = require('../../models/Missions/Missions.model');
 
+
+/**
+ * Retrieves all missions from the database and renders the missions view.
+ */
 exports.getMissions = async (req, res) => {
     const missions = await Mission.fetchAll();
     res.render('../views/Missions/missions', { title: 'Missions', missions, csrfToken: req.csrfToken()});
