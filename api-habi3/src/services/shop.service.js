@@ -1,6 +1,7 @@
 const db = require("../../../util/database");
 const AWS = require('aws-sdk');
 
+// aws sdk setup
 const AWS_BUCKET = process.env.AWS_BUCKET;
 const AWS_REGION = process.env.AWS_REGION;
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
@@ -15,6 +16,11 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 
+/**
+ * This function gets all shop items with purchase status for a user
+ * 
+ * getShopItemsForUser returns all items with signed URLs for images and purchase status per user
+ */
 exports.getShopItemsForUser = async (id) => {
   const query = `
     SELECT s.IDItem, s.name, s.state, s.category, s.price, s.image_name,
@@ -26,7 +32,7 @@ exports.getShopItemsForUser = async (id) => {
   `;
   const [rows] = await db.execute(query, [id]);
 
-  // Generar signed URL por cada item
+  // add signedUrls to items to consume them in the mobile application
   const itemsWithUrls = await Promise.all(
     rows.map(async (item) => {
       if (!item.image_name) return { ...item, imageUrl: null };
@@ -40,12 +46,17 @@ exports.getShopItemsForUser = async (id) => {
   return itemsWithUrls;
 };
 
+/**
+ * This function buys an item to a user and adds it to the users inventory
+ * 
+ * buyShopItemForUser adds item to the user inventory and also does error handling
+ */
 exports.buyShopItemForUser = async (IDUser, IDItem) => {
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
 
-    // verificar que el item ya esta comprado
+    // Check if item is already purchased
     const [existingPurchase] = await connection.execute(
       "SELECT IDUserShop FROM userShop WHERE IDUser = ? AND IDItem = ?",
       [IDUser, IDItem]
@@ -55,7 +66,7 @@ exports.buyShopItemForUser = async (IDUser, IDItem) => {
       throw new Error("Item already purchased");
     }
 
-    // Obtener precio del ítem
+    // Get item price
     const [itemRows] = await connection.execute(
       "SELECT price FROM shop WHERE IDItem = ?",
       [IDItem]
@@ -65,7 +76,7 @@ exports.buyShopItemForUser = async (IDUser, IDItem) => {
 
     const price = itemRows[0].price;
 
-    // Verificar que el usuario tenga monedas suficientes
+    // Check if user has enough coins
     const [userRows] = await connection.execute(
       "SELECT coins FROM user WHERE IDUser = ?",
       [IDUser]
@@ -76,20 +87,20 @@ exports.buyShopItemForUser = async (IDUser, IDItem) => {
     const userCoins = userRows[0].coins;
     if (userCoins < price) throw new Error("Not enough coins");
 
-    // Actualizar monedas del usuario
+    // Update user coins
     await connection.execute(
       "UPDATE user SET coins = coins - ? WHERE IDUser = ?",
       [price, IDUser]
     );
 
-    // Registrar compra en userShop
+    // Register purchase in userShop
     const [purchaseResult] = await connection.execute(
       `INSERT INTO userShop (IDUser, IDItem, transaction, purchaseAmount, pointsEarned, purchaseDate)
        VALUES (?, ?, UUID(), 1, 1, NOW())`,
       [IDUser, IDItem]
     );
 
-    // Agregar ítem al inventario
+    // Add item to inventory
     await connection.execute(
       `INSERT INTO inventory (IDUser, IDItem, Quantity, status)
        VALUES (?, ?, 1, 0)`,
