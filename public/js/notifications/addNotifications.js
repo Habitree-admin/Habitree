@@ -1,20 +1,28 @@
-document.addEventListener("click", (event) => {
-    // Busca el botón Add con clase header__button
-    const addBtn = event.target.closest(".header__button");
-    if (!addBtn) return; // Si no es el botón "Add", sal de la función
+/**
+ * 
+ * This function allows the administrator to open a form to create a new notification
+ * 
+ * This function on the code manage the fetching and display of the Add modal
+ * 
+**/
 
-    // Realiza la petición para obtener el contenido del modal de agregar
+document.addEventListener("click", (event) => {
+    // Search the Add button in the header__button class
+    const addBtn = event.target.closest(".header__button");
+    if (!addBtn) return; // If its not the Add button -> exit the function
+
+    // Make the request to get the add modal content
     fetch(`/notifications/add-modal`)
-        // Verifica que la respuesta sea correcta
+        // Verify that the response is correctly
         .then(res => {
             if (!res.ok) {
                 throw new Error("Error al obtener el modal de agregar notificación");
             }
             return res.text();
         })
-        // Si la respuesta es correcta procesa el HTML recibido
+        // If the response is correct -> process the HTML
         .then(html => {
-            // PASO 1: Inserta el HTML recibido en el modal-root que es dinamico
+            // STEP 1: Insert the HTML into the modal-root that is dynamic
             const modalRoot = document.getElementById("modal-root");
             if (modalRoot) {
                 modalRoot.innerHTML = html;
@@ -23,18 +31,18 @@ document.addEventListener("click", (event) => {
                 return;
             }
 
-            // PASO 2: El modal add ya se desplego, ahora selecciona el modal y el backdrop
-            // para manipular su visibilidad y añadir funcionalidad de cierre
+            // STEP 2: The add modal is already deployed, now select the modal and backdrop
+            // to manipulate its visibility and add closing functionality
             const modal = modalRoot.querySelector(".modal");
             const backdrop = document.getElementById("backdrop");
 
-            // PASO 3: Verificar que ambos elementos existan
+            // STEP 3: Verify that both elements exist
             if (modal && backdrop) {
-                // Muestra el modal
+                // Show the modal
                 modal.classList.add("active");
                 backdrop.classList.add("active");
 
-                // PASO 4: Crear event listeners para cerrar el modal
+                // STEP 4: Create an event listeners to close the modal
                 const closeModalBtn = modal.querySelector(".close-modal");
                 if (closeModalBtn) {
                     closeModalBtn.onclick = () => {
@@ -43,14 +51,14 @@ document.addEventListener("click", (event) => {
                     };
                 }
 
-                // PAS 5: Cierra el modal si se hace clic en el backdrop
+                // STEP 5: Close the modal if clicking on the backdrop
                 backdrop.onclick = (event) => {
                     if (event.target === backdrop) {
                         modal.classList.remove("active");
                         backdrop.classList.remove("active");
                     }
                 };
-            // Si no se encuentran los elementos se muestra un error en consola
+            // If the elements are not found -> show an error in console
             } else {
                 console.error("Error: Modal o backdrop no encontrados.");
             }
