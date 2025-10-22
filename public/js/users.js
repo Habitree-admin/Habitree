@@ -29,7 +29,12 @@ modal.addEventListener("click", (e) => {
     }
 });
 
-// Mostrar mensajes en el pop-up
+/**
+ 
+ this shows a message in the modal popup
+ this displays success or error text briefly
+ *
+ */
 function showMessage(msg, isError = false) {
     const msgDiv = document.getElementById("form-message");
     msgDiv.textContent = msg;
@@ -38,12 +43,12 @@ function showMessage(msg, isError = false) {
     setTimeout(() => { msgDiv.style.display = "none"; }, 3000);
 }
 
-// Abrir modal en modo edición al hacer clic en 'Manage'
+// Open modal in edit mode on 'Manage' click
 document.querySelectorAll(".manage-user-btn").forEach(btn => {
     btn.addEventListener("click", function(e) {
         const row = e.target.closest("tr");
         const userId = row.getAttribute("data-id");
-        // Obtener datos del usuario por AJAX
+        // Get user data via fetch
         fetch(`/users/${userId}`)
             .then(res => res.json())
             .then(user => {
@@ -60,7 +65,7 @@ document.querySelectorAll(".manage-user-btn").forEach(btn => {
                 document.getElementById("id-readonly-msg").style.display = "inline";
                 document.getElementById("delete-btn").style.display = "inline-block";
                 document.getElementById("add-edit-btn").textContent = "Edit";
-                // Mostrar el botón de borrar dentro del modal
+                // show delete button inside modal
                 const deleteBtn = document.getElementById("delete-btn");
                 deleteBtn.style.display = "inline-block";
                 deleteBtn.dataset.userId = userId;
@@ -72,7 +77,12 @@ document.querySelectorAll(".manage-user-btn").forEach(btn => {
     });
 });
 
-//Eliminar usuario 
+/**
+ 
+ this handler deletes a user from the UI
+ this posts to bd and shows message on success
+ *
+ */
 document.getElementById('delete-btn').addEventListener('click', function() {
     if (!confirm('¿Seguro que quieres eliminar este usuario?')) return;
     const userId = this.dataset.userId || currentUserId;
@@ -97,7 +107,13 @@ document.getElementById('delete-btn').addEventListener('click', function() {
     });
 });
 
-// Interceptar el submit en modo edición para enviar por AJAX
+/**
+ 
+ this handler submits user edits via ajax in edit mode
+ this prevents default and posts json
+ *
+ */
+// intercept submit in edit mode
 form.addEventListener("submit", async function (e) {
     const submitBtn = document.getElementById("add-edit-btn");
     submitBtn.disabled = true;
@@ -176,13 +192,11 @@ function filterUsers() {
             row.style.display = "none";
         }
     });
-    // Ocultar/mostrar mensaje de no encontrado
     if (!found) {
         noUserFoundMsg.style.display = "block";
     } else {
         noUserFoundMsg.style.display = "none";
     }
-    // Ocultar la fila de "No hay usuarios registrados" si hay búsqueda
     const noUsersRow = usersTableBody.querySelector("tr.no-users-row");
     if (noUsersRow) {
         noUsersRow.style.display = searchValue === "" ? "" : "none";

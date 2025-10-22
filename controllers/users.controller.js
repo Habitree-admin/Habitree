@@ -33,7 +33,7 @@ exports.getUsers = async (req, res) => {
     }
 };
 
-// Obtener usuario por ID (para edición)
+// Obtener usuario por ID
 exports.getUserById = async (req, res) => {
     try {
         const [rows] = await Usuario.fetchById(req.params.id);
@@ -46,9 +46,15 @@ exports.getUserById = async (req, res) => {
     }
 };
 
-// Editar usuario existente
+/**
+ 
+ this function updates a user in the application
+ this function validates email and check changes to the db
+*
+ */
 exports.editUser = async (req, res) => {
     try {
+        // Read user ID and updated fields from the request
         const id = req.params.id;
         const data = {
             name: req.body.name,
@@ -56,17 +62,18 @@ exports.editUser = async (req, res) => {
             gender: req.body.gender,
             dateOfBirth: req.body.dateOfBirth
         };
-
-        // Validar si el correo ya existe en otro usuario
+        // Check if provided email already exists for another user
         const [existingEmailRows] = await Usuario.checkEmailExists(data.email, id);
         if (existingEmailRows.length > 0) {
             return res.status(400).json({ success: false, message: 'El correo ya existe, elige otro.' });
         }
-
         const result = await Usuario.update(id, data);
+
         if (result[0].affectedRows === 0) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
+
+        // Return success response
         res.json({ success: true, message: 'User updated successfully' });
     } catch (err) {
         res.status(500).json({ success: false, message: 'Error updating user' });
@@ -150,9 +157,15 @@ exports.postUsers = async (req, res) => {
     }
 };
 
-// Borrar usuario (borrado lógico)
+/**
+ 
+ this function soft-deletes a user
+ this function marks the user deleted and desactivate sessions
+*
+ */
 exports.deleteUser = async (req, res) => {
     try {
+        // Read user ID and perform logical delete
         const id = req.params.id;
         const [result] = await Usuario.softDelete(id);
         const affected = result && result.affectedRows ? result.affectedRows : 0;
@@ -160,6 +173,7 @@ exports.deleteUser = async (req, res) => {
         if (affected === 0) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
+
         // Invalidate any active sessions for this user
         try {
             const sessionStore = req.sessionStore;
@@ -168,17 +182,15 @@ exports.deleteUser = async (req, res) => {
                     if (err) {
                         console.error('Error listing sessions:', err);
                     } else if (sessions) {
-                        // sessions may be an object map (sid -> session) or an array depending on store
                         const iterate = (entries) => {
                             for (const sid in entries) {
                                 if (!Object.prototype.hasOwnProperty.call(entries, sid)) continue;
                                 let sess = entries[sid];
                                 try {
-                                    // Some stores return the session as a JSON string
                                     if (typeof sess === 'string') sess = JSON.parse(sess);
                                 } catch (parseErr) {
-                                    // ignore parse error and continue
                                 }
+                                // If session belongs to deleted user, destroy it
                                 if (sess && String(sess.idUsuario) === String(id)) {
                                     sessionStore.destroy(sid, (destroyErr) => {
                                         if (destroyErr) console.error('Error destroying session', sid, destroyErr);
@@ -210,7 +222,12 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
-// Logout handler: destroy current session and redirect to login
+/**
+ 
+ this function logs out the current user
+ this destroys the session, clears the cookie, and redirects to login
+*
+ */
 exports.logout = (req, res) => {
     try {
         req.session.destroy((err) => {
