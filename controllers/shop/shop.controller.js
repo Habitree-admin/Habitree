@@ -5,7 +5,7 @@ const upload = require('../../config/multer.config');
 const AWS = require('aws-sdk');
 const Item = require('../../models/shop/shop.model');
 
-// Configurar AWS S3
+// Configure AWS S3
 const AWS_BUCKET = process.env.AWS_BUCKET;
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
@@ -397,11 +397,19 @@ exports.postUpdateItem = async (req, res) => {
     }
   });
 };
+
+/**
+ * 
+ * This function change the state of an item to activate or deactivate
+ * 
+ * This function manage the request to change the state of an item and send the response
+ *  
+ */
 exports.toggleItemState = async (req, res) => {
   const { id } = req.body;
 
   try {
-    // Obtener el estado actual del item
+    //Obtain the state of the item
     const [rows] = await Item.getStatus(Number(id));
 
     if (rows.length === 0) {
@@ -414,11 +422,11 @@ exports.toggleItemState = async (req, res) => {
     let actionMessage;
 
     if (currentState === 1) {
-      // Si está activo, desactivarlo
+      // If it is active, deactivate it
       [result] = await Item.deactivate(Number(id));
       actionMessage = 'Item desactivado correctamente';
     } else {
-      // Si está inactivo, activarlo
+      // If it is inactive, activate it
       [result] = await Item.activate(Number(id));
       actionMessage = 'Item activado correctamente';
     }

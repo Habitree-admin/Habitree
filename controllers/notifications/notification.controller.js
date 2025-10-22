@@ -14,18 +14,19 @@ exports.getNotifications = async (req, res) => {
     });
 };
 
+// Gets the add notification modal
 exports.getAddNotification = (req, res) => {
-    // Renderizado del formulario de Add Notification
-    // Guarda el token generado en la variable csrfToken y se lo pasa a la vista
+    //Render the view for adding a new notification
+    //Save the CSRF token to include it in the form for security
     res.render('notifications/addNotifications', { csrfToken: req.csrfToken() });
 }
 
 
-// Nuevo endpoint para enviar notificación por canal (topic)
+//New endpoint to send notification by channel (topic)
 exports.sendPushNotification = async (req, res) => {
     const { canal, titulo, mensaje } = req.body;
     try {
-        // Envía la notificación por FCM topic
+        // Send the notification by FCM topic
         await sendNotificationToTopic(canal, titulo, mensaje);
         res.status(200).json({ success: true, message: 'Notificación enviada por canal' });
     } catch (err) {
@@ -35,19 +36,19 @@ exports.sendPushNotification = async (req, res) => {
 };
 
 
-// Crear notificación en la base de datos y envia
+// Make the notification in the database and send it
 exports.createNotification = async (req, res) => {
     const { canal, titulo, mensaje, category } = req.body;
     try {
-        // Guarda la notificación en la base de datos con los nuevos campos
+        // Save the notification in the database with the new fields
         await Notification.create(titulo, mensaje, canal, category);
         console.log('Success: Notificación creada en la base de datos');
-        
-        // Envía la notificación 
+
+        // Send the notification
         await sendNotificationToTopic(canal, titulo, mensaje);
         console.log('Success: Notificación enviada por FCM');
-        
-        // Redirige a la lista de notificaciones
+
+        // Redirect to the notifications list
         res.redirect('/notifications');
     } catch (err) {
         console.error('Error al crear/enviar notificación:', err);
@@ -68,7 +69,7 @@ exports.getNotificationEditor = async (req, res) => {
 
         const notification = rows[0];
 
-        // Pasa todos los campos incluyendo titulo y canal
+        // Pass all fields including title and channel
         res.render('notifications/editNotifications', {
             id: notification.IDNotification,
             titulo: notification.titulo,
@@ -84,12 +85,13 @@ exports.getNotificationEditor = async (req, res) => {
     }
 };
 
+// Make the POST request to add a new notification
 exports.postAddNotification = async (req, res) => {
     const { titulo, mensaje, canal, category } = req.body;
     try {
-        // Llama a la función Add del model con los nuevos campos
+        // Call the model function with the new fields
         await Notification.add(titulo, mensaje, canal, category);
-        // Redirige a la lista de notificaciones
+        // Redirect to the notifications list
         res.redirect('/notifications');
     } catch (error) {
         console.error(error);
@@ -99,13 +101,13 @@ exports.postAddNotification = async (req, res) => {
 
 exports.postDelete = (req, res) => {
     const { id, currentState } = req.body;
-    
-    // Si el estado actual es 'deactivate' (es decir, está activo), lo cambia a 0.
-    // Si el estado actual es 'activate' (es decir, está inactivo), lo cambia a 1.
+
+    // If the current state is 'deactivate' (i.e., it is active), change it to 0.
+    // If the current state is 'activate' (i.e., it is inactive), change it to 1.
     const newIsActive = currentState === 'deactivate' ? 0 : 1;
 
     try {
-        // Llama a la función del modelo con el nuevo valor numérico
+        // Call the model function with the new numeric value
         Notification.updateIsActive(id, newIsActive);
         
         res.redirect('/notifications');
