@@ -11,9 +11,16 @@ module.exports = class Item{
         this.price = price; 
         this.image_name = image_name;
     } 
- 
-//Save the registration of an item
 
+
+    /**
+     * 
+     * This function saves an item to the database with its
+     * image name
+     * 
+     * This function returns the affected rows in the DB
+     * 
+     */
     save(){
  
         return db.execute(
