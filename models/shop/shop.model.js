@@ -12,8 +12,15 @@ module.exports = class Item{
         this.image_name = image_name;
     } 
 
-//Guardar el registro de una mision 
 
+    /**
+     * 
+     * This function saves an item to the database with its
+     * image name
+     * 
+     * This function returns the affected rows in the DB
+     * 
+     */
     save(){
  
         return db.execute(

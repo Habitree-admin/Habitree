@@ -1,11 +1,10 @@
-// controllers/shop/shop.controller.js
 const path = require('path');
 const fs = require('fs');
 const upload = require('../../config/multer.config');
 const AWS = require('aws-sdk');
 const Item = require('../../models/shop/shop.model');
 
-// Configurar AWS S3
+// Configure AWS S3 sdk
 const AWS_BUCKET = process.env.AWS_BUCKET;
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
@@ -20,6 +19,16 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 
+
+/**
+ * 
+ * This function generates a signed url to access the 
+ * content of the image
+ * 
+ * generatedSignedUrls function returns a link via the s3 sdk
+ * to access the image content
+ * 
+ */
 async function generateSignedUrls(items) {
   return await Promise.all(items.map(async (item) => {
     const params = {
@@ -30,7 +39,7 @@ async function generateSignedUrls(items) {
     const signedUrl = s3.getSignedUrl('getObject', params);
     return {
       ...item,
-      id: item.IDItem,       // <- alias consistente para el frontend
+      id: item.IDItem,       // add the image link to the items array
       imageUrl: signedUrl
     };
   }));
@@ -108,6 +117,16 @@ exports.getFilterOptions = async (req, res) => {
     });
   }
 };
+
+/**
+ * 
+ * This function gets a file from the s3 bucket
+ * through a get petition in the shop ropute
+ * 
+ * generatedSignedUrls function returns an image file to 
+ * the shop route
+ * 
+ */
 exports.getBucketFile = async(req, res, next) => {
     const filename = req.params.file;
     console.log('========== GET BUCKET FILE ==========');
@@ -145,14 +164,21 @@ exports.getBucketFile = async(req, res, next) => {
     });
 };
 
-// Generar URL firmada (signed URL) para acceso temporal
+/**
+ * 
+ * This function getsthe signed url from the image of the bucket
+ * 
+ * getBucketFileUrl function returns an url to access to the 
+ * image content
+ * 
+ */
 exports.getBucketFileUrl = async(req, res, next) => {
     const filename = req.params.file;
     
     const params = {
         Bucket: AWS_BUCKET,
         Key: filename,
-        Expires: 3600 // URL válida por 1 hora
+        Expires: 3600 // signed url expires in an hour
     };
     
     try {
@@ -172,11 +198,19 @@ exports.getBucketFileUrl = async(req, res, next) => {
     }
 };
 
+/**
+ * 
+ * This function handles the POST method from the /shop route
+ * 
+ * postItem function add an image to the data base and 
+ * uploads the selected image to the bucket
+ * 
+ */
 exports.postItem = async (req, res, next) => {
-  console.log("Cargando el archivo");
 
   const uploadMiddleware = upload.array('file', 1);
 
+  //uploadMiddleware handles the multer 
   uploadMiddleware(req, res, async function (err) {
     if (err) {
       console.error("❌ Error en multer:", err);
@@ -185,9 +219,6 @@ exports.postItem = async (req, res, next) => {
         msg: "Error uploading file."
       });
     }
-
-    console.log('Body:', req.body);
-    console.log('Files:', req.files);
 
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({
@@ -213,12 +244,12 @@ exports.postItem = async (req, res, next) => {
       const s3Result = await s3.upload(params).promise();
       console.log(`Archivo subido exitosamente a S3: ${s3Result.Location}`);
 
-      // Eliminar el archivo local
+      // delete local file
       fs.unlink(filePath, (unlinkErr) => {
         if (unlinkErr) console.error("No se pudo borrar archivo local:", unlinkErr);
       });
 
-      // Guardar en la base de datos
+      // add item to the DB
       const addItem = new Item(
         req.body.name,
         req.body.state,
@@ -230,7 +261,6 @@ exports.postItem = async (req, res, next) => {
       await addItem.save();
       console.log("Item guardado en base de datos");
 
-      // Redirigir al finalizar todo
       return res.json({
         success: true,
         msg: "Item agregado exitosamente",
@@ -238,7 +268,7 @@ exports.postItem = async (req, res, next) => {
       });
 
     } catch (error) {
-      console.error("❌ Error en postItem:", error);
+      console.error("Error en postItem:", error);
       return res.status(500).json({
         code: 500,
         msg: "Error processing request",
