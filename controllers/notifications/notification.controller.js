@@ -123,6 +123,7 @@ exports.postDelete = (req, res) => {
         // Call the model function with the new state
         Notification.updateIsActive(id, newIsActive);
         
+        // Reditect to notifications page after successful changes
         res.redirect('/notifications');
         
         console.log(`Success: Notificación ${id} actualizada a isActive = ${newIsActive}`);
