@@ -29,7 +29,9 @@ exports.getShopItemsForUser = async (id) => {
     LEFT JOIN userShop us 
            ON s.IDItem = us.IDItem 
           AND us.IDUser = ?
+    WHERE s.state = 1
   `;
+  
   const [rows] = await db.execute(query, [id]);
 
   // add signedUrls to items to consume them in the mobile application
