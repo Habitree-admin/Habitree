@@ -4,16 +4,16 @@ const crypto = require("crypto");
 const Usuario = require("../models/user.model");
 const nodemailer = require("nodemailer")
 
-// Configurar el transporter de Nodemailer, es una cuenta de gmail con contraseña de app
+// Configure the Nodemailer transporter, it is a Gmail account with an app password.
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-        user: process.env.EMAIL_USER, // tu correo
-        pass: process.env.EMAIL_PASS  // tu contraseña de aplicación
+        user: process.env.EMAIL_USER, // email
+        pass: process.env.EMAIL_PASS  // password
     }
 });
 
-// Función para generar una contraseña aleatoria segura
+// Function to generate a secure random password
 function generateRandomPassword(length = 12) {
     return crypto.randomBytes(length).toString("base64url").slice(0, length);      
 }
@@ -33,7 +33,7 @@ exports.getUsers = async (req, res) => {
     }
 };
 
-// Obtener usuario por ID
+// get user by ID
 exports.getUserById = async (req, res) => {
     try {
         const [rows] = await Usuario.fetchById(req.params.id);
@@ -98,12 +98,12 @@ exports.postUsers = async (req, res) => {
             });
         }
 
-        // Generar contraseña aleatoria o usar la del body
+        // Generate random password or use the one in the body
         const passwordPlano = generateRandomPassword(12);
         // Hashear
         const hashedPassword = await bcrypt.hash(passwordPlano, 12);
 
-        // Crear usuario en la BD
+        //Create user in the DB
         await Usuario.save({
             name: req.body.name,
             email: req.body.email,
@@ -133,7 +133,7 @@ exports.postUsers = async (req, res) => {
             `,
         };
 
-        // Enviar correo
+        // Send email
         await transporter.sendMail(mailOptions);
         console.log("Correo enviado a:", userEmail);
 
