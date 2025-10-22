@@ -11,22 +11,31 @@ module.exports = class Usuario {
         this.dateOfBirth = my_dateOfBirth;
     }
 
+
+    /**
+     * 
+     * This function allows to fetch an individual user by its email
+     * to use this function in the login
+     * 
+     * This function returns the user data
+     * 
+     */
     static async fetchOne(email) {
        
         const emailToFind = email.toLowerCase();
         const [rows] = await db.execute("SELECT * FROM user WHERE deleted = 0");
         
-        // Buscar el usuario con el email coincidente
+        //Search matching email
         const matchedUser = rows.find(row => {
             const decryptedEmail = decrypt(row.email);
             return decryptedEmail && decryptedEmail.toLowerCase() === emailToFind;
         });
         
         if (!matchedUser) {
-            return [[]]; // No encontrado
+            return [[]];  //didnt find a user
         }
         
-        // Desencriptar y retornar
+        // Decrypt and return data 
         return [[decryptUserData(matchedUser)]];
     }
 

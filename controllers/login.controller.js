@@ -3,6 +3,11 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user.model');
 const { decryptUserData } = require('../util/encryption'); // Ensure correct path
 
+/**
+ * This function renders the login page with CSRF protection.
+ * 
+ * getLogin Displays the login view and shows any error message if it happened.
+ */
 exports.getLogin = (req, res) => {
   const failed = req.session.failed || false;
   res.render('../views/login', {
@@ -11,6 +16,13 @@ exports.getLogin = (req, res) => {
   });
 };
 
+
+/**
+ * This function handles the user login.
+ * 
+ * postLogin basically performs the POST petition
+ * and validates the user credentials, and starts the session
+ */
 exports.postLogin = async (req, res) => {
   try {
     // Search user by email
@@ -40,10 +52,10 @@ exports.postLogin = async (req, res) => {
 
     // Save decrypted data in session
     req.session.idUsuario = user.IDUser;
-    req.session.name = user.name; // Already decrypted
-    req.session.email = user.email; // Already decrypted
-    req.session.gender = user.gender; // Already decrypted
-    req.session.dateOfBirth = user.dateOfBirth; // Already decrypted
+    req.session.name = user.name;
+    req.session.email = user.email;
+    req.session.gender = user.gender;
+    req.session.dateOfBirth = user.dateOfBirth;
     req.session.isLoggedIn = true;
 
     // Save session and redirect

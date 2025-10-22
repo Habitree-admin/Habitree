@@ -1,6 +1,6 @@
 const db = require('../../util/database');
 
-// Clase Item
+// Item Class
 module.exports = class Item{
 
     constructor(name, state, category, price, image_name){
@@ -11,8 +11,8 @@ module.exports = class Item{
         this.price = price; 
         this.image_name = image_name;
     } 
-
-//Guardar el registro de una mision 
+ 
+//Save the registration of an item
 
     save(){
  
@@ -22,12 +22,12 @@ module.exports = class Item{
         );
     }
 
-        // Obtener todos los items
+    // Obtain all items
     static fetchAll() {
         return db.execute('SELECT * FROM shop')
     }
 
-    // Filtrar por State
+    // Filter by State
     static fetchByState(state) {
         return db.execute(
             'SELECT * FROM shop WHERE state = ?',
@@ -35,7 +35,7 @@ module.exports = class Item{
         );
     }
 
-    // Filtrar por Category
+    // Filter by Category
     static fetchByCategory(category) {
         return db.execute(
             'SELECT * FROM shop WHERE category = ?',
@@ -51,7 +51,7 @@ module.exports = class Item{
         );
     }
 
-    // Filtro 
+    // Filter
     static fetchFiltered(filters = {}) {
         let query = 'SELECT * FROM shop WHERE 1=1';
         const params = [];
@@ -80,26 +80,26 @@ module.exports = class Item{
         return db.execute(query, params);
     }
 
-    // Obtener categorías únicas
+    // Obtain unique categories
     static getUniqueCategories() {
         return db.execute(
             'SELECT DISTINCT category FROM shop ORDER BY category'
         );
     }
 
-    // Obtener estados únicos
+    // Obtain unique states
     static getUniqueStates() {
         return db.execute('SELECT DISTINCT state FROM shop ORDER BY state');
     }
 
-    // Obtener rango de precios
+    // Obtain the price range
     static getPriceRange() {
         return db.execute(
             'SELECT MIN(price) as minPrice, MAX(price) as maxPrice FROM shop'
         );
     }
 
-    // Obtener un item por ID
+    // Obtain the item by ID
     static fetchById(id) {
     return db.execute('SELECT * FROM shop WHERE IDItem = ?', [id]); 
   }
@@ -113,7 +113,7 @@ module.exports = class Item{
         );
     }
 
-    // Para que no cambie el image_name si no se sube nueva imagen
+    // For not to change the image_name if no new image is uploaded
     static updateWithoutImage(id, { name, state, category, price }) {
     return db.execute(
         `UPDATE shop
@@ -123,15 +123,17 @@ module.exports = class Item{
     );
     }
 
-
+    // Obtain the status of an item
     static getStatus(id) {
         return db.execute('SELECT state FROM shop WHERE IDItem = ?', [id]);
     }
 
+    // Activate an item
     static activate(id) {
         return db.execute('UPDATE shop SET state = 1 WHERE IDItem = ?', [id]);
     }
 
+    // Deactivate an item
     static deactivate(id) {
         return db.execute('UPDATE shop SET state = 0 WHERE IDItem = ?', [id]);
     }

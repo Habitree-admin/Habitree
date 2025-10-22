@@ -1,13 +1,19 @@
 const tokenService = require('../services/token.service');
 
+/**
+ * This function validates JWT access token in a request header
+ * 
+ * authMiddleware verifies Bearer token and attaches decoded user data to request or returns 401 error
+ */
 const authMiddleware = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
 
+    // check request header
     if (!token) {
         return res.status(401).json({
             success: false,
-            message: 'Acceso denegado: Token no proporcionado',
+            message: 'Access denied: Token not provided',
         });
     }
 
@@ -18,7 +24,7 @@ const authMiddleware = async (req, res, next) => {
     } catch (err) {
         res.status(401).json({
             success: false,
-            message: 'Token inválido o expirado',
+            message: 'Invalid or expired token',
             details: err.message,
         });
     }

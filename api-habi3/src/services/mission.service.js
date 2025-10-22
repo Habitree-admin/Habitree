@@ -1,5 +1,11 @@
 const db = require("../../../util/database");
 
+/**
+ * This function gets all available missions with the rewards related to the mission
+ * 
+ * getAllMissions returns all the missions with a left join to show the missions as completed or uncompleted for the user with their
+ * related reward
+ */
 const getAllMissions = async (userId) => {
   const [rows] = await db.execute(
     `
@@ -45,15 +51,12 @@ const getAllMissions = async (userId) => {
     [userId]
   );
 
-  console.log('Raw rows from DB:', rows.length); // Debug
-
-  // Objeto para agrupar misiones
+  // object to group missions
   const missionsMap = {};
 
   rows.forEach(row => {
     const missionId = row.IDMission;
     
-    // Si la misión no existe, la creamos
     if (!missionsMap[missionId]) {
       missionsMap[missionId] = {
         IDMission: row.IDMission,
@@ -65,9 +68,9 @@ const getAllMissions = async (userId) => {
       };
     }
 
-    // Solo procesamos rewards que existan
+    // adds rewards to the response
     if (row.IDReward) {
-      // Verificamos si este reward ya está en la lista
+      
       const existingReward = missionsMap[missionId].rewards.find(r => r.IDReward === row.IDReward);
       
       if (!existingReward) {
@@ -100,12 +103,15 @@ const getAllMissions = async (userId) => {
   });
 
   const result = Object.values(missionsMap);
-  console.log('Final result length:', result.length); // Debug
-  console.log('Sample mission:', JSON.stringify(result[0], null, 2)); // Debug
   
   return result;
 };
 
+/**
+ * This function gets all user missions with their evidence and notifications
+ * 
+ * getUserMission returns completed missions by user
+ */
 const getUserMission = async() => {
     const [rows] = await db.execute(`
 SELECT 
@@ -135,6 +141,11 @@ LEFT JOIN rewards r ON mr.IDReward = r.IDReward;
     return rows; 
 };
 
+/**
+ * This function gets all missions from a user with its evidence and notification
+ * 
+ * getUserMissions returns user missions filtered by user ID including rewards, evidence and notification details
+ */
 const getUserMissions = async (userId) => {
   const [rows] = await db.execute(
     `
@@ -168,53 +179,59 @@ const getUserMissions = async (userId) => {
   return rows;
 };
 
+/**
+ * This function marks a mission as complete and makes all the changes required to complete a mission
+ * such as adding the xp, and coins to the user, also giving the rewards to the user
+ * 
+ * postCompleteMissionUser returns if the mission got completed by the user and adds to the response how many xp and coins the user got, plus the rewards he got
+ */
 const postCompleteMissionUser = async (IDUser, IDMission) => {
   const connection = await db.getConnection();
   
   try {
     await connection.beginTransaction();
 
-    // 1. Verificar si el usuario ya completó esta misión
+    // checks if user completed the mission
     const [existingMission] = await connection.execute(
       "SELECT * FROM userMissions WHERE IDUser = ? AND IDMission = ?",
       [IDUser, IDMission]
     );
 
     if (existingMission.length > 0) {
-      throw new Error("El usuario ya completó esta misión");
+      throw new Error("The user aalready completed the mission");
     }
 
-    // 2. Verificar que la misión existe y obtener su experiencia
+    // get the experience from the mission
     const [mission] = await connection.execute(
       "SELECT experience, available FROM mission WHERE IDMission = ?",
       [IDMission]
     );
 
     if (mission.length === 0) {
-      throw new Error("La misión no existe");
+      throw new Error("the mission doesnt exists");
     }
 
     if (!mission[0].available) {
-      throw new Error("La misión no está disponible");
+      throw new Error("Mission is not available");
     }
 
-    // 3. Verificar que el usuario existe
+    // gets user coins
     const [user] = await connection.execute(
       "SELECT IDUser, coins FROM user WHERE IDUser = ?",
       [IDUser]
     );
 
     if (user.length === 0) {
-      throw new Error("El usuario no existe");
+      throw new Error("Cannot get user");
     }
 
-    // 4. Insertar registro en userMissions (status = 1 = completed)
+    // Mark the mission as completed in userMissions (status = 1 === completed)
     await connection.execute(
       "INSERT INTO userMissions (IDUser, IDMission, status) VALUES (?, ?, 1)",
       [IDUser, IDMission]
     );
 
-    // 5. Obtener todas las rewards de la misión
+    // obtain all the rewards related to the mission
     const [rewards] = await connection.execute(
       `SELECT r.IDReward, r.name, r.description, r.type, r.value
        FROM rewards r
@@ -223,13 +240,13 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
       [IDMission]
     );
 
-    // 6. Insertar rewards en userRewards y sumar coins si es monetary
+    // update the rewards obtained from the mission to the userRewards table
     const userRewards = [];
     let totalCoinsAdded = 0;
 
     for (const reward of rewards) {
       try {
-        // Insertar en userRewards
+
         const [insertResult] = await connection.execute(
           "INSERT INTO userRewards (IDUser, IDReward) VALUES (?, ?)",
           [IDUser, reward.IDReward]
@@ -244,11 +261,10 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
           value: reward.value
         });
 
-        // Normalizar el tipo para comparación
         const rewardType = reward.type ? String(reward.type).trim().toLowerCase() : '';
         const rewardValue = parseInt(reward.value) || 0;
 
-        // Si la recompensa es de tipo "monetary", sumar el value a las coins del usuario
+        // if the reward is monetary adds the coins to the user
         if (rewardType === "monetary" && rewardValue > 0) {
           await connection.execute(
             "UPDATE user SET coins = coins + ? WHERE IDUser = ?",
@@ -259,17 +275,18 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
         }
 
       } catch (rewardError) {
-        // Si hay error (por ejemplo, reward duplicada), continúa con la siguiente
+        
         continue;
       }
     }
 
-    // 7. Verificar si el usuario tiene un árbol, si no, crearlo
+    // gets user tree
     const [existingTree] = await connection.execute(
       "SELECT IDTree, level FROM tree WHERE IDUser = ?",
       [IDUser]
     );
 
+    // adds xp to user tree
     if (existingTree.length === 0) {
       await connection.execute(
         "INSERT INTO tree (IDUser, level) VALUES (?, ?)",
@@ -282,13 +299,13 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
       );
     }
 
-    // 8. Obtener el nuevo nivel del árbol
+    // get updated xp
     const [updatedTree] = await connection.execute(
       "SELECT level FROM tree WHERE IDUser = ?",
       [IDUser]
     );
 
-    // 9. Obtener las coins actualizadas del usuario
+    // get updated coins
     const [updatedUser] = await connection.execute(
       "SELECT coins FROM user WHERE IDUser = ?",
       [IDUser]
@@ -321,5 +338,3 @@ const postCompleteMissionUser = async (IDUser, IDMission) => {
 
 
 module.exports = { getAllMissions,getUserMission, postCompleteMissionUser, getUserMissions };
-
-
