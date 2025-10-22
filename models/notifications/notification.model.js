@@ -2,7 +2,7 @@
 const db = require('../../util/database');
 // eslint-disable-next-line no-undef
 module.exports = class notification {
-    //Constructor de la clase. Sirve para crear un nuevo objeto, y en él se definen las propiedades del modelo
+    //Constructor of the class. It is used to create a new object, work with the properties of the model are defined
     constructor(IDNotification, dateCreated, description, category, isActive) {
         this.IDNotification = IDNotification;
         this.dateCreated = dateCreated;
@@ -19,14 +19,15 @@ module.exports = class notification {
         return db.execute('SELECT * FROM notification');
     }
     
-    //Funcion para añadir una nueva notificación tomando titulo, mensaje, canal y categoria del formulario
+    //Function to add a new notification using a title, message, channel and category from the form
     static add(titulo, mensaje, canal, category) {
         return db.execute(`INSERT INTO notification
             (dateCreated, titulo, description, canal, category, isActive)
             VALUES (NOW(), ?, ?, ?, ?, 1)`,
             [titulo, mensaje, canal, category]);
     }
-    
+
+    //Function to update the isActive status of a notification
     static updateIsActive(id, newIsActive) {
         return db.execute(`UPDATE notification
              SET isActive = ?
@@ -34,6 +35,7 @@ module.exports = class notification {
             [newIsActive, id]);
     }
     
+    //Function to update all the information of a notification
     static update(titulo, mensaje, canal, category, id) {
   return db.execute(
     `UPDATE notification
@@ -43,12 +45,12 @@ module.exports = class notification {
   );
 }
 
-    
+    //Function to fetch a notification by the ID
     static fetchById(id) {
         return db.execute('SELECT * FROM notification WHERE IDNotification = ?', [id]);
     }
     
-    // Método para crear una nueva notificación (actualizado con los nuevos campos)
+    //Function to create a new notification (updated with the new fields)
     static create(titulo, mensaje, canal, category) {
         return db.execute(
             'INSERT INTO notification (dateCreated, titulo, description, canal, category, isActive) VALUES (NOW(), ?, ?, ?, ?, 1)',
