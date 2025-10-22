@@ -1,12 +1,23 @@
 const Notification = require('../../models/notifications/notification.model');
 const { sendNotificationToTopic } = require('../../util/fcm');
 
+/**
+
+this function allows administrators to view all created notifications in the web panel of the application
+
+getNotifications retrieves all notifications from database and renders them in the administrative panel view
+*
+ */
 
 /**
  * Retrieves all notifications from the database and renders the notifications view.
  */
 exports.getNotifications = async (req, res) => {
+    
+    // fetch all notifications from database
     const notifications = await Notification.fetchAll();
+    
+    // render notifications view with data and CSRF token
     res.render('notifications/notifications', { 
         title: 'Notifications', 
         notifications,
@@ -14,20 +25,40 @@ exports.getNotifications = async (req, res) => {
     });
 };
 
-// Gets the add notification modal
+/**
+ 
+This function displays the form to create new notifications from the web panel of the application
+
+getAddNotification renders the add notification form view with CSRF token
+*
+ */
+
 exports.getAddNotification = (req, res) => {
-    //Render the view for adding a new notification
-    //Save the CSRF token to include it in the form for security
+
+    // render add notification form with CSRF token for security
     res.render('notifications/addNotifications', { csrfToken: req.csrfToken() });
 }
 
 
-//New endpoint to send notification by channel (topic)
+/**
+ 
+This function allows sending instant push notifications to users by channel without saving to database
+
+sendPushNotification sends notifications directly via Firebase FCM by topic without persistence
+*
+ */
+
+// send instant push notification via FCM topic
 exports.sendPushNotification = async (req, res) => {
+    
+    // extract notification data from request body
     const { canal, titulo, mensaje } = req.body;
     try {
-        // Send the notification by FCM topic
+        
+        // send notification via Firebase FCM topic
         await sendNotificationToTopic(canal, titulo, mensaje);
+        
+        // return success response
         res.status(200).json({ success: true, message: 'Notificación enviada por canal' });
     } catch (err) {
         console.error('Error al enviar push:', err);
@@ -36,19 +67,30 @@ exports.sendPushNotification = async (req, res) => {
 };
 
 
-// Make the notification in the database and send it
+/**
+ 
+This function allows creating and sending complete notifications from the web panel saving them to database
+
+createNotification saves notification to database and sends it via Firebase FCM by topic
+*
+ */
+
+// create notification in database and send via FCM
 exports.createNotification = async (req, res) => {
+    
+    // extract notification data from request body
     const { canal, titulo, mensaje, category } = req.body;
     try {
-        // Save the notification in the database with the new fields
+        
+        // save notification to database with all fields
         await Notification.create(titulo, mensaje, canal, category);
-        console.log('Success: Notificación creada en la base de datos');
-
-        // Send the notification
+        console.log('Success: Notification created in database');
+        
+        // send notification via Firebase FCM topic
         await sendNotificationToTopic(canal, titulo, mensaje);
-        console.log('Success: Notificación enviada por FCM');
-
-        // Redirect to the notifications list
+        console.log('Success: Notification sent via FCM');
+        
+        // redirect to notifications list
         res.redirect('/notifications');
     } catch (err) {
         console.error('Error al crear/enviar notificación:', err);
@@ -69,7 +111,7 @@ exports.getNotificationEditor = async (req, res) => {
 
         const notification = rows[0];
 
-        // Pass all fields including title and channel
+        // pass all fields including title and channel
         res.render('notifications/editNotifications', {
             id: notification.IDNotification,
             titulo: notification.titulo,
@@ -85,13 +127,23 @@ exports.getNotificationEditor = async (req, res) => {
     }
 };
 
-// Make the POST request to add a new notification
+/**
+ 
+This function processes the create notification form and saves them to database without sending
+
+postAddNotification handles post from form to create notifications only in database
+*
+ */
+
 exports.postAddNotification = async (req, res) => {
+    // extract notification data from form submission
     const { titulo, mensaje, canal, category } = req.body;
     try {
-        // Call the model function with the new fields
+
+        // save notification to database only (no FCM sending)
         await Notification.add(titulo, mensaje, canal, category);
-        // Redirect to the notifications list
+        
+        // Redirect to notifications list
         res.redirect('/notifications');
     } catch (error) {
         console.error(error);
@@ -101,13 +153,13 @@ exports.postAddNotification = async (req, res) => {
 
 exports.postDelete = (req, res) => {
     const { id, currentState } = req.body;
-
-    // If the current state is 'deactivate' (i.e., it is active), change it to 0.
-    // If the current state is 'activate' (i.e., it is inactive), change it to 1.
+    
+    // if current state is 'deactivate' it's active, change it to 0
+    // if current state is 'activate' it's inactive, change it to 1
     const newIsActive = currentState === 'deactivate' ? 0 : 1;
 
     try {
-        // Call the model function with the new numeric value
+        // call model function with new numeric value
         Notification.updateIsActive(id, newIsActive);
         
         res.redirect('/notifications');
@@ -120,15 +172,29 @@ exports.postDelete = (req, res) => {
     }
 };
 
+/**
+ 
+This function allows editing existing notifications and resending them to users
+
+postUpdate updates notification data in database and sends updated version via FCM
+*
+ */
+
 exports.postUpdate = async (req, res) => {
+  
+  // extract updated notification data from request
   const { id, canal, titulo, mensaje, category } = req.body;
   try {
+    
+    // update notification data in database
     await Notification.update(titulo, mensaje, canal, category, id);
-    console.log("Success update");
+    console.log("Success update");  
 
+    // send updated notification via Firebase FCM
     await sendNotificationToTopic(canal, titulo, mensaje);
     console.log("Success: Notificación enviada por FCM");
 
+    // redirect to notifications list
     res.redirect('/notifications');
   } catch (error) {
     console.error("Error al actualizar la notificación:", error);
