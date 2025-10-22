@@ -81,6 +81,12 @@ module.exports = class Usuario {
         }
     }
 
+    /**
+     * Fetch users from DB
+     * 
+     * This functions returns all the existing users info from
+     * users table in db
+     */
     static async fetchAll() {
         try {
             const [rows] = await db.execute(

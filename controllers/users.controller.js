@@ -28,7 +28,12 @@ function generateRandomPassword(length = 12) {
     return crypto.randomBytes(length).toString("base64url").slice(0, length);      
 }
 
-
+/**
+ * Gets users list
+ * 
+ * pass users list to the users view, if users not found, shows error.
+ * 
+ */
 exports.getUsers = async (req, res) => {
     try {
         const usuarios = await Usuario.fetchAll();
@@ -39,7 +44,7 @@ exports.getUsers = async (req, res) => {
         });
     } catch (err) {
         console.error(err);
-        res.status(500).send("Error al obtener usuarios");
+        res.status(500).send("Error getting users");
     }
 };
 
