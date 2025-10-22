@@ -1,10 +1,15 @@
+/*
+Handler when click to edit a league Open and populate the "Manage League" modal when a button is clicked.
+*/
+
 document.addEventListener("click", (event) => {
+    
     const manageBtn = event.target.closest(".manage-league-btn");
     if (!manageBtn) return;
 
     const fila = manageBtn.closest("tr");
     if (!fila) return;
-
+    // Extracts current league name and level from the rows
     const leagueName = fila.cells[1].textContent.trim();
     const leagueLevel = fila.cells[2].textContent.trim();
 
@@ -27,10 +32,10 @@ document.addEventListener("click", (event) => {
             document.getElementById("editLeagueName").value = leagueName;
             document.getElementById("editLeagueNameA2").value = leagueName;
             document.getElementById("editLeagueLevel").value = leagueLevel;
-
+            // show modal
             const modal = document.getElementById("manageLeagueModal");
             const backdrop = document.getElementById("backdrop");
-
+            // Activate modal and backdrop
             if (modal && backdrop) {
                 modal.classList.add("active");
                 backdrop.classList.add("active");
