@@ -4,16 +4,26 @@ const crypto = require("crypto");
 const Usuario = require("../models/user.model");
 const nodemailer = require("nodemailer")
 
-// Configure the Nodemailer transporter, it is a Gmail account with an app password.
+/**
+*  
+* This variable sets up the transporter to send an email
+* via the nodemailer api
+* 
+*/
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-        user: process.env.EMAIL_USER, // email
-        pass: process.env.EMAIL_PASS  // password
+        user: process.env.EMAIL_USER, // email thats going to send the email
+        pass: process.env.EMAIL_PASS  // email password requiered to send the email
     }
 });
 
-// Function to generate a secure random password
+/**
+*  
+* This function generates a random password to
+* send to the user thats going to get registered
+* 
+*/
 function generateRandomPassword(length = 12) {
     return crypto.randomBytes(length).toString("base64url").slice(0, length);      
 }
@@ -80,6 +90,12 @@ exports.editUser = async (req, res) => {
     }
 };
 
+/**
+ * 
+ * This function handles the POST method of the user route
+ * and sends an email to the user being registered with its
+ * credentials
+ */
 exports.postUsers = async (req, res) => {
     console.log("Datos recibidos en POST /users:", req.body);
 
@@ -98,12 +114,12 @@ exports.postUsers = async (req, res) => {
             });
         }
 
-        // Generate random password or use the one in the body
+        // Generates random password
         const passwordPlano = generateRandomPassword(12);
-        // Hashear
+        // Hashes the plain password
         const hashedPassword = await bcrypt.hash(passwordPlano, 12);
 
-        //Create user in the DB
+        // Saves the user
         await Usuario.save({
             name: req.body.name,
             email: req.body.email,
@@ -113,11 +129,11 @@ exports.postUsers = async (req, res) => {
         });
 
 
-        // Datos para el correo
+        // variables to send the email
         const userEmail = req.body.email;
         const userPassword = passwordPlano;
 
-        // Configurar el correo
+        // Sets up the emaill message
         const mailOptions = {
             from: `"Habitree App" <${process.env.EMAIL_USER}>`,
             to: userEmail,
@@ -133,12 +149,14 @@ exports.postUsers = async (req, res) => {
             `,
         };
 
-        // Send email
+        // sends email
         await transporter.sendMail(mailOptions);
         console.log("Correo enviado a:", userEmail);
 
         res.redirect('/users');
     } catch (err) {
+
+        //error handling
         console.error(err);
         if (err.code === 'DUPLICATE_EMAIL' || err.code === 'ER_DUP_ENTRY') {
             try {

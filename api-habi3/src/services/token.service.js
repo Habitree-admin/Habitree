@@ -8,6 +8,11 @@ const ACCESS_TOKEN_EXPIRES = process.env.ACCESS_TOKEN_EXPIRES;
 const REFRESH_TOKEN_EXPIRES = process.env.REFRESH_TOKEN_EXPIRES;
 const REFRESH_TOKEN_RENEWAL_THRESHOLD = parseInt(process.env.REFRESH_TOKEN_RENEWAL_THRESHOLD, 10);
 
+/**
+ * This function converts expiration string to seconds
+ * 
+ * parseExpirationToSeconds returns seconds from expiration format like '7d', '1h', '30m', '60s'
+ */
 const parseExpirationToSeconds = (expiration) => {
     const value = parseInt(expiration, 10);
     const unit = expiration.slice(-1);
@@ -20,6 +25,11 @@ const parseExpirationToSeconds = (expiration) => {
     }
 };
 
+/**
+ * This function generates a JWT access token
+ * 
+ * generateAccessToken returns signed JWT with user data and short expiration time
+ */
 const generateAccessToken = (user) => {
     return jwt.sign(
         { userId: user.userId, email: user.email },
@@ -28,6 +38,11 @@ const generateAccessToken = (user) => {
     );
 };
 
+/**
+ * This function generates a JWT refresh token
+ * 
+ * generateRefreshToken returns signed JWT with long expiration and stores it in database
+ */
 const generateRefreshToken = async (user) => {
     const refreshToken = jwt.sign(
         { userId: user.userId, email: user.email },
@@ -48,6 +63,11 @@ const generateRefreshToken = async (user) => {
     return { refreshToken, expiresAt };
 };
 
+/**
+ * This function verifies a JWT access token
+ * 
+ * verifyAccessToken returns decoded token data or throws error if invalid
+ */
 const verifyAccessToken = (token) => {
     try {
         return jwt.verify(token, ACCESS_TOKEN_SECRET);
@@ -56,6 +76,11 @@ const verifyAccessToken = (token) => {
     }
 };
 
+/**
+ * This function verifies a JWT refresh token
+ * 
+ * verifyRefreshToken returns decoded token data and expiration after validating against database
+ */
 const verifyRefreshToken = async (token) => {
     try {
         const decoded = jwt.verify(token, REFRESH_TOKEN_SECRET);
@@ -74,10 +99,20 @@ const verifyRefreshToken = async (token) => {
     }
 };
 
+/**
+ * This function invalidates a refresh token
+ * 
+ * invalidateRefreshToken removes token from database to prevent future use
+ */
 const invalidateRefreshToken = async (token) => {
     await db.execute('DELETE FROM refresh_tokens WHERE token = ?', [token]);
 };
 
+/**
+ * This function checks if refresh token should be renewed
+ * 
+ * shouldRenewRefreshToken returns true if token expires within renewal threshold time
+ */
 const shouldRenewRefreshToken = (expiresAt) => {
     const now = new Date();
     const timeLeft = (new Date(expiresAt) - now) / 1000;

@@ -374,7 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const id = btn.getAttribute('data-id');
       
-      if (!confirm('¿Deseas cambiar el estado de este producto?')) return;
+      if (!confirm('Do you want to change the status of this product?')) return;
 
       try {
         const res = await fetch('/shop/toggle', {

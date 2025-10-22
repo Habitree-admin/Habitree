@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const AWS = require("aws-sdk");
 const { encrypt, decrypt, encryptUserData, decryptUserData, decryptUsersArray } = require("../../../util/encryption");
 
+// aws sdk setup
 const AWS_BUCKET = process.env.AWS_BUCKET;
 const AWS_REGION = process.env.AWS_REGION;
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
@@ -17,25 +18,35 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 
+/**
+ * This function gets all users from database
+ * 
+ * getAllUsers returns all users with decrypted personal data
+ */
 const getAllUsers = async () => {
   const [rows] = await db.execute("SELECT * FROM user");
-  // Desencriptar todos los usuarios
+  // Decrypt all users
   return decryptUsersArray(rows);
 };
 
+/**
+ * This function logins a user with email and password
+ * 
+ * getLoginUser returns user data after validating encrypted email and hashed password
+ */
 const getLoginUser = async (email, password) => {
   const emailToFind = email.toLowerCase();
   
-  // 1. Obtener TODOS los usuarios
+  // gets users
   const [rows] = await db.execute(
     "SELECT IDUser, name AS name, email, gender, dateOfBirth, coins, password FROM user WHERE deleted = 0"
   );
 
   if (rows.length === 0) {
-    throw new Error("Usuario no encontrado");
+    throw new Error("User not found");
   }
 
-  // 2. Desencriptar cada email hasta encontrar coincidencia
+  // Decrypt email until finding a match
   let matchedUser = null;
   for (const row of rows) {
     const decryptedEmail = decrypt(row.email);
@@ -46,20 +57,20 @@ const getLoginUser = async (email, password) => {
   }
 
   if (!matchedUser) {
-    throw new Error("Usuario no encontrado");
+    throw new Error("User not found");
   }
 
-  // 3. Comparar contraseña con bcrypt
+  // Compare password with bcrypt
   const isMatch = await bcrypt.compare(password, matchedUser.password);
 
   if (!isMatch) {
-    throw new Error("Contraseña incorrecta");
+    throw new Error("Incorrect password");
   }
 
-  // 4. Desencriptar datos del usuario
+  // Decrypt user
   const user = decryptUserData(matchedUser);
 
-  // 5. Retornar datos del usuario (sin contraseña)
+  // Return user data
   return {
     userId: user.IDUser,
     name: user.name,
@@ -70,20 +81,25 @@ const getLoginUser = async (email, password) => {
   };
 };
 
+/**
+ * This function logins a user with google by its email
+ * 
+ * getLoginUserGoogle returns user data after validating encrypted email without password check
+ */
 const getLoginUserGoogle = async (email) => {
   try {
     const emailToFind = email.toLowerCase();
     
-    // Obtener TODOS los usuarios
+    // get users
     const [rows] = await db.execute(
       "SELECT IDUser, name, email, gender, dateOfBirth, coins FROM user WHERE deleted = 0"
     );
 
     if (rows.length === 0) {
-      throw new Error("Usuario no encontrado");
+      throw new Error("User not found");
     }
 
-    // Desencriptar cada email hasta encontrar coincidencia
+    // Decrypt email until finding a match
     let matchedUser = null;
     for (const row of rows) {
       const decryptedEmail = decrypt(row.email);
@@ -94,12 +110,13 @@ const getLoginUserGoogle = async (email) => {
     }
 
     if (!matchedUser) {
-      throw new Error("Usuario no encontrado");
+      throw new Error("User not found");
     }
 
-    // Desencriptar datos del usuario
+    // Decrypt user
     const user = decryptUserData(matchedUser);
 
+    // Return user data
     return {
       userId: user.IDUser,
       name: user.name,
@@ -109,11 +126,16 @@ const getLoginUserGoogle = async (email) => {
       coins: user.coins
     };
   } catch (error) {
-    console.error('Error en getLoginUserGoogle:', error.message);
+    console.error('Error in getLoginUserGoogle:', error.message);
     throw error;
   }
 };
 
+/**
+ * This function gets user stats
+ * 
+ * getStatsUser returns user coins and xp with user info
+ */
 const getStatsUser = async (id) => {
   const [rows] = await db.execute(
     `SELECT 
@@ -128,10 +150,15 @@ const getStatsUser = async (id) => {
     [id]
   );
   
-  // Desencriptar los datos
+  // Decrypt data
   return decryptUsersArray(rows);
 };
 
+/**
+ * This function registers a new user in the database
+ * 
+ * postSignupUser returns userId after encrypting personal data, hashing password
+ */
 const postSignupUser = async (name, email, gender, dateOfBirth, coins, password) => {
   try {
     let hashedPassword = null;
@@ -139,7 +166,7 @@ const postSignupUser = async (name, email, gender, dateOfBirth, coins, password)
       hashedPassword = await bcrypt.hash(password, 12);
     }
 
-    // Verificar que el email no exista (requiere desencriptar todos)
+    // Verify email doesn't exist (requires decrypting all)
     const emailToCheck = email.toLowerCase();
     const [existingUsers] = await db.execute(
       "SELECT email FROM user WHERE deleted = 0"
@@ -148,11 +175,11 @@ const postSignupUser = async (name, email, gender, dateOfBirth, coins, password)
     for (const user of existingUsers) {
       const decryptedEmail = decrypt(user.email);
       if (decryptedEmail && decryptedEmail.toLowerCase() === emailToCheck) {
-        throw new Error("El email ya está registrado");
+        throw new Error("Email is already registered");
       }
     }
 
-    // Encriptar datos sensibles (incluyendo email)
+    // Encrypt sensitive data (including email)
     const encryptedData = encryptUserData({
       name,
       email: emailToCheck,
@@ -175,7 +202,7 @@ const postSignupUser = async (name, email, gender, dateOfBirth, coins, password)
 
     const userId = result.insertId;
 
-    // Insertar en tree vinculado a ese usuario
+    // Insert into tree linked to that user
     await db.execute(
       "INSERT INTO tree (IDUser, level) VALUES (?, ?)",
       [userId, 1]
@@ -187,9 +214,14 @@ const postSignupUser = async (name, email, gender, dateOfBirth, coins, password)
   }
 };
 
+/**
+ * This function updates user information
+ * 
+ * editUserInfo returns affected rows after encrypting and updating user personal data
+ */
 const editUserInfo = async (id, name, email, gender, dateOfBirth) => {
   try {
-    // Verificar que el email no exista en otro usuario
+    // Verify email doesn't exist in another user
     const emailToCheck = email.toLowerCase();
     const [existingUsers] = await db.execute(
       "SELECT IDUser, email FROM user WHERE deleted = 0 AND IDUser <> ?",
@@ -199,11 +231,11 @@ const editUserInfo = async (id, name, email, gender, dateOfBirth) => {
     for (const user of existingUsers) {
       const decryptedEmail = decrypt(user.email);
       if (decryptedEmail && decryptedEmail.toLowerCase() === emailToCheck) {
-        throw new Error("El email ya está registrado en otro usuario");
+        throw new Error("Email is already registered for another user");
       }
     }
 
-    // Encriptar los datos antes de actualizar
+    // Encrypt data before updating
     const encryptedData = encryptUserData({
       name,
       email: emailToCheck,
@@ -224,9 +256,14 @@ const editUserInfo = async (id, name, email, gender, dateOfBirth) => {
   }
 };
 
+/**
+ * This function changes user password
+ * 
+ * changeUserPassword returns affected rows after hashing and updating new password
+ */
 const changeUserPassword = async (id, password) => {
   try {
-    // Hashear nueva contraseña
+    // Hash new password
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const [result] = await db.execute(
@@ -242,6 +279,11 @@ const changeUserPassword = async (id, password) => {
   }
 };
 
+/**
+ * This function gets missions summary grouped by category (water, consumption, energy, etc.)
+ * 
+ * getMissionsSummaryByUser returns total values for each mission category completed by the user
+ */
 const getMissionsSummaryByUser = async (id) => {
   const [rows] = await db.execute(
     `SELECT 
@@ -277,6 +319,11 @@ const getMissionsSummaryByUser = async (id) => {
   return summary;
 };
 
+/**
+ * This function gets all rewards obtained by a user
+ * 
+ * getUserRewardsById returns all rewards obtained by the user
+ */
 const getUserRewardsById = async (id) => {
   const [rows] = await db.execute(
     `SELECT 
@@ -297,6 +344,11 @@ const getUserRewardsById = async (id) => {
   return rows;
 };
 
+/**
+ * This function gets the top users of the application based on xp
+ * 
+ * getLeaderboardS returns top 10 users ordered by xp with league info and decrypted names
+ */
 const getLeaderboardS = async () => {
   const [rows] = await db.execute(`
     SELECT 
@@ -312,10 +364,15 @@ const getLeaderboardS = async () => {
     LIMIT 10
   `);
 
-  // Desencriptar los nombres
+  // Decrypt names
   return decryptUsersArray(rows);
 };
 
+/**
+ * This function gets the user inventory
+ * 
+ * getInventoryByUser returns all items of the user inventory with signedUrls from the s3 buckets
+ */
 const getInventoryByUser = async (userId) => {
   const query = `
     SELECT 
@@ -349,9 +406,14 @@ const getInventoryByUser = async (userId) => {
   return inventoryWithUrls;
 };
 
+/**
+ * This function uses/equips an item to the user
+ * 
+ * useItemByUser returns if item was equipped successfully, updates inventory status and the item column in the users tablee
+ */
 const useItemByUser = async (idUser, idItem) => {
   if (idItem === 0) {
-    console.log(`Desequipando item para usuario ${idUser}`);
+    console.log(`Unequipping item for user ${idUser}`);
     
     await db.execute(
       `UPDATE inventory 
@@ -385,7 +447,7 @@ const useItemByUser = async (idUser, idItem) => {
   );
 
   if (updateResult.affectedRows === 0) {
-    throw new Error("El ítem no existe en el inventario del usuario");
+    throw new Error("Item does not exist in user inventory");
   }
 
   const [rows] = await db.execute(
@@ -394,7 +456,7 @@ const useItemByUser = async (idUser, idItem) => {
   );
 
   if (rows.length === 0) {
-    throw new Error("El ítem no existe en la tienda");
+    throw new Error("Item does not exist in shop");
   }
 
   const imageName = rows[0].image_name;
@@ -409,6 +471,11 @@ const useItemByUser = async (idUser, idItem) => {
   return { idUser, idItem, imageName };
 };
 
+/**
+ * This function gets the active item for a user
+ * 
+ * getActiveItemByUser returns active item with signedURL or null if no item is equipped
+ */
 const getActiveItemByUser = async (idUser) => {
   const [rows] = await db.execute(
     `SELECT item FROM user WHERE IDUser = ? AND deleted = 0`,

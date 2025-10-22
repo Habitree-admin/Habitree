@@ -1,5 +1,10 @@
 const db = require("../../../util/database");
 
+/**
+ * This function gets all available quizzes with their rewards and questions for a specific user
+ * 
+ * getAllQuizzes returns all the quizzes with their questions and rewards related to them, and show only available quizzes
+ */
 const getAllQuizzes = async (userId) => {
   const [rows] = await db.execute(
     `
@@ -106,7 +111,7 @@ const getAllQuizzes = async (userId) => {
       }
     }
 
-    // Agregar preguntas con wrongAnswers
+    //add wrong answers
     if (row.IDQuestion) {
       const existingQuestion = quizzesMap[quizId].questions.find(q => q.IDQuestion === row.IDQuestion);
       
@@ -126,7 +131,11 @@ const getAllQuizzes = async (userId) => {
   return Object.values(quizzesMap);
 };
 
-// Obtener UN quiz específico con sus preguntas (para resolverlo)
+/**
+ * This function gets a specific quiz by ID
+ * 
+ * getQuizById returns a quiz by id with its questions and answers, wih rewards and xp
+ */
 const getQuizById = async (quizId) => {
   const [rows] = await db.execute(
     `
@@ -248,6 +257,11 @@ const getQuizById = async (quizId) => {
   return quiz;
 };
 
+/**
+ * This function marks a quiz as completed
+ * 
+ * postCompleteQuizUser returns a quiz completion message and also does error handling
+ */
 const postCompleteQuizUser = async (IDUser, IDQuiz) => {
   const connection = await db.getConnection();
 
@@ -255,51 +269,47 @@ const postCompleteQuizUser = async (IDUser, IDQuiz) => {
     await connection.beginTransaction();
     console.log(`Starting quiz completion for User: ${IDUser}, Quiz: ${IDQuiz}`);
 
-    // 1. Verificar si el usuario ya completó este quiz
+    // check if the quiz is already completed
     const [existingQuiz] = await connection.execute(
       "SELECT * FROM userQuizzes WHERE IDUser = ? AND IDQuiz = ?",
       [IDUser, IDQuiz]
     );
 
     if (existingQuiz.length > 0) {
-      throw new Error("El usuario ya completó este quiz");
+      throw new Error("User has already completed this quiz");
     }
-    console.log("✅ Quiz not completed before");
 
-    // 2. Verificar que el quiz existe y obtener su experiencia
+    // get quiz xp
     const [quiz] = await connection.execute(
       "SELECT experience, available FROM quiz WHERE IDQuiz = ?",
       [IDQuiz]
     );
 
     if (quiz.length === 0) {
-      throw new Error("El quiz no existe");
+      throw new Error("Quiz does not exist");
     }
 
     if (!quiz[0].available) {
-      throw new Error("El quiz no está disponible");
+      throw new Error("Quiz is not available");
     }
-    console.log("✅ Quiz exists and is available");
 
-    // 3. Verificar que el usuario existe
+    // gets user
     const [user] = await connection.execute(
       "SELECT IDUser FROM user WHERE IDUser = ?",
       [IDUser]
     );
 
     if (user.length === 0) {
-      throw new Error("El usuario no existe");
+      throw new Error("User does not exist");
     }
-    console.log("✅ User exists");
 
-    // 4. Insertar registro en userQuizzes (status = 1 = completed)
+    // marks the quiz as completed (status = 1 == completed)
     const [userQuizResult] = await connection.execute(
       "INSERT INTO userQuizzes (IDUser, IDQuiz, status) VALUES (?, ?, 1)",
       [IDUser, IDQuiz]
     );
-    console.log("✅ UserQuiz inserted with ID:", userQuizResult.insertId);
 
-    // 5. Obtener todas las rewards del quiz
+    // obtain rewards related to the quiz
     const [rewards] = await connection.execute(
       `SELECT r.IDReward, r.name, r.description, r.type, r.value
        FROM rewards r
@@ -307,9 +317,8 @@ const postCompleteQuizUser = async (IDUser, IDQuiz) => {
        WHERE qr.IDQuiz = ? AND r.available = 1`,
       [IDQuiz]
     );
-    console.log(`Found ${rewards.length} rewards for quiz ${IDQuiz}`);
 
-    // 6. Insertar rewards en userRewards
+    // insert rewards in user rewards
     const userRewards = [];
     for (const reward of rewards) {
       try {
@@ -317,8 +326,6 @@ const postCompleteQuizUser = async (IDUser, IDQuiz) => {
           "INSERT INTO userRewards (IDUser, IDReward) VALUES (?, ?)",
           [IDUser, reward.IDReward]
         );
-
-        console.log(`✅ Reward ${reward.IDReward} inserted with ID: ${insertResult.insertId}`);
 
         userRewards.push({
           IDUserReward: insertResult.insertId,
@@ -329,25 +336,24 @@ const postCompleteQuizUser = async (IDUser, IDQuiz) => {
           value: reward.value
         });
       } catch (rewardError) {
-        console.log(`❌ Warning: Could not insert reward ${reward.IDReward} for user ${IDUser}:`, rewardError.message);
+        console.log(`Warning: Could not insert reward ${reward.IDReward} for user ${IDUser}:`, rewardError.message);
       }
     }
 
-    // 7. Verificar si el usuario tiene un árbol, si no, crearlo
+    // get user tree
     const [existingTree] = await connection.execute(
       "SELECT IDTree, level FROM tree WHERE IDUser = ?",
       [IDUser]
     );
 
     if (existingTree.length === 0) {
-      // Crear árbol inicial con la experiencia del quiz
       await connection.execute(
         "INSERT INTO tree (IDUser, level) VALUES (?, ?)",
         [IDUser, quiz[0].experience]
       );
-      console.log("✅ New tree created for user");
+      console.log("New tree created for user");
     } else {
-      // 8. Actualizar experiencia del árbol
+      // update user xp
       await connection.execute(
         "UPDATE tree SET level = level + ? WHERE IDUser = ?",
         [quiz[0].experience, IDUser]
@@ -355,18 +361,17 @@ const postCompleteQuizUser = async (IDUser, IDQuiz) => {
       console.log("✅ Tree level updated");
     }
 
-    // 9. Obtener nuevo nivel del árbol
+    // get updated user xp
     const [updatedTree] = await connection.execute(
       "SELECT level FROM tree WHERE IDUser = ?",
       [IDUser]
     );
 
     await connection.commit();
-    console.log("✅ Transaction committed successfully");
 
     return {
       success: true,
-      message: "Quiz completado exitosamente",
+      message: "Quiz completed successfully",
       data: {
         IDQuiz,
         IDUser,
@@ -379,7 +384,7 @@ const postCompleteQuizUser = async (IDUser, IDQuiz) => {
 
   } catch (error) {
     await connection.rollback();
-    console.log("❌ Transaction rolled back due to error:", error.message);
+    console.log("Transaction rolled back due to error:", error.message);
     throw error;
   } finally {
     connection.release();
@@ -388,5 +393,3 @@ const postCompleteQuizUser = async (IDUser, IDQuiz) => {
 
 
 module.exports = { getAllQuizzes, getQuizById, postCompleteQuizUser};
-
-

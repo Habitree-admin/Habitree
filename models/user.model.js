@@ -39,9 +39,18 @@ module.exports = class Usuario {
         return [[decryptUserData(matchedUser)]];
     }
 
+
+    /**
+     * 
+     * This function allows to save a user to the database
+     * it also encrypts the user data
+     * 
+     * This function returns the userId that got sved in the DB
+     * 
+     */
     static async save(data) {
         try {
-            // Encriptar TODOS los datos sensibles (incluyendo email)
+            // Encrypt all sensitive user information
             const encryptedData = encryptUserData(data);
             
             const [result] = await db.execute(
@@ -52,7 +61,7 @@ module.exports = class Usuario {
                     encryptedData.gender,
                     encryptedData.dateOfBirth,
                     0,
-                    data.password, // Ya viene hasheado con bcrypt
+                    data.password, // it comes encrypted in the controller
                     0,
                     1
                 ]
@@ -60,7 +69,7 @@ module.exports = class Usuario {
 
             const userId = result.insertId;
 
-            // Insertar en tree vinculado a ese usuario
+            // also add a tree to the database related to the user
             await db.execute(
                 "INSERT INTO tree (IDUser, level) VALUES (?, ?)",
                 [userId, 1]
