@@ -402,7 +402,7 @@ exports.postUpdateItem = async (req, res) => {
  * 
  * This function change the state of an item to activate or deactivate
  * 
- * This function on the code manage the fetching and display of the Add modal
+ * This function manage the request to change the state of an item and send the response
  *  
  */
 exports.toggleItemState = async (req, res) => {
@@ -415,7 +415,7 @@ exports.toggleItemState = async (req, res) => {
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Item no encontrado' });
     }
-    
+
     const currentState = Number(rows[0].state);
     console.log('Estado actual del item:', currentState);
     let result;
