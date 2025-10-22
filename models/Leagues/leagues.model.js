@@ -22,7 +22,7 @@ async function createLeagueViaProcedure({ name, lvl}, connection) {
 
 
 /**
- * Description placeholder
+ * This function returns all registered leagues
  *
  * @class League
  * @typedef {League}
@@ -34,9 +34,7 @@ class League {
         this.min_level = min_level; 
     } 
 
-    /**
-     * Devuelve todas las ligas.
-     */
+  
     static fetchAll() {
         return db.execute('SELECT * FROM Leagues');
     }
