@@ -210,7 +210,7 @@ exports.postItem = async (req, res, next) => {
 
   const uploadMiddleware = upload.array('file', 1);
 
-  //uploadMiddleware handles the multer 
+  //uploadMiddleware handles the update 
   uploadMiddleware(req, res, async function (err) {
     if (err) {
       console.error("❌ Error en multer:", err);
@@ -220,6 +220,7 @@ exports.postItem = async (req, res, next) => {
       });
     }
 
+    //error handling
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({
         code: 400,
@@ -227,20 +228,22 @@ exports.postItem = async (req, res, next) => {
       });
     }
 
+    //add file temporarily
     const filePath = path.join(__dirname, '../../bucket', req.files[0].filename);
     const fileName = req.files[0].filename;
 
     try {
-      // Leer el archivo local
+      // read local file
       const fileData = fs.readFileSync(filePath);
 
-      // Subir a S3
+      // params for s3 sdk
       const params = {
         Bucket: AWS_BUCKET,
         Key: fileName,
         Body: fileData,
       };
 
+      // upload image to bucket
       const s3Result = await s3.upload(params).promise();
       console.log(`Archivo subido exitosamente a S3: ${s3Result.Location}`);
 
@@ -249,7 +252,6 @@ exports.postItem = async (req, res, next) => {
         if (unlinkErr) console.error("No se pudo borrar archivo local:", unlinkErr);
       });
 
-      // add item to the DB
       const addItem = new Item(
         req.body.name,
         req.body.state,
@@ -258,6 +260,7 @@ exports.postItem = async (req, res, next) => {
         fileName
       );
 
+      // add item to the bd
       await addItem.save();
       console.log("Item guardado en base de datos");
 
