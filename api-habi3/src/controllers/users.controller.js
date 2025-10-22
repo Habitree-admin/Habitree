@@ -1,25 +1,37 @@
 const userService = require("../services/users.service");
 const tokenService = require('../services/token.service');
 
+/**
+ * This function gets all users
+ * 
+ * getUsers returns all users from the database with decrypted data
+ */
 const getUsers = async (req, res) => {
   try {
     const users = await userService.getAllUsers();
     res.json(users);
   } catch (err) {
     res.status(500).json({
-      error: "Error al obtener usuarios",
+      error: "Error obtaining users",
       details: err.message,
     });
   }
 };
 
+/**
+ * This function handles traditional login and generates JWT tokens
+ * 
+ * getLoginJWT returns access token and refresh token for authenticated user, and user info to use on mobile apps
+ */
 const getLoginJWT = async (req, res) => {
     try {
         const { email, password } = req.body;
+        
+        // check request body
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'Faltan credenciales',
+                message: 'Missing credentials',
             });
         }
 
@@ -29,7 +41,7 @@ const getLoginJWT = async (req, res) => {
 
         res.json({
             success: true,
-            message: '✅ Login exitoso',
+            message: 'Login successful',
             user,
             accessToken,
             refreshToken,
@@ -38,20 +50,26 @@ const getLoginJWT = async (req, res) => {
     } catch (err) {
         res.status(401).json({
             success: false,
-            message: '❌ Credenciales inválidas',
+            message: 'Invalid credentials',
             details: err.message,
         });
     }
 };
 
+/**
+ * This function handles google login and generates JWT tokens
+ * 
+ * getLoginJWT returns access token and refresh token for authenticated user, and user info to use on mobile apps
+ */
 const getLoginGoogleJWT = async (req, res) => {
     try {
         const { email } = req.body;
         
+        // check request body
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: 'Faltan credenciales',
+                message: 'Missing credentials',
             });
         }
 
@@ -66,7 +84,7 @@ const getLoginGoogleJWT = async (req, res) => {
 
         res.json({
             success: true,
-            message: '✅ Login exitoso',
+            message: 'Login successful',
             user: {
                 userId: user.userId,
                 name: user.name,
@@ -80,23 +98,29 @@ const getLoginGoogleJWT = async (req, res) => {
             refreshTokenExpiresAt: expiresAt.getTime()
         });
     } catch (err) {
-        console.error('Error en Google login:', err.message);
+        console.error('Error in Google login:', err.message);
         res.status(401).json({
             success: false,
-            message: '❌ Credenciales inválidas',
+            message: 'Invalid credentials',
             details: err.message,
         });
     }
 };
 
+/**
+ * This function handles traditional login without token
+ * 
+ * getLogin returns user info to use on mobile apps after authentication
+ */
 const getLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // check request body
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Faltan credenciales",
+        message: "Missing credentials",
       });
     }
 
@@ -104,27 +128,33 @@ const getLogin = async (req, res) => {
 
     res.json({
       success: true,
-      message: "✅ Login exitoso",
+      message: "Login successful",
       user,
     });
 
   } catch (err) {
     res.status(401).json({
       success: false,
-      message: "❌ Credenciales inválidas",
+      message: "Invalid credentials",
       details: err.message,
     });
   }
 };
 
+/**
+ * This function handles google login without token
+ * 
+ * getLoginGoogle returns user info to use on mobile apps after authentication
+ */
 const getLoginGoogle = async (req, res) => {
   try {
     const { email } = req.body;
 
+    // check request body
     if (!email) {
       return res.status(400).json({
         success: false,
-        message: "Faltan credenciales",
+        message: "Missing credentials",
       });
     }
 
@@ -139,19 +169,24 @@ const getLoginGoogle = async (req, res) => {
 
     res.json({
       success: true,
-      message: "✅ Login exitoso",
+      message: "Login successful",
       user: responseUser,
     });
 
   } catch (err) {
     res.status(401).json({
       success: false,
-      message: "❌ Credenciales inválidas",
+      message: "Invalid credentials",
       details: err.message,
     });
   }
 };
 
+/**
+ * This function gets user stats
+ * 
+ * getStats returns user stats like name, email, xp
+ */
 const getStats = async (req, res) => {
   try {
     const id = req.params.id; 
@@ -159,20 +194,26 @@ const getStats = async (req, res) => {
     res.json(passkeys);
   } catch (err) {
     res.status(500).json({
-      error: "Error obtaining user credcentials",
+      error: "Error obtaining user credentials",
       details: err.message,
     });
   }
 };
 
+/**
+ * This function registers a new user in the application
+ * 
+ * postSignup returns the userId after completing signup
+ */
 const postSignup = async (req, res) => {
   try {
     const { name, email, gender, dateOfBirth, coins, password } = req.body;
 
+    // check request body
     if (!email) {
       return res.status(400).json({
         success: false,
-        message: "El campo 'email' es obligatorio.",
+        message: "Email field is required.",
       });
     }
 
@@ -195,12 +236,17 @@ const postSignup = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Error al registrar usuario",
+      message: "Error registering user",
       details: err.message,
     });
   }
 };
 
+/**
+ * This function updates user information
+ * 
+ * editUser returns the number of affected rows after updating the user
+ */
 const editUser = async (req, res) => {
   try {
     const {name, email, gender, dateOfBirth} = req.body;
@@ -209,12 +255,17 @@ const editUser = async (req, res) => {
     res.json(rows);
   } catch (err) {
     res.status(500).json({
-      error: "Error al obtener usuarios",
+      error: "Error updating user",
       details: err.message,
     });
   }
 };
 
+/**
+ * This function changes the users password
+ * 
+ * changepasswd returns the number of affected rows after updating the password
+ */
 const changepasswd = async (req, res) => {
   try {
     const {password} = req.body;
@@ -223,12 +274,17 @@ const changepasswd = async (req, res) => {
     res.json(rows);
   } catch (err) {
     res.status(500).json({
-      error: "Error al obtener usuarios",
+      error: "Error changing password",
       details: err.message,
     });
   }
 };
 
+/**
+ * This function gets missions summary for a user
+ * 
+ * getMissionsSummary returns total values grouped by mission category for the user
+ */
 const getMissionsSummary = async (req, res) => {
   try {
     const id = req.params.id; 
@@ -242,6 +298,11 @@ const getMissionsSummary = async (req, res) => {
   }
 };
 
+/**
+ * This function gets all rewards obtained from a user
+ * 
+ * getUserRewards returns all rewards obtained by the user
+ */
 const getUserRewards = async (req, res) => {
   try {
     const id = req.params.id; 
@@ -255,6 +316,11 @@ const getUserRewards = async (req, res) => {
   }
 };
 
+/**
+ * This function gets the top users of the application based on xp
+ * 
+ * getLeaderboard returns top 10 users ordered by xp
+ */
 const getLeaderboard = async (req, res) => {
   try {
     const leaderboard = await userService.getLeaderboardS();
@@ -262,12 +328,17 @@ const getLeaderboard = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Error al obtener leaderboard",
+      message: "Error obtaining leaderboard",
       details: err.message
     });
   }
 };
 
+/**
+ * This function gets the user inventory
+ * 
+ * getInventory returns all items that the user has bought thorugh the shop
+ */
 const getInventory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -278,23 +349,29 @@ const getInventory = async (req, res) => {
       data: inventory
     });
   } catch (err) {
-    console.error("Error en getInventory:", err);
+    console.error("Error in getInventory:", err);
     res.status(500).json({
       success: false,
-      message: "Error al obtener inventario",
+      message: "Error obtaining inventory",
       details: err.message
     });
   }
 };
 
+/**
+ * This function equips and item to the user
+ * 
+ * useItem returns if item was equipped successfully or unsuccessfully
+ */
 const useItem = async (req, res) => {
   try {
     const { IDUser, IDItem } = req.body;
 
+    // check request body
     if (!IDUser || IDItem === undefined || IDItem === null) {
       return res.status(400).json({
         success: false,
-        message: "Faltan parámetros: IDUser o IDItem",
+        message: "Missing parameters: IDUser or IDItem",
       });
     }
 
@@ -302,19 +379,24 @@ const useItem = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Item usado correctamente",
+      message: "Item used successfully",
       data: result,
     });
   } catch (err) {
-    console.error("Error en useItem:", err);
+    console.error("Error in useItem:", err);
     res.status(500).json({
       success: false,
-      message: "Error al usar el ítem",
+      message: "Error using item",
       details: err.message,
     });
   }
 };
 
+/**
+ * This function gets the active item the user is using
+ * 
+ * getActiveItem returns name and the signedurl of the item that the user has active
+ */
 const getActiveItem = async (req, res) => {
   try {
     const { id } = req.params;
@@ -323,7 +405,7 @@ const getActiveItem = async (req, res) => {
     if (!activeItem) {
       return res.status(404).json({
         success: false,
-        message: "El usuario no tiene un ítem activo."
+        message: "User has no active item."
       });
     }
 
@@ -332,24 +414,29 @@ const getActiveItem = async (req, res) => {
       data: activeItem
     });
   } catch (err) {
-    console.error("❌ Error en getActiveItem:", err);
+    console.error("❌ Error in getActiveItem:", err);
     res.status(500).json({
       success: false,
-      message: "Error al obtener ítem activo del usuario",
+      message: "Error obtaining user active item",
       details: err.message
     });
   }
 };
 
-
+/**
+ * This function refreshes an expired access token
+ * 
+ * refreshToken returns new access token and if the refresh token is expired also returns a new refresh token
+ */
 const refreshToken = async (req, res) => {
     try {
         const { refreshToken } = req.body;
         
+        // check request body
         if (!refreshToken) {
             return res.status(400).json({
                 success: false,
-                message: 'Falta el refresh token',
+                message: 'Missing refresh token',
             });
         }
 
@@ -373,35 +460,41 @@ const refreshToken = async (req, res) => {
             refreshTokenExpiresAt: newExpiresAt.getTime()
         });
     } catch (err) {
-        console.error('Error al refrescar token:', err.message);
+        console.error('Error refreshing token:', err.message);
         res.status(401).json({
             success: false,
-            message: '❌ Refresh token inválido o expirado',
+            message: '❌ Invalid or expired refresh token',
             details: err.message,
         });
     }
 };
 
+/**
+ * This function logs out a user by invalidating refresh token
+ * 
+ * logout returns session was closed successfully or unsuccessfully
+ */
 const logout = async (req, res) => {
     try {
         const { refreshToken } = req.body;
 
+        // check request body
         if (!refreshToken) {
             return res.status(400).json({
                 success: false,
-                message: 'Falta el refresh token',
+                message: 'Missing refresh token',
             });
         }
 
         await tokenService.invalidateRefreshToken(refreshToken);
         res.json({
             success: true,
-            message: '✅ Sesión cerrada exitosamente',
+            message: '✅ Session closed successfully',
         });
     } catch (err) {
         res.status(500).json({
             success: false,
-            message: 'Error al cerrar sesión',
+            message: 'Error closing session',
             details: err.message,
         });
     }
@@ -423,5 +516,6 @@ module.exports = {
     getLoginGoogleJWT, 
     getLoginJWT, 
     refreshToken, 
-    logout, getActiveItem
+    logout, 
+    getActiveItem
 };
