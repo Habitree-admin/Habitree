@@ -104,8 +104,14 @@ module.exports = class Usuario {
         return [decryptUsersArray(rows)];
     }
 
+    /**
+         
+     this function updates user fields in the database
+     this function encrypts fields then runs the update
+     *
+     */
     static async update(id, data) {
-        // Encriptar los datos antes de actualizar (NO el email)
+        // encrypt fields before updating
         const encryptedName = encrypt(data.name);
         const encryptedGender = encrypt(data.gender);
         const encryptedDateOfBirth = encrypt(data.dateOfBirth);
@@ -116,6 +122,12 @@ module.exports = class Usuario {
         );
     }
 
+    /** 
+   
+     this function performs a logical delete for a user
+     this function sets the deleted flag to 1 for the given user id
+    *
+    */
     static async softDelete(id) {
         return db.execute(
             "UPDATE user SET deleted = 1 WHERE IDUser = ?",
@@ -133,8 +145,13 @@ module.exports = class Usuario {
         );
     }
 
+    /**
+     
+     this function checks if an email exists for another user
+     this function queries the user table excluding the given user id
+     *
+     */
     static async checkEmailExists(email, excludeUserId) {
-        // Buscar email sin encriptar
         return db.execute(
             "SELECT IDUser FROM user WHERE email = ? AND deleted = 0 AND IDUser <> ?",
             [email.toLowerCase(), excludeUserId]
