@@ -25,7 +25,7 @@
         </div>
         <!-- Search field -->
         <div class="search-container" style="width: 30%; margin-left: 3vh; display: inline-flex;">
-            <input type="text" id="searchInput" placeholder="Buscar por nombre o ID..." />
+            <input type="text" id="searchInput" placeholder="Search by name or ID..." />
         </div>
 
         <!-- Table of registered users -->
@@ -62,12 +62,13 @@
                             </tr>
                         <% }); %>
                     <% } else { %>
-                        <tr class="no-users-row"><td colspan="6">No hay usuarios registrados.</td></tr>
+                        <tr class="no-users-row"><td colspan="6">No users found.</td></tr>
                     <% } %>
                 </tbody>
             </table>
-            <!-- User not found message -->
-            <div id="noUserFoundMsg" style="display:none; color:red; margin-top:10px;">Usuario no encontrado.</div>
+
+            <!-- Mensaje de usuario no encontrado -->
+            <div id="noUserFoundMsg" style="display:none; color:red; margin-top:10px;">User not found.</div>
         </div>
 
         <!-- POP UP TO ADD USER -->

@@ -2,11 +2,16 @@
 // eslint-disable-next-line no-undef
 const db = require('../../util/database');
 
+
+/**
+ * Creates a league
+ * 
+ * Calls a procedure in the dataBase, creates a new league and reorganizes the users
+ * 
+ */
 async function createLeagueViaProcedure({ name, lvl}, connection) {
-    // ... (Tu código de createLeagueViaProcedure)
     const procName = 'InsertarLiga'; 
     const params = [name, lvl];
-    // ... (resto de la lógica)
     try {
         if (connection) {
             const [result] = await connection.execute(`CALL ${procName}(?, ?)`, params);

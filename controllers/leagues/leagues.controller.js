@@ -24,6 +24,13 @@ exports.getEditLeagueModal = (req, res) => {
     });
 };
 
+/**
+     * Adds a new league.
+     *
+     * Creates a league using values from the request:
+     * - name: league name (string)
+     * - lvl: league level as a trimmed string (rawLvl)
+     */
 exports.postAddLeague = async (req, res) => {
     console.log('POST /leagues/add body:', req.body);
     const { name, lvl } = req.body;
