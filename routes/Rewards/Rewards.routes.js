@@ -3,19 +3,19 @@ const router = express.Router();
 const isAuth = require('../../util/is-auth');
 const RewardController = require("../../controllers/Rewards/Rewards.controller");
 
-// Obtener todas las recompensas
+// Collect all rewards
 router.get("/", isAuth, RewardController.getRewards);
 
-// Registrar nueva recompensa
+// Add a new reward
 router.post("/", isAuth, RewardController.postRewards);
 
-// Obtener recompensa por ID (para ediciÃ³n)
+// Collect reward for ID(to edit)
 router.get("/:id", isAuth, RewardController.getRewardById);
 
-// Editar recompensa
+// Edit reward
 router.post("/edit/:id", isAuth, RewardController.editReward);
 
-// Eliminar recompensa
+// Erase reward
 router.delete("/:id", isAuth, RewardController.deleteReward);
 
 module.exports = router;

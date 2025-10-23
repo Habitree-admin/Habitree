@@ -1,11 +1,15 @@
 // public/js/indicators/indicators.js
 
+ /**
+   * This file continsthe the logic of graphs
+  */
+
 console.log('🚀 Script indicators.js cargado');
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOMContentLoaded ejecutado');
     
-    // Leer datos del atributo data
+    // Read the data atribute
     const dataElement = document.getElementById('indicatorsData');
     
     if (!dataElement) {
@@ -157,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('✅ Chart created successfully!');
     
-    // ====== GRÁFICA DE RADAR ======
+    // ====== Radar Graph ======
     console.log('📊 Creating radar chart...');
     
     let metricsData;

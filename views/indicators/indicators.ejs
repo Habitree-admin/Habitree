@@ -13,13 +13,13 @@
     <!-- Navbar -->
     <%- include('../partials/navbar') %>
 
-    <!-- Contenido principal -->
+    <!-- Principal Content -->
     <div class="Dashboard_content">
       <div class="Dashboard-navbar">
         <h1 class="Dashboard__title">Sustainability Indicators</h1>
       </div>
 
-      <!-- SECCIÓN 1: TOTALES GLOBALES CON CARDS -->
+      <!-- SECTION 1: GLOBAL TOTAL WHIT CARDS -->
       <div class="global-indicators-section">
         <h2 class="section-title">
           <i class="fa-solid fa-globe"></i> Global Impact Summary
@@ -70,22 +70,22 @@
         </div>
       </div>
 
-      <!-- SECCIÓN 2: GRÁFICAS -->
+      <!-- SECTION 2: GRAPHS -->
       <div class="charts-section">
-        <!-- Gráfica de barras -->
+        <!-- Graphic Bar -->
         <div class="chart-container">
           <h3 class="chart-title">Impact by Category</h3>
           <canvas id="impactChart"></canvas>
         </div>
 
-        <!-- Gráfica de radar -->
+        <!-- Graphic Radar -->
         <div class="chart-container radar-chart">
           <h3 class="chart-title">Impact Performance Overview</h3>
           <canvas id="radarChart"></canvas>
         </div>
       </div>
 
-      <!-- SECCIÓN 3: TABLA POR USUARIO (AL FINAL) 
+      <!-- SECTION 3: TABLE FOR USER (In case of use in future)
       <div class="user-indicators-section">
         <h2 class="section-title">
           <i class="fa-solid fa-users"></i> Individual User Breakdown
@@ -142,7 +142,7 @@
   </div>
 
   
-  <!-- Datos en atributos data -->
+  <!-- Data in data atributes -->
   <div id="indicatorsData" style="display:none;" 
        data-indicators='<%= JSON.stringify(globalTotals || []) %>'
        data-metrics='<%= JSON.stringify(impactMetrics || []) %>'>
@@ -151,7 +151,7 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   
-  <!-- Script de indicators -->
+  <!-- Script of indicators -->
   <script src="/js/indicators/indicators.js"></script>
 
 </body>

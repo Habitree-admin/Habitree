@@ -1,6 +1,10 @@
 const db = require('../../util/database');
 
-// Clase Reward
+ /**
+   * This file collect the data of rewards from the database
+  */
+
+// Class Reward
 module.exports = class Reward {
 
     constructor(name, description, type, available, value) {
@@ -8,11 +12,11 @@ module.exports = class Reward {
         this.description = description;
         this.type = type;        // monetary / nonMonetary
         this.available = available; // 0 / 1
-        this.value = value;      // puede ser número o código
+        this.value = value;      // It can be number or code
     }
 
     /**
-     * Guarda una nueva recompensa
+     * Save new reward
      */
     save() {
         return db.execute(
@@ -35,7 +39,7 @@ module.exports = class Reward {
     }
 
     /**
-     * Devuelve una recompensa por su ID
+     * Returns a reward for ID
      * @param {number} id
      * @returns {Promise}
      */
@@ -44,7 +48,7 @@ module.exports = class Reward {
     }
 
     /**
-     * Actualiza una recompensa existente
+     * Update existing reward 
      * @param {number} id
      * @param {object} data
      * @returns {Promise}

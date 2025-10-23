@@ -10,9 +10,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  let prevStatus = null; // para confirmar cuando se cambia a "0"
+  let prevStatus = null; 
 
-  // Delegación: botón Manage (clase .edit-btn)
+
+   /**
+   * Button  Manage (class .edit-btn)
+  */
   tbody.addEventListener("click", async (e) => {
     const btn = e.target.closest("button.edit-btn");
     if (!btn) return;
@@ -29,20 +32,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const reward = await response.json();
 
-      // Rellenar formulario
+      // Fill ouut forms
       document.getElementById("editName").value        = reward.name ?? "";
       document.getElementById("editDescription").value = reward.description ?? "";
       document.getElementById("editType").value        = reward.type ?? "nonMonetary";
       document.getElementById("editValue").value       = reward.value ?? "";
       document.getElementById("editStatus").value      = reward.available ? "1" : "0";
 
-      // Guardamos el estado previo para confirmar si cambia a 0
+      // Save preview state to confirm if changes to 0
       prevStatus = reward.available ? "1" : "0";
 
-      // Action del form (POST tradicional)
+      // Action of form (POST)
       form.action = `/modify-reward/edit/${encodeURIComponent(reward.IDReward ?? id)}`;
 
-      // Mostrar modal
+      // Show modal
       modal.classList.add("open");
     } catch (err) {
       console.error("Error cargando recompensa:", err);
@@ -50,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Confirmar si se desactiva (de 1 -> 0)
+  // Confirm if is desactivated (to 1 -> 0)
   form.addEventListener("submit", (e) => {
     const editStatus = document.getElementById("editStatus");
     if (prevStatus !== "0" && editStatus.value === "0") {
@@ -58,12 +61,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!ok) {
         e.preventDefault();
         e.stopPropagation();
-        editStatus.value = prevStatus; // restaurar
+        editStatus.value = prevStatus; 
       }
     }
   });
 
-  // Cerrar modal
+  // Close modal
   closeBtn.addEventListener("click", () => modal.classList.remove("open"));
   modal.addEventListener("click", (e) => {
     if (e.target === modal) modal.classList.remove("open");

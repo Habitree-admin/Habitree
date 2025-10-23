@@ -1,8 +1,13 @@
 const { response } = require('express');
 const Indicator = require('../../models/indicators/indicators.model');
 
+
 /**
- * Listar todos los indicadores
+ * This File contains the controller list of all sustentable indicators
+ */
+
+/**
+ * List all indicators
  */
 exports.getIndicators = async (req, res) => {
     try {
