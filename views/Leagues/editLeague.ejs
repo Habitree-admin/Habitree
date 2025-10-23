@@ -5,7 +5,7 @@
             <button id="closeManageLeagueModal" class="fa fa-times close-btn"></button>
         </div>
         <div class="modal-content">
-            <!-- Formulario para cambiar nombre -->
+            <!-- Form to change league name -->
             <form id="editLeagueNameForm" action="/leagues/editName" method="POST" style="margin-bottom:2rem;">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <input type="hidden" name="nameA" id="editLeagueNameA">
@@ -17,7 +17,7 @@
                     <button type="submit" class="submit-btn">Cambiar nombre</button>
                 </div>
             </form>
-            <!-- Formulario para cambiar nivel -->
+            <!-- Form to change league level -->
             <form id="editLeagueLevelForm" action="/leagues/editLevel" method="POST">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <input type="hidden" name="nameA" id="editLeagueNameA2">
@@ -25,6 +25,7 @@
                     <label for="editLeagueLevel">Nuevo nivel mínimo</label>
                     <input type="number" name="lvl" id="editLeagueLevel" required>
                 </div>
+                <!-- Submit button -->
                 <div class="button-container">
                     <button type="submit" class="submit-btn">Cambiar nivel</button>
                 </div>
