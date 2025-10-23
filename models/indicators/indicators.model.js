@@ -4,7 +4,7 @@ const db = require('../../util/database');
 module.exports = class Indicator {
 
     /**
-     * Devuelve todos los indicadores agrupados por usuario y categoría
+     * Returns all the indicators for user and category 
      * @returns {Promise}
      */
     static async fetchAll() {
@@ -39,7 +39,7 @@ module.exports = class Indicator {
             `
         );
 
-        // Agrupar por usuario
+        // Groups for user
         const usersMap = {};
 
         rows.forEach(row => {
@@ -59,7 +59,7 @@ module.exports = class Indicator {
                 };
             }
 
-            // Convertir a números usando Number() o parseInt()
+            // Converts to numbers using Number() or parseInt()
             const missionCount = parseInt(row.missionCount) || 0;
             const totalValue = parseInt(row.totalValue) || 0;
             const totalExperience = parseInt(row.totalExperience) || 0;
@@ -71,7 +71,7 @@ module.exports = class Indicator {
                 totalExperience: totalExperience
             });
 
-            // Ahora sí suma correctamente
+            // Sum all the data
             usersMap[userId].totals.totalMissions += missionCount;
             usersMap[userId].totals.totalValue += totalValue;
             usersMap[userId].totals.totalExperience += totalExperience;
@@ -81,7 +81,7 @@ module.exports = class Indicator {
     }
 
     /**
- * Devuelve totales globales por categoría (todos los usuarios sumados)
+ * Returns the global totlas data for category (all users summed)
  * @returns {Promise}
  */
 static async fetchGlobalTotals() {
@@ -118,7 +118,7 @@ static async fetchGlobalTotals() {
 }
 
 /**
- * Obtener métricas de impacto para gráfica de radar
+ * Obtain metrics of impact for radar graph 
  * @returns {Promise}
  */
 static async fetchImpactMetrics() {

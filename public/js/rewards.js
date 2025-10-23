@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Abrir modal Add y resetear el form
+  // Open moadl Add and track form
   openBtn.addEventListener("click", () => {
     const form = modal.querySelector("form");
     if (form) {
@@ -21,10 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.classList.add("open");
   });
 
-  // Cerrar con la X
+  // Close with X
   closeBtn.addEventListener("click", () => modal.classList.remove("open"));
 
-  // Cerrar al hacer click fuera del contenido
+  //Close with click out of content
   modal.addEventListener("click", (e) => {
     if (e.target === modal) modal.classList.remove("open");
   });
