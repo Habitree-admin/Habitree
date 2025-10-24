@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Icons and page styles -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
         <link rel="stylesheet" href="/css/shop/shop.css">
         <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
@@ -11,10 +12,15 @@
     </head>
     <body>
     <div class="content">
+        <!-- App navbar -->
         <%- include('../partials/navbar') %>
+
+        <!-- Main dashboard container -->
         <div class="Dashboard_content">
             <div class="Dashboard__title-container">
                 <h1 class="Dashboard__title">Store</h1>
+
+                <!-- Header actions: add item and toggle filters -->
                 <div class="filter-and-add">
                     <button id="openModal" class="instrument-sans-bold header__button">Add</button>
                     <button class="instrument-sans-bold header__button" id="filterToggle">
@@ -23,6 +29,7 @@
                 </div>
             </div>
 
+            <!-- Filters panel (hidden by default) -->
             <div class="filters hidden" id="filtersSection">
                 <form id="filterForm">
                     <div class="filter-row">
@@ -49,9 +56,9 @@
                             <label for="filterMaxPrice">Max Price</label>
                             <input type="number" id="filterMaxPrice" class="filter-input" min="0" step="0.01" placeholder="9999.99">
                         </div>
-
                     </div>
 
+                    <!-- Filter actions -->
                     <div class="filter-actions">
                         <button type="button" class="filter-btn apply-btn" onclick="applyFilters()">
                             Apply
@@ -63,20 +70,23 @@
                 </form>
             </div>
 
-
+            <!-- Product list container -->
             <div class="table-container instrument-sans-regular">
                 <div class="products-wrapper">
+                    <!-- Loading state -->
                     <div id="loadingSpinner" class="loading-spinner" style="display: none;">
                         <i class="fas fa-spinner fa-spin"></i>
                         <p>Loading products...</p>
                     </div>
 
+                    <!-- No results state -->
                     <div id="noResults" class="no-results" style="display: none;">
                         <i class="fas fa-search"></i>
                         <p>No products found</p>
                         <button onclick="clearFilters()" class="filter-btn apply-btn">Clear</button>
                     </div>
 
+                    <!-- Products grid -->
                     <div class="product-grid" id="productGrid">
                         <% for (item of items) { %>
                             <div class="product-card" data-id="<%= item.id %>">
@@ -106,8 +116,8 @@
                                         </button>
                                         <div class="change-btn">
                                             <p>Change State</p>
-                                            <button class=" change-state-btn <%= item.state == 1 ? 'btm--active' : '' %>" data-id="<%= item.IDItem %>">
-                                                <p class="circle <%= item.state == 1 ? 'active' : '' %>"></p>
+                                            <button class=" change-state-btn <%= item.state == 1 ? 'btm--active' : '' %>" data-id="<%= item.IDItem %>">
+                                                <p class="circle <%= item.state == 1 ? 'active' : '' %>"></p>
                                             </button>
                                         </div>
                                     </div>
@@ -120,7 +130,7 @@
         </div>
     </div>
 
-        <!-- add item modal -->    
+        <!-- Modal: add/edit item -->
         <div class="modal" id="modal">
             <div class="modal-inner">
                 <nav>            
@@ -132,6 +142,7 @@
                     <div id="form-message" style="display:none;"></div>
                     <input type="hidden" id="image_name_current" name="image_name_current" value="">
 
+                    <!-- Basic item fields -->
                     <section class="inputs-row">
                         <div class="input-container">
                             <label for="name">Item Name:</label>
@@ -146,6 +157,7 @@
                         </div>
                     </section>
 
+                    <!-- Pricing and category -->
                     <section class="inputs-row">
                         <div class="input-container">
                             <label for="price">Price:</label>
@@ -157,21 +169,26 @@
                         </div>
                     </section>
 
-                    <!-- file selecition -->
+                    <!-- File selection -->
                     <section>
                         <label for="file">Select files</label>
                         <input id="file" name="file" type="file" multiple />
                     </section>
 
+                    <!-- Submit actions (add or edit) -->
                     <button type="submit" class="submit-btn">Add</button>
                     <button type="submit" class="submit-btn" id="edit-btn" style="display:none;">Edit</button>
                     <input type="hidden" id="image_name_current" name="image_name_current" value="">
                 </form>  
             </div>
         </div>
+
+        <!-- Modal/backdrop mounts -->
         <div id="modal-root"></div>
         <div id="backdrop" class="backdrop"></div>
     </div>
+
+    <!-- CSRF token and scripts -->
     <script>
         window.csrfToken = "<%= csrfToken %>";
     </script>
