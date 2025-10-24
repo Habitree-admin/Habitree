@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/quizzes/quizzes.css">
+    <title>Quizzes</title>
+    <link rel="icon" type="image/png" href="/img/LogoHabitree.png">
+</head>
+
+<body>
+
+<div class="content">
+    <%- include('../partials/navbar') %>
+
+    <div class="Dashboard_content">
+        <div class="Dashboard__title-container">
+            <h1 class="Dashboard__title">Quizzes</h1>
+            <div class="container__button">
+                <button id="openModal" class="instrument-sans-bold header__button">Add</button>
+            </div>
+        </div>
+
+        <!-- Table showing all quizzes -->
+        <div class="table-container instrument-sans-regular">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Available</th>
+                    <th>Experience</th>
+                    <th>Questions</th>
+                    <th class="actions">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!--Loop through quizzes array and display each quizz avialable-->
+                <% if (quizzes && quizzes.length > 0) { %>
+                    <% quizzes.forEach(function(quiz) { %>
+                        <% if (quiz.available == 1) { %>
+                            <tr>
+                                <td><%= quiz.IDQuiz %></td>
+                                <td><%= quiz.description %></td>
+                                <td><%= quiz.category %></td>
+                                <td><%= quiz.available ? 'Yes' : 'No' %></td>
+                                <td><%= quiz.experience %></td>
+                                <td><%= quiz.questions %></td>
+                                <td class="actions"><button class="table__button manage-button">Manage</button></td>
+                            </tr>
+                        <% } %>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <!--Display message if quizzes doesn't exist -->
+                        <td colspan="7" style="text-align:center;">No quizzes available</td>
+                    </tr>
+                <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- POP UP PARA AGREGAR QUIZ -->
+<div class="modal" id="modal">
+    <div class="modal-inner">
+        <div class="modal-header">
+            <h1 class="modal-title">Add New Quiz</h1>
+            <button id="closeModal" class="fa fa-times"></button>
+        </div>
+
+        <div class="modal-content">
+            <form id="quizForm" action="/quizzes" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                <div class="form-content">
+                    <section class="inputs-row">
+                        <div class="input-container">
+                            <label for="available">Status</label>
+                            <select id="available" name="available" required>
+                                <option value=1>Available</option>
+                                <option value=0>Unavailable</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <section class="inputs-row">
+                        <div class="input-container">
+                            <label for="category">Category</label>
+                            <input class="smallInput" type="text" id="category" name="category" placeholder="Water" required>
+                        </div>
+
+                        <div class="input-container">
+                            <label for="experience">Experience</label>
+                            <input class="smallInput" type="number" id="experience" name="experience" placeholder="100" min="1" max="9999" required>
+                        </div>
+                    </section>
+
+                    <section>
+                        <label for="description">Description</label>
+                        <input class="description" type="text" id="description" name="description" placeholder="A quiz about climate change." required>
+                    </section>
+
+                    <section>
+                        <label>Questions</label>
+                        <!-- Contenedor para preguntas guardadas -->
+                        <div id="savedQuestionsContainer"></div>
+                        
+                        <div class="question-container" id="questionFormContainer" style="display: none;">
+                            <div class="question-input-group">
+                                <input type="text" id="questionText" placeholder="What is the climate change?" class="smallInput">
+                                <select class="question-type" id="questionType">
+                                    <option value="Multiple Choice">Multiple Choice</option>
+                                    <option value="True/False">True/False</option>
+                                </select>
+                            </div>
+                            <div class="options-container" id="optionsContainer">
+                            </div>
+                            <div class="question-form-actions">
+                                <button type="button" id="saveQuestionBtn" class="submit-btn">Save Question</button>
+                                <button type="button" id="cancelQuestionBtn" class="submit-btn" style="background: #6c757d;">Cancel</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="form-actions">
+                        <button type="button" id="addQuestionBtn" class="submit-btn margin-top" style="background-color: #27ae60; color: white;">Add Question</button>
+                </div>
+
+                <div class="form-actions">
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="submit-btn" id="add-edit-btn">Add</button>
+                    </div>
+                    <span id="id-readonly-msg" style="display:none; color: #888; font-size: 12px;">ID no editable</span>
+                    <div id="form-message" style="display:none; margin-top:10px;"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Updating quiz...</div>
+    </div>
+</div>
+
+<!-- Pop up para agregar preguntas -->
+<script src="/js/quizzes/quizzes.js"></script>
+</body>
+</html>

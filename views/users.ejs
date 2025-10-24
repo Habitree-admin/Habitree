@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <link rel="stylesheet" href ="/css/users.css">
+    <title>Users</title>
+    <link rel="icon" type="image/png" href="/img/LogoHabitree.png">
+    <meta name="csrf-token" content="<%= csrfToken %>">
+</head>
+
+
+<body>
+    <div class="content">
+        <%- include('partials/navbar') %>
+
+    <div class="Dashboard_content">
+        <div class = "Dashboard__title-container">
+            <h1 class="Dashboard__title">Users</h1>
+            <div class="container__button">
+                <button id= "openModal" class="instrument-sans-bold header__button">Add</button>
+            </div>
+        </div>
+        <!-- Search field -->
+        <div class="search-container" style="width: 30%; margin-left: 3vh; display: inline-flex;">
+            <input type="text" id="searchInput" placeholder="Search by name or ID..." />
+        </div>
+
+        <!-- Table of registered users -->
+        <div class="table-container">
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Gender</th>
+                        <th>Date of Birth</th>
+                        <th class="actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <% if (usuarios && usuarios.length > 0) { %>
+                        <% usuarios.forEach(function(usuario) { %>
+                            <tr class="user-row"
+                                data-id="<%= usuario.IDUser %>"
+                                data-name="<%= usuario.name %>"
+                                data-email="<%= usuario.email %>"
+                                data-gender="<%= usuario.gender %>"
+                                data-dateofbirth="<%= usuario.dateOfBirth ? usuario.dateOfBirth.toISOString ? usuario.dateOfBirth.toISOString().slice(0,10) : usuario.dateOfBirth : '' %>"
+                            >
+                                <td><%= usuario.IDUser %></td>
+                                <td><%= usuario.name %></td>
+                                <td><%= usuario.email %></td>
+                                <td><%= usuario.gender %></td>
+                                <td><%= usuario.dateOfBirth ? usuario.dateOfBirth.toISOString ? usuario.dateOfBirth.toISOString().slice(0,10) : usuario.dateOfBirth : '' %></td>
+                                <td class="actions">
+                                    <button class="table__button manage-user-btn">Manage</button>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr class="no-users-row"><td colspan="6">No users found.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+
+            <!-- Mensaje de usuario no encontrado -->
+            <div id="noUserFoundMsg" style="display:none; color:red; margin-top:10px;">User not found.</div>
+        </div>
+
+        <!-- POP UP TO ADD USER -->
+        <div class="modal" id="modal">
+            <div class="modal-inner">
+                <nav>            
+                    <button id="closeModal" class="fa fa-times"></button>
+                </nav>
+                <h1 class ="modal-title">Add User</h1>
+                <form action="/users" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <div id="form-message" style="display:none;"></div>
+
+                    <section>
+                        <label for="name">Name</label>
+                        <input class = "description" type="text" id="name" name="name" placeholder="Name" required>
+                        <br style="clear:both;" />
+                    </section>
+                    <section>
+                        <label for="name">Email</label>
+                        <input class = "description" type="email" id="email" name="email" placeholder="Email" required>
+                        <br style="clear:both;" />
+                    </section>  
+
+                    <section class="inputs-row">
+                        <div class="input-container">
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender" required>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="input-container">
+                            <label for="dateOfBirth" class="label">Date of Birth</label>
+                            <input
+                                class="text-modal"
+                                min="1900-01-01"
+                                max="2010-12-31"
+                                type="date"
+                                placeholder="dd/mm/yy"
+                                id="dateOfBirth"
+                                name="dateOfBirth"
+                                required
+                                oninvalid="this.setCustomValidity('Please select a date')" 
+                                onchange="this.setCustomValidity('')"
+                                style="width: auto;"
+                            />
+                        </div>
+                    </section>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="submit-btn" id="add-edit-btn">Add</button>
+                        <button type="button" class="submit-btn" id="delete-btn" style="background-color: #d35400; color: white; display: none;">Delete</button>
+                    </div>
+                    <span id="id-readonly-msg" style="display:none; color: #888; font-size: 12px;">ID no editable en edicion</span>
+                </form>  
+            </div>
+        </div>
+        <script src ="/js/users.js"></script>
+    </div>
+
+        <script src="/js/users.js"></script>
+
+        <% if (typeof alertMessage !== 'undefined' && alertMessage) { %>
+            <script>
+                alert("<%= alertMessage %>");
+            </script>
+        <% } %>
+
+</body>
+</html>

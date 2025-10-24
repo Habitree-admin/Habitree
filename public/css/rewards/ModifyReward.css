@@ -1,0 +1,6 @@
+@import url('/css/rewards/rewards.css');
+
+/* Personalización mínima para el modal de edición */
+#modifyRewardModal .modal-inner {
+  border: 2px solid #2DA460;
+}

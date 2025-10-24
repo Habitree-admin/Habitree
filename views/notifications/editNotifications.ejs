@@ -1,0 +1,38 @@
+<div class="modal">
+  <h2 id="modal-title">Edit Notification</h2>
+  <form id="form-edit-notification" action="/notifications/update" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <input type="hidden" name="id" value="<%= id %>" />
+
+    <!-- Camp Title -->
+    <label for="titulo">Tittle:</label>
+    <input type="text" name="titulo" id="titulo" value="<%= titulo %>" required />
+
+    <!-- Camp Message -->
+    <label for="mensaje">Message:</label>
+    <input type="text" name="mensaje" id="mensaje" value="<%= description %>" required />
+
+    <!-- Camp Canal -->
+    <label for="canal">Channel:</label>
+    <input type="text" name="canal" id="canal" value="<%= canal %>" readonly style="background:#e0ffe0;" />
+
+    <!-- Camp Category -->
+    <label for="category">Category:</label>
+    <input type="text" name="category" id="category" value="<%= category %>" required />
+
+    <div class="button-container">
+      <button id="guardar-btn" type="submit">Edit</button>
+
+      <% if (isActive === 'Sí') { %>
+        <button id="delete-btn" type="button" class="close-modal">Deactivate</button>
+      <% } else { %>
+        <button id="delete-btn" type="button" class="close-modal">Activate</button>
+      <% } %>
+    </div>
+  </form>
+
+  <form id="form-delete-notification" action="/notifications/delete" method="POST" style="display: none;">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <input type="hidden" name="id" value="<%= id %>" />
+  </form>
+</div>
