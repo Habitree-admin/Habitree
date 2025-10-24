@@ -8,11 +8,11 @@ exports.getLeagues = async (req, res) => {
 }
 
 exports.getAddLeague = (req, res) => {
-    res.render('leagues/addLeague', { csrfToken: req.csrfToken() });
+    res.render('Leagues/addLeague', { csrfToken: req.csrfToken() });
 }
 
 exports.getAddLeagueModal = (req, res) => {
-    res.render('leagues/addLeague', { csrfToken: req.csrfToken() });
+    res.render('Leagues/addLeague', { csrfToken: req.csrfToken() });
 }
 
 exports.getEditLeagueModal = (req, res) => {
@@ -24,6 +24,13 @@ exports.getEditLeagueModal = (req, res) => {
     });
 };
 
+/**
+     * Adds a new league.
+     *
+     * Creates a league using values from the request:
+     * - name: league name (string)
+     * - lvl: league level as a trimmed string (rawLvl)
+     */
 exports.postAddLeague = async (req, res) => {
     console.log('POST /leagues/add body:', req.body);
     const { name, lvl } = req.body;
@@ -44,30 +51,53 @@ exports.postAddLeague = async (req, res) => {
 };
 
 const leaguesModel = require('../../models/Leagues/leagues.model');
+/*
+This funciton change the name of a league information 
 
+    postEditLeagueName Change the name of an available league and call the process in models
+    after this redirect to leagues page on the ejs view
+*/
 exports.postEditLeagueName = async (req, res) => {
+    // Extract the current and new names the user put from the request body
     const { nameA, name } = req.body;
     try {
+        // Call the model function to change name
         await leaguesModel.cambiarNombreLiga(nameA, name);
+        // Redirect to leagues page
         res.redirect('/leagues');
     } catch (err) {
+        // Log and send error 
         console.error('Error al cambiar nombre de liga:', err);
         res.status(500).send('Error al cambiar nombre de liga');
     }
 };
+/*
 
+This funciton change the minimum level of a league information 
+
+    postEditLeagueLevel Change the min level of an available league and call the process in models
+    after this redirect to leagues page on the ejs view
+*/
 exports.postEditLeagueLevel = async (req, res) => {
+    // Extract the current name and new min level the user put from the request body
     const { nameA, lvl } = req.body;
     try {
+        // Call the model function to change min level
         await leaguesModel.cambiarMinLevelLiga(nameA, parseInt(lvl, 10));
+        // Redirect to leagues page
         res.redirect('/leagues');
     } catch (err) {
+        // Log and send error
         console.error('Error al cambiar min level de liga:', err);
         res.status(500).send('Error al cambiar min level de liga');
     }
 };
 
-// Eliminar liga
+/**
+ * This function delete the league by its name information on the ejs view
+ *
+ *  deleteLeague Delete an available league and renderize it in the route
+ */
 exports.deleteLeague = async (req, res) => {
     const { leagueName } = req.body;
 

@@ -7,10 +7,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     <link rel="stylesheet" href="/css/quizzes/quizzes.css">
     <title>Quizzes</title>
+    <link rel="icon" type="image/png" href="/img/LogoHabitree.png">
 </head>
 
 <body>
-<!-- Página y tabla principal-->
+
 <div class="content">
     <%- include('../partials/navbar') %>
 
@@ -22,6 +23,7 @@
             </div>
         </div>
 
+        <!-- Table showing all quizzes -->
         <div class="table-container instrument-sans-regular">
             <table>
                 <thead>
@@ -36,20 +38,24 @@
                 </tr>
                 </thead>
                 <tbody>
+                <!--Loop through quizzes array and display each quizz avialable-->
                 <% if (quizzes && quizzes.length > 0) { %>
                     <% quizzes.forEach(function(quiz) { %>
-                        <tr>
-                            <td><%= quiz.IDQuiz %></td>
-                            <td><%= quiz.description %></td>
-                            <td><%= quiz.category %></td>
-                            <td><%= quiz.available ? 'Yes' : 'No' %></td>
-                            <td><%= quiz.experience %></td>
-                            <td><%= quiz.questions %></td>
-                            <td class="actions"><button class="table__button manage-button">Manage</button></td>
-                        </tr>
+                        <% if (quiz.available == 1) { %>
+                            <tr>
+                                <td><%= quiz.IDQuiz %></td>
+                                <td><%= quiz.description %></td>
+                                <td><%= quiz.category %></td>
+                                <td><%= quiz.available ? 'Yes' : 'No' %></td>
+                                <td><%= quiz.experience %></td>
+                                <td><%= quiz.questions %></td>
+                                <td class="actions"><button class="table__button manage-button">Manage</button></td>
+                            </tr>
+                        <% } %>
                     <% }) %>
                 <% } else { %>
                     <tr>
+                        <!--Display message if quizzes doesn't exist -->
                         <td colspan="7" style="text-align:center;">No quizzes available</td>
                     </tr>
                 <% } %>

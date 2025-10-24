@@ -1,8 +1,13 @@
 const quizzesService = require("../services/quizzes.service");
 
+/**
+ * This function gets all quizzes for a specific user
+ * 
+ * getQuizzes returns all quizzes by user, completed or not completed
+ */
 const getQuizzes = async (req, res) => {
   try {
-    const { id } = req.params;; // ejemplo: leer de query
+    const { id } = req.params;
     const quizzes = await quizzesService.getAllQuizzes(id);
     res.json(quizzes);
   } catch (err) {
@@ -13,6 +18,11 @@ const getQuizzes = async (req, res) => {
   }
 };
 
+/**
+ * This function gets a quiz by ID
+ * 
+ * getQuiz returns all the data from a quiz by its ID, like its questions, and answers to those questions
+ */
 const getQuiz = async (req, res) => {
   try {
     const { id } = req.params; // quizId
@@ -33,24 +43,29 @@ const getQuiz = async (req, res) => {
   }
 };
 
+/**
+ * This function marks a quiz as completed for a user
+ * 
+ * postCompleteQuiz returns the quiz was completed succesfully or unsuccessfully
+ */
 const postCompleteQuiz = async (req, res) => {
   try {
     const { IDQuiz, IDUser } = req.body;
 
-    // Validar que se enviaron los campos requeridos
+    // check request body
     if (!IDQuiz || !IDUser) {
       return res.status(400).json({
         success: false,
-        message: "IDQuiz e IDUser son requeridos",
+        message: "IDQuiz and IDUser are required",
         data: null
       });
     }
 
-    // Validar que son números válidos
+    // error handling
     if (isNaN(IDQuiz) || isNaN(IDUser)) {
       return res.status(400).json({
         success: false,
-        message: "IDQuiz e IDUser deben ser números válidos",
+        message: "IDQuiz and IDUser must be numbers",
         data: null
       });
     }
@@ -61,16 +76,16 @@ const postCompleteQuiz = async (req, res) => {
     
   } catch (err) {
     let statusCode = 500;
-    let message = "Error interno del servidor";
+    let message = "Internal server error";
 
-    // Manejar errores específicos
-    if (err.message.includes("ya completó este quiz")) {
+    // Error handling
+    if (err.message.includes("Quiz already completed")) {
       statusCode = 409; // Conflict
       message = err.message;
-    } else if (err.message.includes("no existe")) {
+    } else if (err.message.includes("Quiz doesnt exist")) {
       statusCode = 404; // Not Found
       message = err.message;
-    } else if (err.message.includes("no está disponible")) {
+    } else if (err.message.includes("Quiz not available")) {
       statusCode = 400; // Bad Request
       message = err.message;
     }

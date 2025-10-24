@@ -1,0 +1,374 @@
+/* CSS específico para indicators - sin estilos del navbar */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap');
+
+html, body {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    min-height: 100vh;
+    min-width: 100vw;
+    font-family: 'Instrument Sans', sans-serif;
+    background-color: #f4f7f2;
+}
+
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.content{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+}
+
+.Dashboard_content {
+    flex-basis: 70%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.Dashboard_content::-webkit-scrollbar-thumb {
+    background: #2DA460;
+    border-radius: 8px;
+}
+
+.Dashboard_content::-webkit-scrollbar-track {
+    background: #e0e0e0;
+    border-radius: 8px;
+}
+
+.Dashboard_content::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+    background: transparent;
+}
+
+.Dashboard__title {
+    margin-top: 10px;
+    font-size: 32px;
+    padding: 20px;
+    width: 100%;
+    color: #0b2f1f;
+}
+
+.Dashboard__title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.Dashboard-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+}
+
+.Dashboard__gridContent {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 20px;
+    min-height: 0;
+    height: 70%;
+    justify-items: center;
+    align-items: center;
+}
+
+.Dashboard__gridItem {
+    border: 2px solid #0b2f1f;
+    border-radius: 16px;
+    padding: 16px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.Dashboard__gridItem:hover {
+    border: 2px solid #2DA460;
+    cursor: pointer;
+}
+
+.Dashboard__gridItemIcon__text {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #626262;
+    margin-bottom: 50px;
+}
+
+.Dashboard__gridItemIcon {
+    background-color: #2ecc702a;
+    border-radius: 8px;
+    padding: 12px;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.Dashboard__gridItemIcon__icon {
+    color: #2DA460;
+    font-size: 24px;
+    margin-top: 12px;
+}
+
+i {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.table__button {
+    font-size: 12px;
+    border-radius: 10px;
+    background: linear-gradient(to right, #2DA460, #2D9459);
+    color: white;
+    padding: 6px 20px;
+    border: none;
+    cursor: pointer;
+}
+
+.table-container {
+    border-radius: 8px;
+    overflow-x: auto;
+    border: 2px solid #0B2F1F;
+    margin: 24px 32px 24px 32px;
+    box-sizing: border-box;
+    padding: 16px;
+}
+
+.table-container table {
+    border: none;
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0;
+    table-layout: fixed;
+}
+
+.table-container th,
+.table-container td {
+    padding: 12px 16px;
+    text-align: left;
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 12px;
+}
+
+.table-container .actions {
+    text-align: center;
+}
+
+/* Estilos específicos para la fila de TOTAL */
+.total-row {
+    background-color: #f0f8f4;
+    font-weight: bold;
+    border-top: 2px solid #2DA460;
+}
+
+.total-row td {
+    color: #0b2f1f;
+    font-size: 13px;
+}
+
+.table-container tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.table-container tbody .total-row:hover {
+    background-color: #e8f5e9;
+}
+
+/* Sección de indicadores globales */
+.global-indicators-section {
+    margin: 20px 32px;
+    padding: 24px;
+    background: white;
+    border-radius: 12px;
+    border: 2px solid #0B2F1F;
+}
+
+.user-indicators-section {
+    margin: 20px 32px;
+}
+
+.section-title {
+    font-size: 24px;
+    color: #0b2f1f;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-title i {
+    font-size: 28px;
+    color: #2DA460;
+}
+
+/* Cards de impacto global */
+.global-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.impact-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.impact-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Colores específicos por categoría */
+.water-card {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    border-color: #3498db;
+}
+
+.energy-card {
+    background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+    border-color: #e74c3c;
+}
+
+.transport-card {
+    background: linear-gradient(135deg, #74ebd5 0%, #acb6e5 100%);
+    border-color: #1abc9c;
+}
+
+.waste-card {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    border-color: #f39c12;
+}
+
+
+.consumption-card {
+    background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+    border-color: #9b59b6;
+}
+
+.awareness-card {
+    background: linear-gradient(135deg, #a1ffce 0%, #faffd1 100%);
+    border-color: #27ae60;
+}
+
+.card-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.card-icon i {
+    color: #0b2f1f;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #0b2f1f;
+    margin-bottom: 8px;
+    text-transform: capitalize;
+}
+
+.card-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: #2DA460;
+    margin-bottom: 4px;
+}
+
+.unit {
+    font-size: 14px;
+    font-weight: normal;
+    color: #0b2f1f;
+    display: block;
+    margin-top: 4px;
+}
+
+.card-missions {
+    font-size: 14px;
+    color: #626262;
+}
+
+/* Contenedor de gráfica */
+.chart-container {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    margin-top: 24px;
+    border: 1px solid #e0e0e0;
+}
+
+.chart-title {
+    font-size: 20px;
+    color: #0b2f1f;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+canvas {
+    max-height: 400px;
+}
+
+.no-data {
+    text-align: center;
+    color: #626262;
+    font-size: 16px;
+    padding: 40px;
+}
+
+/* Gráfica de radar */
+.radar-chart {
+    margin-top: 24px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Sección de gráficas en fila */
+.charts-section {
+    margin: 20px 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* Ajustar la gráfica de radar para que no tenga estilos adicionales */
+.radar-chart {
+    margin-top: 0;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Ajustar altura del canvas */
+canvas {
+    max-height: 350px;
+}
+
+/* Responsive: en pantallas pequeñas, una columna */
+@media (max-width: 1024px) {
+    .charts-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Espaciado entre secciones */
+.user-indicators-section {
+    margin-top: 40px;
+}

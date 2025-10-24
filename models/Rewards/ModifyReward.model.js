@@ -1,15 +1,19 @@
 const db = require('../../util/database');
+ /**
+   * This file collect the data of rewards from the database
+  */
+
 
 module.exports = class ModifyReward {
   /**
-   * Obtener recompensa por su ID
+   * Collect reward for ID
    */
   static fetchById(id) {
     return db.execute('SELECT * FROM rewards WHERE IDReward = ?', [id]);
   }
 
   /**
-   * Actualizar recompensa existente
+   * Update existent reward
    */
   static update(id, data) {
     return db.execute(

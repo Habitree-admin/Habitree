@@ -1,49 +1,58 @@
 const db = require('../../util/database');
 
-// Clase Reward
+/**
+ * Collects reward data access functions for the database.
+ *
+ */
+
+// Class Reward
 module.exports = class Reward {
 
-    constructor(IDReward, name, description, type, available, value) {
-        this.IDReward = IDReward;
+    constructor(name, description, type, available, value) {
         this.name = name;
         this.description = description;
         this.type = type;        // monetary / nonMonetary
         this.available = available; // 0 / 1
-        this.value = value;      // puede ser número o código
+        this.value = value;      // Number or code
     }
 
     /**
-     * Guarda una nueva recompensa
+     * Saves a new reward into the database.
+     *
      */
     save() {
         return db.execute(
-            'INSERT INTO rewards (IDReward, name, description, type, available, value) VALUES (?, ?, ?, ?, ?, ?)',
-            [this.IDReward, this.name, this.description, this.type, this.available, this.value]
+            'INSERT INTO rewards (name, description, type, available, value) VALUES (?, ?, ?, ?, ?)',
+            [this.name, this.description, this.type, this.available, this.value]
         );
     }
 
     /**
-     * Devuelve todas las recompensas
-     * @returns {Promise}
+     * Retrieves all available rewards from the database.
+     * Returns rows where `available = 1`.
+     *
      */
     static fetchAll() {
-        return db.execute('SELECT * FROM rewards WHERE available = 1'); // Muestra solo las activas
+        // returns a promise that resolves with rewards where available = 1
+        return db.execute('SELECT * FROM rewards WHERE available = 1'); 
     }
 
     /**
-     * Devuelve una recompensa por su ID
+     * Retrieves a reward by its ID.
      * @param {number} id
      * @returns {Promise}
+     *
      */
     static fetchById(id) {
         return db.execute('SELECT * FROM rewards WHERE IDReward = ?', [id]);
     }
 
     /**
-     * Actualiza una recompensa existente
+     * Updates an existing reward by ID.
      * @param {number} id
      * @param {object} data
      * @returns {Promise}
+     *
      */
     static update(id, data) {
         return db.execute(

@@ -1,20 +1,21 @@
 const express = require("express");
 const router = express.Router();
+const isAuth = require('../../util/is-auth');
 const RewardController = require("../../controllers/Rewards/Rewards.controller");
 
-// Obtener todas las recompensas
-router.get("/", RewardController.getRewards);
+// Collect all rewards
+router.get("/", isAuth, RewardController.getRewards);
 
-// Registrar nueva recompensa
-router.post("/", RewardController.postRewards);
+// Add a new reward
+router.post("/", isAuth, RewardController.postRewards);
 
-// Obtener recompensa por ID (para ediciÃ³n)
-router.get("/:id", RewardController.getRewardById);
+// Collect reward for ID(to edit)
+router.get("/:id", isAuth, RewardController.getRewardById);
 
-// Editar recompensa
-router.post("/edit/:id", RewardController.editReward);
+// Edit reward
+router.post("/edit/:id", isAuth, RewardController.editReward);
 
-// Eliminar recompensa
-router.delete("/:id", RewardController.deleteReward);
+// Erase reward
+router.delete("/:id", isAuth, RewardController.deleteReward);
 
 module.exports = router;

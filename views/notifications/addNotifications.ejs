@@ -1,22 +1,22 @@
 <div class="modal">
     <h2 id="modal-title">Add Notification</h2>
     <form id="form-add-notification" action="/notifications/create" method="POST">
-        <!--campo CSRF -->
+        <!--camp CSRF -->
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
         
-        <!-- Campo Título -->
-        <label for="titulo">Título:</label>
+        <!-- camp Tittle -->
+        <label for="titulo">Tittle:</label>
         <input type="text" name="titulo" id="titulo" required>
         
-        <!-- Campo Mensaje (Description) -->
-        <label for="mensaje">Mensaje:</label>
+        <!-- camp Message (Description) -->
+        <label for="mensaje">Message:</label>
         <input type="text" name="mensaje" id="mensaje" required>
         
-        <!-- Campo Canal (readonly) -->
-        <label for="canal">Canal:</label>
+        <!-- camp Canal (readonly) -->
+        <label for="canal">Channel:</label>
         <input type="text" name="canal" id="canal" value="general" readonly style="background:#e0ffe0;">
         
-        <!-- Campo Category -->
+        <!-- camp Category -->
         <label for="category">Category:</label>
         <input type="text" name="category" id="category" required>
         

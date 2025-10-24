@@ -3,9 +3,8 @@ const db = require('../../util/database');
 // Clase mission
 module.exports = class Mission{
 
-    constructor(IDMission,responseVerification,category,description,dateOfCreation,available,experience,value){
+    constructor(responseVerification,category,description,dateOfCreation,available,experience,value){
 
-        this.IDMission = IDMission;
         this.responseVerification = responseVerification;
         this.category = category; 
         this.description = description; 
@@ -16,24 +15,32 @@ module.exports = class Mission{
 
     } 
 
-//Guardar el registro de una mision 
+/**
+ * This function allows the application to save new missions for the users.
+ *
+ * This function is responsible for storing a new mission record in the database
+ * 
+ */
 
     save(){
  
         const currentDate = new Date();
+
+        // Runs a SQL query against the database
         return db.execute(
-            'INSERT INTO mission (IDMission,responseVerification,category,description,dateOfCreation,available,experience,value) VALUES(?,?,?,?,?,?,?,?)',
-            [this.IDMission, this.responseVerification, this.category, this.description, currentDate, this.available, this.experience, this.value]
+
+        //It inserts the values of the mission instance into the mission table.
+            'INSERT INTO mission (responseVerification,category,description,dateOfCreation,available,experience,value) VALUES(?,?,?,?,?,?,?)',
+            [ this.responseVerification, this.category, this.description, currentDate, this.available, this.experience, this.value]
         );
     }
 
 
     /**
-     * Devuelve todas las misiones.
-     * @returns {Promise}
+     * Retrieves all available missions from the database.
+     * Only missions with available = 1 are returned.
      */
     static fetchAll() {
-    // Solo misiones activas (borrado lógico)
     return db.execute('SELECT * FROM mission WHERE available=1');
     }
 

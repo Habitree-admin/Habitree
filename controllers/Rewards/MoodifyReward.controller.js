@@ -1,7 +1,12 @@
 const Reward = require('../../models/Rewards/ModifyReward.model');
 
 /**
- * Obtener recompensa por ID (para mostrar en el modal de edición)
+ * This file contains the controllers for the activities of modified a reward
+ */
+
+
+/**
+ * Collect reward for ID (to give in modal of edition)
  */
 exports.getRewardById = async (req, res) => {
   try {
@@ -17,7 +22,7 @@ exports.getRewardById = async (req, res) => {
 };
 
 /**
- * Editar recompensa existente
+ * Edit existent reward 
  */
 exports.editReward = async (req, res) => {
   try {
@@ -36,7 +41,7 @@ exports.editReward = async (req, res) => {
       return res.status(404).render("error", { message: "Reward not found" });
     }
 
-    //  Redirigir directamente a la vista /rewards
+    //  Redirect directly to view  /rewards
     res.redirect("/rewards");
 
   } catch (err) {

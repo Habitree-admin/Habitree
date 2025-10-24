@@ -23,6 +23,12 @@ app.use(session({
     secret: 'mi string secreto que debe ser un string aleatorio muy largo, no como éste', 
     resave: false, //La sesión no se guardará en cada petición, sino sólo se guardará si algo cambió 
     saveUninitialized: false, //Asegura que no se guarde una sesión para una petición que no lo necesita
+    cookie: {
+        maxAge: 40 * 60 * 1000, // duración  de 40 minutos
+        secure: false,     // envía la cookie por HTTPS, pero en desarrollo ponerlo en false
+        httpOnly: true,   // Evita acceso desde JS del cliente
+        sameSite: 'lax' // Evita envío de cookies en peticiones cruzadas
+    }
 }));
 
 const cookieParser = require('cookie-parser');
@@ -73,7 +79,7 @@ app.use('/shop', shopRoutes);
 const userRoutes = require('./routes/users.routes');
 app.use('/users', userRoutes);
 
-const loginRoutes = require('./routes/login.routes');
+const loginRoutes = require('./routes/login.routes.js');
 app.use('/login', loginRoutes);
 
 const rewardsRoutes = require('./routes/Rewards/Rewards.routes');
@@ -91,6 +97,10 @@ app.use('/leagues', leaguesRoutes)
 
 const missionsRoutes = require('./routes/Missions/missions.routes');
 app.use(missionsRoutes);
+
+// Ruta de Indicators
+const indicatorsRoutes = require('./routes/indicators/indicators.routes');
+app.use('/indicators', indicatorsRoutes);
  
 const quizzesRoutes = require ('./routes/quizzes/quizzes.routes');
 app.use(quizzesRoutes);

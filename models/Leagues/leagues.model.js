@@ -2,11 +2,16 @@
 // eslint-disable-next-line no-undef
 const db = require('../../util/database');
 
+
+/**
+ * Creates a league
+ * 
+ * Calls a procedure in the dataBase, creates a new league and reorganizes the users
+ * 
+ */
 async function createLeagueViaProcedure({ name, lvl}, connection) {
-    // ... (Tu código de createLeagueViaProcedure)
     const procName = 'InsertarLiga'; 
     const params = [name, lvl];
-    // ... (resto de la lógica)
     try {
         if (connection) {
             const [result] = await connection.execute(`CALL ${procName}(?, ?)`, params);
@@ -20,7 +25,13 @@ async function createLeagueViaProcedure({ name, lvl}, connection) {
     }
 }
 
-// Renombra la clase a League para mayor claridad
+
+/**
+ * This function returns all registered leagues
+ *
+ * @class League
+ * @typedef {League}
+ */
 class League {
     constructor(ID_league, league, min_level){
         this.ID_league = ID_league;
@@ -28,9 +39,7 @@ class League {
         this.min_level = min_level; 
     } 
 
-    /**
-     * Devuelve todas las ligas.
-     */
+  
     static fetchAll() {
         return db.execute('SELECT * FROM Leagues');
     }
@@ -44,7 +53,13 @@ async function cambiarMinLevelLiga(nombre_liga, nuevo_min_level) {
     return db.execute('CALL CambiarMinLevelLiga(?, ?)', [nombre_liga, nuevo_min_level]);
 }
 
-
+/**
+ *
+ * This function allows the user to delete a league available in the database
+ *
+ * This function calls a procedure on the data base that uses the league name
+ *
+ */
 async function deleteLeagueByName(leagueName) {
     try {
         const [rows] = await db.query(`CALL EliminarLigaCompleta(?)`, [leagueName]);

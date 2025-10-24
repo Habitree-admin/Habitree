@@ -29,7 +29,12 @@ modal.addEventListener("click", (e) => {
     }
 });
 
-// Mostrar mensajes en el pop-up
+/**
+ 
+ this shows a message in the modal popup
+ this displays success or error text briefly
+ *
+ */
 function showMessage(msg, isError = false) {
     const msgDiv = document.getElementById("form-message");
     msgDiv.textContent = msg;
@@ -38,12 +43,12 @@ function showMessage(msg, isError = false) {
     setTimeout(() => { msgDiv.style.display = "none"; }, 3000);
 }
 
-// Abrir modal en modo edición al hacer clic en 'Manage'
+// Open modal in edit mode on 'Manage' click
 document.querySelectorAll(".manage-user-btn").forEach(btn => {
     btn.addEventListener("click", function(e) {
         const row = e.target.closest("tr");
         const userId = row.getAttribute("data-id");
-        // Obtener datos del usuario por AJAX
+        // Get user data via fetch
         fetch(`/users/${userId}`)
             .then(res => res.json())
             .then(user => {
@@ -60,7 +65,7 @@ document.querySelectorAll(".manage-user-btn").forEach(btn => {
                 document.getElementById("id-readonly-msg").style.display = "inline";
                 document.getElementById("delete-btn").style.display = "inline-block";
                 document.getElementById("add-edit-btn").textContent = "Edit";
-                // Mostrar el botón de borrar dentro del modal
+                // show delete button inside modal
                 const deleteBtn = document.getElementById("delete-btn");
                 deleteBtn.style.display = "inline-block";
                 deleteBtn.dataset.userId = userId;
@@ -72,7 +77,12 @@ document.querySelectorAll(".manage-user-btn").forEach(btn => {
     });
 });
 
-//Eliminar usuario 
+/**
+ 
+ this handler deletes a user from the UI
+ this posts to bd and shows message on success
+ *
+ */
 document.getElementById('delete-btn').addEventListener('click', function() {
     if (!confirm('¿Seguro que quieres eliminar este usuario?')) return;
     const userId = this.dataset.userId || currentUserId;
@@ -97,36 +107,65 @@ document.getElementById('delete-btn').addEventListener('click', function() {
     });
 });
 
-// Interceptar el submit en modo edición para enviar por AJAX
-form.addEventListener("submit", function(e) {
+/**
+ 
+ this handler submits user edits via ajax in edit mode
+ this prevents default and posts json
+ *
+ */
+// intercept submit in edit mode
+form.addEventListener("submit", async function (e) {
+    const submitBtn = document.getElementById("add-edit-btn");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Processing...";
+
     if (editMode) {
         e.preventDefault();
+
         const data = {
             name: form.name.value,
             email: form.email.value,
             gender: form.gender.value,
             dateOfBirth: form.dateOfBirth.value
         };
-        fetch(`/users/edit/${currentUserId}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "CSRF-Token": form._csrf.value
-            },
-            body: JSON.stringify(data)
-        })
-        .then(res => res.json())
-        .then(result => {
+
+        try {
+            const res = await fetch(`/users/edit/${currentUserId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "CSRF-Token": form._csrf.value
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+
             if (result.success) {
                 showMessage(result.message);
-                setTimeout(() => { window.location.reload(); }, 1200);
+                setTimeout(() => window.location.reload(), 1200);
             } else {
                 showMessage(result.message, true);
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Edit";
             }
-        })
-        .catch(() => {
+
+        } catch (err) {
             showMessage("Error updating user", true);
-        });
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Edit";
+        }
+
+    } else {
+        // Si es modo "Add", bloquea clics rápidos
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Adding...";
+
+        // Reactiva el botón después de unos segundos preventivos
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Add";
+        }, 4000);
     }
 });
 
@@ -153,13 +192,11 @@ function filterUsers() {
             row.style.display = "none";
         }
     });
-    // Ocultar/mostrar mensaje de no encontrado
     if (!found) {
         noUserFoundMsg.style.display = "block";
     } else {
         noUserFoundMsg.style.display = "none";
     }
-    // Ocultar la fila de "No hay usuarios registrados" si hay búsqueda
     const noUsersRow = usersTableBody.querySelector("tr.no-users-row");
     if (noUsersRow) {
         noUsersRow.style.display = searchValue === "" ? "" : "none";

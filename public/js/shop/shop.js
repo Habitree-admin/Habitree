@@ -1,17 +1,24 @@
-// Variables globales
+// Global variables
 let currentFilters = {};
 
-// Inicialización
+/**
+ * Initializes listeners and loads initial filter options on DOM ready.
+ *
+ */
 document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
     loadFilterOptions();
 });
 
-// Configurar event listeners
+/**
+ * Wires up UI events like filter toggle and edit buttons.
+ * Calls attachEditListeners to bind edit actions on product cards.
+ *
+ */
 function initializeEventListeners() {
     const filterToggle = document.getElementById('filterToggle');
 
-    // Toggle filtros
+    // Toggle filters
     filterToggle.addEventListener('click', () => {
         const filtersSection = document.getElementById('filtersSection');
         filtersSection.classList.toggle('hidden');
@@ -20,7 +27,11 @@ function initializeEventListeners() {
     attachEditListeners();
 }
 
-// Cargar opciones de filtros desde la BD
+/**
+ * Loads available filter options (states, categories, price range) from the server.
+ * Populates selects and placeholders based on API response.
+ *
+ */
 async function loadFilterOptions() {
     try {
         const response = await fetch('/shop/api/filter-options');
@@ -29,7 +40,7 @@ async function loadFilterOptions() {
         if (result.success) {
             const { categories, states, priceRange } = result.data;
 
-            // Llenar select de estados
+            // Fill state select
             const stateSelect = document.getElementById('filterState');
             states.forEach(state => {
                 const option = document.createElement('option');
@@ -38,7 +49,7 @@ async function loadFilterOptions() {
                 stateSelect.appendChild(option);
             });
 
-            // Llenar select de categorías
+            // Fill category select
             const categorySelect = document.getElementById('filterCategory');
             categories.forEach(category => {
                 const option = document.createElement('option');
@@ -47,7 +58,7 @@ async function loadFilterOptions() {
                 categorySelect.appendChild(option);
             });
 
-            // Configurar placeholder del precio máximo
+            // Configure max price placeholder
             if (priceRange.maxPrice > 0) {
                 document.getElementById('filterMaxPrice').placeholder = priceRange.maxPrice.toFixed(2);
             }
@@ -57,21 +68,24 @@ async function loadFilterOptions() {
     }
 }
 
-// Aplicar filtros
+/**
+ * Collects filter form values, validates price range, and queries filtered items.
+ * Updates the product grid with results and shows loading states.
+ *
+ */
 async function applyFilters() {
     const state = document.getElementById('filterState').value;
     const category = document.getElementById('filterCategory').value;
     const minPrice = document.getElementById('filterMinPrice').value;
     const maxPrice = document.getElementById('filterMaxPrice').value;
 
-
-    // Validar rango de precios
+    // Validate price range
     if (minPrice && maxPrice && parseFloat(minPrice) > parseFloat(maxPrice)) {
         alert('El precio mínimo no puede ser mayor que el precio máximo');
         return;
     }
 
-    // Construir objeto de filtros
+    // Build filters object
     currentFilters = {};
     if (state) currentFilters.state = state;
     if (category) currentFilters.category = category;
@@ -84,7 +98,7 @@ async function applyFilters() {
         const params = new URLSearchParams(currentFilters);
         const url = `/shop/api/filter?${params.toString()}`;
 
-        console.log('Fetching:', url); // Para debugging
+        console.log('Fetching:', url); // for debugging
 
         const response = await fetch(url);
 
@@ -107,14 +121,21 @@ async function applyFilters() {
     }
 }
 
-// Limpiar filtros
+/**
+ * Resets filter form and reloads the page to clear results.
+ *
+ */
 function clearFilters() {
     document.getElementById('filterForm').reset();
     currentFilters = {};
     location.reload();
 }
 
-// Mostrar productos
+/**
+ * Renders the products grid or a no-results view based on API data.
+ * Rebinds edit button listeners after rendering.
+ *
+ */
 function displayProducts(products) {
   const grid = document.getElementById('productGrid');
   const noResults = document.getElementById('noResults');
@@ -137,9 +158,13 @@ function displayProducts(products) {
   attachEditListeners(); 
 }
 
-// Adjuntar listeners a botones de edición
+/**
+ * Binds click handlers to every edit button inside product cards.
+ * Fetches item data in JSON and opens the modal in edit mode.
+ *
+ */
 function attachEditListeners() {
-  document.querySelectorAll(".product-card .edit-item-btn").forEach(btn => { // Todos los botones .edit-item-btn
+  document.querySelectorAll(".product-card .edit-item-btn").forEach(btn => { // all .edit-item-btn buttons
     btn.addEventListener("click", async (e) => {
       const card = e.target.closest(".product-card");
       const itemId = card?.getAttribute("data-id");
@@ -152,29 +177,28 @@ function attachEditListeners() {
         if (!json.success) throw new Error(json.message || "Error loading item data");
         const item = json.data;
 
-        // Seleccionar elementos del modal
+        // Select modal elements
         const modal = document.getElementById("modal");
         const form = modal.querySelector("form");
         const modalTitle = modal.querySelector(".modal-title");
 
-        // Busca los inputs y rellena
+        // Find inputs and fill them
         form.name.value = item.name ?? "";
         form.price.value = item.price ?? "";
         form.category.value = item.category ?? "";
         form.state.value = String(item.state ?? "1");
 
-        // Conserva el image_name actual
+        // Keep current image_name
         form.querySelector("#image_name_current").value = item.image_name || "";
 
-
-        // preparar modo edición
+        // Prepare edit mode
         modalTitle.textContent = "Edit Item";
         form.action = `/shop/update/${item.id}`;
         modal.classList.add("open");
         editMode = true;
         currentUserId = item.id;
 
-        // UI botones del modal
+        // UI buttons in modal
         document.querySelector(".submit-btn").style.display = "none";
         document.getElementById("edit-btn").style.display = "inline-block";
       } catch (err) {
@@ -185,12 +209,15 @@ function attachEditListeners() {
   });
 }
 
-
-// Crear tarjeta de producto
+/**
+ * Creates a product card element from a product object.
+ * Outputs the structure used by the grid and includes the edit button.
+ *
+ */
 function createProductCard(product) {
   const card = document.createElement('div');
   card.className = 'product-card';
-  card.dataset.id = product.id; // <- con alias ya existe
+  card.dataset.id = product.id; // with alias it already exists
 
   const imageUrl = product.imageUrl || '/images/placeholder.jpg';
   const price = parseFloat(product.price).toFixed(2);
@@ -223,8 +250,10 @@ function createProductCard(product) {
   return card;
 }
 
-
-// Mostrar/ocultar loading
+/**
+ * Shows or hides the loading spinner and related sections.
+ *
+ */
 function showLoading(show) {
     const spinner = document.getElementById('loadingSpinner');
     const grid = document.getElementById('productGrid');
@@ -239,7 +268,10 @@ function showLoading(show) {
     }
 }
 
-// Mostrar error
+/**
+ * Displays an error banner inside the grid area with a message.
+ *
+ */
 function showError(message) {
     const grid = document.getElementById('productGrid');
     grid.innerHTML = `
@@ -258,6 +290,10 @@ const modalTitle = modal.querySelector(".modal-title");
 let editMode = false;
 let currentUserId = null;
 
+/**
+ * Opens the modal in "Add Item" mode and resets form state.
+ *
+ */
 openBtn.addEventListener("click", () => {
     modal.classList.add("open");
     modalTitle.textContent = "Add Item";
@@ -270,17 +306,28 @@ openBtn.addEventListener("click", () => {
     document.getElementById("edit-btn").style.display = "none";
 });
 
+/**
+ * Closes the modal (close button).
+ *
+ */
 closeBtn.addEventListener("click", () => {
     modal.classList.remove("open");
 });
 
+/**
+ * Closes the modal when clicking on the backdrop.
+ *
+ */
 modal.addEventListener("click", (e) => {
     if (e.target === modal) {
         modal.classList.remove("open");
     }
 });
 
-// Mostrar mensajes en el pop-up
+/**
+ * Shows a temporary message inside the form area.
+ *
+ */
 function showMessage(msg, isError = false) {
     const msgDiv = document.getElementById("form-message");
     msgDiv.textContent = msg;
@@ -289,8 +336,11 @@ function showMessage(msg, isError = false) {
     setTimeout(() => { msgDiv.style.display = "none"; }, 3000);
 }
 
-
-
+/**
+ * Handles submit for add/update item.
+ * Sends multipart form-data with CSRF header and processes JSON or redirect responses.
+ *
+ */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -306,7 +356,7 @@ form.addEventListener("submit", async (e) => {
       body: formData
     });
 
-    // Puede venir JSON (si edit/add por AJAX) o redirección
+    // Could be JSON (AJAX add/edit) or a redirect
     const ct = response.headers.get('content-type') || '';
     if (ct.includes('application/json')) {
       const result = await response.json();
@@ -318,7 +368,7 @@ form.addEventListener("submit", async (e) => {
         alert('Error: ' + (result.msg || 'Operation failed'));
       }
     } else {
-      // Si el server respondió con un redirect por HTML
+      // If server issued an HTML redirect
       modal.classList.remove("open");
       window.location.reload();
     }
@@ -328,11 +378,15 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-// --- Búsqueda de usuarios ---
+// --- User search ---
 const searchInput = document.getElementById("searchInput");
 const usersTableBody = document.getElementById("usersTableBody");
 const noUserFoundMsg = document.getElementById("noUserFoundMsg");
 
+/**
+ * Filters visible user rows by id or name and toggles the "not found" message.
+ *
+ */
 function filterUsers() {
     const searchValue = searchInput.value.trim().toLowerCase();
     let found = false;
@@ -351,19 +405,24 @@ function filterUsers() {
             row.style.display = "none";
         }
     });
-    // Ocultar/mostrar mensaje de no encontrado
+    // Hide/show not found message
     if (!found) {
         noUserFoundMsg.style.display = "block";
     } else {
         noUserFoundMsg.style.display = "none";
     }
-    // Ocultar la fila de "No hay usuarios registrados" si hay búsqueda
+    // Hide the "No users found" row when searching
     const noUsersRow = usersTableBody.querySelector("tr.no-users-row");
     if (noUsersRow) {
         noUsersRow.style.display = searchValue === "" ? "" : "none";
     }
 }
 
+/**
+ * Handles click on "change state" buttons inside the product grid.
+ * Sends a POST to toggle the item, then reloads on success.
+ *
+ */
 document.addEventListener('DOMContentLoaded', () => {
   const productGrid = document.getElementById('productGrid');
 
@@ -373,8 +432,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!btn) return;
 
       const id = btn.getAttribute('data-id');
-
-      if (!confirm('¿Deseas cambiar el estado de este producto?')) return;
+      
+      if (!confirm('Do you want to change the status of this product?')) return;
 
       try {
         const res = await fetch('/shop/toggle', {
@@ -390,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (result.success) {
           alert(result.message);
-          window.location.reload(); // <-- Esta línea recarga la página
+          window.location.reload(); // reload the page to reflect changes
         } else {
           alert(result.message || 'Error al cambiar el estado');
         }
