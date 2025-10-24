@@ -1,13 +1,20 @@
 // Global variables
 let currentFilters = {};
 
-// Initialization
+/**
+ * Initializes listeners and loads initial filter options on DOM ready.
+ *
+ */
 document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
     loadFilterOptions();
 });
 
-// Configure event listeners
+/**
+ * Wires up UI events like filter toggle and edit buttons.
+ * Calls attachEditListeners to bind edit actions on product cards.
+ *
+ */
 function initializeEventListeners() {
     const filterToggle = document.getElementById('filterToggle');
 
@@ -20,7 +27,11 @@ function initializeEventListeners() {
     attachEditListeners();
 }
 
-//Load filter options from DB
+/**
+ * Loads available filter options (states, categories, price range) from the server.
+ * Populates selects and placeholders based on API response.
+ *
+ */
 async function loadFilterOptions() {
     try {
         const response = await fetch('/shop/api/filter-options');
@@ -57,13 +68,16 @@ async function loadFilterOptions() {
     }
 }
 
-// Apply filters
+/**
+ * Collects filter form values, validates price range, and queries filtered items.
+ * Updates the product grid with results and shows loading states.
+ *
+ */
 async function applyFilters() {
     const state = document.getElementById('filterState').value;
     const category = document.getElementById('filterCategory').value;
     const minPrice = document.getElementById('filterMinPrice').value;
     const maxPrice = document.getElementById('filterMaxPrice').value;
-
 
     // Validate price range
     if (minPrice && maxPrice && parseFloat(minPrice) > parseFloat(maxPrice)) {
@@ -84,7 +98,7 @@ async function applyFilters() {
         const params = new URLSearchParams(currentFilters);
         const url = `/shop/api/filter?${params.toString()}`;
 
-        console.log('Fetching:', url); // Para debugging
+        console.log('Fetching:', url); // for debugging
 
         const response = await fetch(url);
 
@@ -107,14 +121,21 @@ async function applyFilters() {
     }
 }
 
-// Clean filters
+/**
+ * Resets filter form and reloads the page to clear results.
+ *
+ */
 function clearFilters() {
     document.getElementById('filterForm').reset();
     currentFilters = {};
     location.reload();
 }
 
-// Show products
+/**
+ * Renders the products grid or a no-results view based on API data.
+ * Rebinds edit button listeners after rendering.
+ *
+ */
 function displayProducts(products) {
   const grid = document.getElementById('productGrid');
   const noResults = document.getElementById('noResults');
@@ -137,9 +158,13 @@ function displayProducts(products) {
   attachEditListeners(); 
 }
 
-// Adjust event listeners to edit buttons
+/**
+ * Binds click handlers to every edit button inside product cards.
+ * Fetches item data in JSON and opens the modal in edit mode.
+ *
+ */
 function attachEditListeners() {
-  document.querySelectorAll(".product-card .edit-item-btn").forEach(btn => { // Todos los botones .edit-item-btn
+  document.querySelectorAll(".product-card .edit-item-btn").forEach(btn => { // all .edit-item-btn buttons
     btn.addEventListener("click", async (e) => {
       const card = e.target.closest(".product-card");
       const itemId = card?.getAttribute("data-id");
@@ -166,7 +191,6 @@ function attachEditListeners() {
         // Keep current image_name
         form.querySelector("#image_name_current").value = item.image_name || "";
 
-
         // Prepare edit mode
         modalTitle.textContent = "Edit Item";
         form.action = `/shop/update/${item.id}`;
@@ -185,12 +209,15 @@ function attachEditListeners() {
   });
 }
 
-
-// Create product card
+/**
+ * Creates a product card element from a product object.
+ * Outputs the structure used by the grid and includes the edit button.
+ *
+ */
 function createProductCard(product) {
   const card = document.createElement('div');
   card.className = 'product-card';
-  card.dataset.id = product.id; // <- with alias it already exists
+  card.dataset.id = product.id; // with alias it already exists
 
   const imageUrl = product.imageUrl || '/images/placeholder.jpg';
   const price = parseFloat(product.price).toFixed(2);
@@ -223,8 +250,10 @@ function createProductCard(product) {
   return card;
 }
 
-
-// Show/hide loading
+/**
+ * Shows or hides the loading spinner and related sections.
+ *
+ */
 function showLoading(show) {
     const spinner = document.getElementById('loadingSpinner');
     const grid = document.getElementById('productGrid');
@@ -239,7 +268,10 @@ function showLoading(show) {
     }
 }
 
-// Show error
+/**
+ * Displays an error banner inside the grid area with a message.
+ *
+ */
 function showError(message) {
     const grid = document.getElementById('productGrid');
     grid.innerHTML = `
@@ -258,6 +290,10 @@ const modalTitle = modal.querySelector(".modal-title");
 let editMode = false;
 let currentUserId = null;
 
+/**
+ * Opens the modal in "Add Item" mode and resets form state.
+ *
+ */
 openBtn.addEventListener("click", () => {
     modal.classList.add("open");
     modalTitle.textContent = "Add Item";
@@ -270,17 +306,28 @@ openBtn.addEventListener("click", () => {
     document.getElementById("edit-btn").style.display = "none";
 });
 
+/**
+ * Closes the modal (close button).
+ *
+ */
 closeBtn.addEventListener("click", () => {
     modal.classList.remove("open");
 });
 
+/**
+ * Closes the modal when clicking on the backdrop.
+ *
+ */
 modal.addEventListener("click", (e) => {
     if (e.target === modal) {
         modal.classList.remove("open");
     }
 });
 
-// Show messages in pop-up
+/**
+ * Shows a temporary message inside the form area.
+ *
+ */
 function showMessage(msg, isError = false) {
     const msgDiv = document.getElementById("form-message");
     msgDiv.textContent = msg;
@@ -289,8 +336,11 @@ function showMessage(msg, isError = false) {
     setTimeout(() => { msgDiv.style.display = "none"; }, 3000);
 }
 
-
-
+/**
+ * Handles submit for add/update item.
+ * Sends multipart form-data with CSRF header and processes JSON or redirect responses.
+ *
+ */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -306,7 +356,7 @@ form.addEventListener("submit", async (e) => {
       body: formData
     });
 
-    // Can come JSON (if edit/add via AJAX) or redirection
+    // Could be JSON (AJAX add/edit) or a redirect
     const ct = response.headers.get('content-type') || '';
     if (ct.includes('application/json')) {
       const result = await response.json();
@@ -318,7 +368,7 @@ form.addEventListener("submit", async (e) => {
         alert('Error: ' + (result.msg || 'Operation failed'));
       }
     } else {
-      // If the server responded with a redirect via HTML
+      // If server issued an HTML redirect
       modal.classList.remove("open");
       window.location.reload();
     }
@@ -333,6 +383,10 @@ const searchInput = document.getElementById("searchInput");
 const usersTableBody = document.getElementById("usersTableBody");
 const noUserFoundMsg = document.getElementById("noUserFoundMsg");
 
+/**
+ * Filters visible user rows by id or name and toggles the "not found" message.
+ *
+ */
 function filterUsers() {
     const searchValue = searchInput.value.trim().toLowerCase();
     let found = false;
@@ -357,13 +411,18 @@ function filterUsers() {
     } else {
         noUserFoundMsg.style.display = "none";
     }
-    // Hide "No users found" row if searching
+    // Hide the "No users found" row when searching
     const noUsersRow = usersTableBody.querySelector("tr.no-users-row");
     if (noUsersRow) {
         noUsersRow.style.display = searchValue === "" ? "" : "none";
     }
 }
 
+/**
+ * Handles click on "change state" buttons inside the product grid.
+ * Sends a POST to toggle the item, then reloads on success.
+ *
+ */
 document.addEventListener('DOMContentLoaded', () => {
   const productGrid = document.getElementById('productGrid');
 
@@ -390,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (result.success) {
           alert(result.message);
-          window.location.reload(); // <-- This line reloads the page
+          window.location.reload(); // reload the page to reflect changes
         } else {
           alert(result.message || 'Error al cambiar el estado');
         }

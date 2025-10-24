@@ -1,8 +1,9 @@
 const db = require('../../util/database');
 
- /**
-   * This file collect the data of rewards from the database
-  */
+/**
+ * Collects reward data access functions for the database.
+ *
+ */
 
 // Class Reward
 module.exports = class Reward {
@@ -12,11 +13,12 @@ module.exports = class Reward {
         this.description = description;
         this.type = type;        // monetary / nonMonetary
         this.available = available; // 0 / 1
-        this.value = value;      // It can be number or code
+        this.value = value;      // Number or code
     }
 
     /**
-     * Save new reward
+     * Saves a new reward into the database.
+     *
      */
     save() {
         return db.execute(
@@ -26,32 +28,31 @@ module.exports = class Reward {
     }
 
     /**
-     * 
-     * This function allows the user to consult all the rewards in the database
-     * 
-     * This function returns all the rewards from the data base
-     * 
+     * Retrieves all available rewards from the database.
+     * Returns rows where `available = 1`.
+     *
      */
     static fetchAll() {
-
-        //this return a promise that resolves with an array of rewards where `available = 1`
+        // returns a promise that resolves with rewards where available = 1
         return db.execute('SELECT * FROM rewards WHERE available = 1'); 
     }
 
     /**
-     * Returns a reward for ID
+     * Retrieves a reward by its ID.
      * @param {number} id
      * @returns {Promise}
+     *
      */
     static fetchById(id) {
         return db.execute('SELECT * FROM rewards WHERE IDReward = ?', [id]);
     }
 
     /**
-     * Update existing reward 
+     * Updates an existing reward by ID.
      * @param {number} id
      * @param {object} data
      * @returns {Promise}
+     *
      */
     static update(id, data) {
         return db.execute(

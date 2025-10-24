@@ -12,10 +12,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let prevStatus = null; 
 
-
-   /**
-   * Button  Manage (class .edit-btn)
-  */
+  /**
+   * Opens the edit modal when clicking a row's "Manage" button (.edit-btn).
+   * Fetches reward data and pre-fills the form fields.
+   *
+   */
   tbody.addEventListener("click", async (e) => {
     const btn = e.target.closest("button.edit-btn");
     if (!btn) return;
@@ -32,17 +33,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const reward = await response.json();
 
-      // Fill ouut forms
+      // Fill out form fields
       document.getElementById("editName").value        = reward.name ?? "";
       document.getElementById("editDescription").value = reward.description ?? "";
       document.getElementById("editType").value        = reward.type ?? "nonMonetary";
       document.getElementById("editValue").value       = reward.value ?? "";
       document.getElementById("editStatus").value      = reward.available ? "1" : "0";
 
-      // Save preview state to confirm if changes to 0
+      // Keep previous status to confirm deactivation
       prevStatus = reward.available ? "1" : "0";
 
-      // Action of form (POST)
+      // Set form action (POST)
       form.action = `/modify-reward/edit/${encodeURIComponent(reward.IDReward ?? id)}`;
 
       // Show modal
@@ -53,7 +54,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Confirm if is desactivated (to 1 -> 0)
+  /**
+   * Confirm deactivation when changing status from 1 → 0 before submitting.
+   *
+   */
   form.addEventListener("submit", (e) => {
     const editStatus = document.getElementById("editStatus");
     if (prevStatus !== "0" && editStatus.value === "0") {
@@ -66,7 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Close modal
+  /**
+   * Close modal handlers (button and backdrop click).
+   *
+   */
   closeBtn.addEventListener("click", () => modal.classList.remove("open"));
   modal.addEventListener("click", (e) => {
     if (e.target === modal) modal.classList.remove("open");

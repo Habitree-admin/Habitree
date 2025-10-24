@@ -50,7 +50,7 @@ module.exports = class Item{
         );
     }
 
-    // Filtrar por Price
+    // Filter by Price
     static fetchByPrice(minPrice, maxPrice) {
         return db.execute(
             'SELECT * FROM shop WHERE price BETWEEN ? AND ?',
@@ -106,11 +106,25 @@ module.exports = class Item{
         );
     }
 
+    /**
+     * 
+     * Fetches a single item by its ID for edit/update flows.
+     * 
+     * Returns the DB row so the controller can prefill the edit form.
+     * 
+     */
     // Obtain the item by ID
     static fetchById(id) {
     return db.execute('SELECT * FROM shop WHERE IDItem = ?', [id]); 
   }
 
+    /**
+     * 
+     * Updates an item including its image_name (used when a new image is uploaded).
+     * 
+     * Persists name, state, category, price, and image_name for the given ID.
+     * 
+     */
     static update(id, { name, state, category, price, image_name }) {
         return db.execute(
         `UPDATE shop
@@ -120,6 +134,13 @@ module.exports = class Item{
         );
     }
 
+    /**
+     * 
+     * Updates an item without changing image_name (no new image uploaded).
+     * 
+     * Persists only name, state, category, and price for the given ID.
+     * 
+     */
     // For not to change the image_name if no new image is uploaded
     static updateWithoutImage(id, { name, state, category, price }) {
     return db.execute(
