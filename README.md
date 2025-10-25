@@ -16,10 +16,10 @@ This repository contains all the code of the Habitree Control Center, this syste
 
 ---
 
-## **Tecnologías Utilizadas**
+## **Technologies: **
 
 ### **Web Application**:
-  - Lenguaje: JavaScript
+  - Programming Language: JavaScript
   - Execution Enviroment: Node.js
 
 ---
