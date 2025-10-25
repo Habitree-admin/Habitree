@@ -5,7 +5,7 @@
 This repository contains all the code of the Habitree Control Center, this systems lets you manage all the modules available on the mobile application, like mission, quizzes, rewards, shop items and visualize general indicators.
 ---
 
-## **Funcionalidades Principales**
+## *Principal Functionalities**
 
 - **Quizzes**:
   - Add and edit a quiz, with its questions
